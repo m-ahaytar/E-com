@@ -1,0 +1,7 @@
+server.port=8083
+
+spring.datasource.url=jdbc:oracle:thin:@localhost:1521:XE
+spring.datasource.username=noker
+spring.datasource.password=123456789
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.OracleDialect
