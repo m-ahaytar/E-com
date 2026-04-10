@@ -1,0 +1,22 @@
+services:
+  backend:
+    build: ./backend
+    container_name: ecomsite-backend
+    ports:
+      - "8081:8080"
+    networks:
+      - ecomsite-network
+
+  frontend:
+    build: ./frontend
+    container_name: ecomsite-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - ecomsite-network
+
+networks:
+  ecomsite-network:
+    driver: bridge
