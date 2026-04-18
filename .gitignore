@@ -1,0 +1,93 @@
+# ------------------------------
+# OS files
+# ------------------------------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.Spotlight-V100/
+.Trashes/
+._*
+
+# ------------------------------
+# IDE / Editor files
+# ------------------------------
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+*.suo
+*.user
+*.userossc
+*.sln.docstates
+*.swp
+*.swo
+*~
+
+# Eclipse / STS
+.classpath
+.project
+.settings/
+.factorypath
+.apt_generated
+.springBeans
+.sts4-cache/
+
+# ------------------------------
+# Logs and runtime
+# ------------------------------
+logs/
+*.log
+*.out
+*.err
+*.pid
+*.pid.lock
+hs_err_pid*
+replay_pid*
+
+# ------------------------------
+# Environment / local overrides
+# ------------------------------
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.local
+
+# ------------------------------
+# Java / Maven build outputs
+# ------------------------------
+**/target/
+**/build/
+*.class
+dependency-reduced-pom.xml
+
+# ------------------------------
+# Node / Vite build outputs
+# ------------------------------
+**/node_modules/
+**/dist/
+**/dist-ssr/
+**/.vite/
+coverage/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ------------------------------
+# Optional local caches
+# ------------------------------
+.cache/
+.eslintcache
+
+# ------------------------------
+# Docker / local runtime overrides
+# ------------------------------
+docker-compose.override.yml
+.docker/
+
