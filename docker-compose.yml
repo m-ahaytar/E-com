@@ -1,0 +1,112 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    build:
+      context: ./backend/api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8085:8080"
+    networks:
+      - ecom-network
+
+  auth-service:
+    build:
+      context: ./backend/auth-service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:oracle:thin:@host.docker.internal:1521/XE
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=oracle.jdbc.OracleDriver
+      - SPRING_DATASOURCE_USERNAME=noker
+      - SPRING_DATASOURCE_PASSWORD=123456789
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.OracleDialect
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.OracleDialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - JAVA_TOOL_OPTIONS=-Duser.timezone=UTC -Doracle.jdbc.timezoneAsRegion=false
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - ecom-network
+
+  product-service:
+    build:
+      context: ./backend/product-service
+      dockerfile: Dockerfile
+    container_name: product-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:oracle:thin:@host.docker.internal:1521/XE
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=oracle.jdbc.OracleDriver
+      - SPRING_DATASOURCE_USERNAME=noker
+      - SPRING_DATASOURCE_PASSWORD=123456789
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.OracleDialect
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.OracleDialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - JAVA_TOOL_OPTIONS=-Duser.timezone=UTC -Doracle.jdbc.timezoneAsRegion=false
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - ecom-network
+
+  order-service:
+    build:
+      context: ./backend/order-service
+      dockerfile: Dockerfile
+    container_name: order-service
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:oracle:thin:@host.docker.internal:1521/XE
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=oracle.jdbc.OracleDriver
+      - SPRING_DATASOURCE_USERNAME=noker
+      - SPRING_DATASOURCE_PASSWORD=123456789
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.OracleDialect
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.OracleDialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - JAVA_TOOL_OPTIONS=-Duser.timezone=UTC -Doracle.jdbc.timezoneAsRegion=false
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - ecom-network
+
+  payment-service:
+    build:
+      context: ./backend/payment-service
+      dockerfile: Dockerfile
+    container_name: payment-service
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:oracle:thin:@host.docker.internal:1521/XE
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=oracle.jdbc.OracleDriver
+      - SPRING_DATASOURCE_USERNAME=noker
+      - SPRING_DATASOURCE_PASSWORD=123456789
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.OracleDialect
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.OracleDialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - JAVA_TOOL_OPTIONS=-Duser.timezone=UTC -Doracle.jdbc.timezoneAsRegion=false
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - ecom-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8085
+    networks:
+      - ecom-network
+
+networks:
+  ecom-network:
+    driver: bridge
