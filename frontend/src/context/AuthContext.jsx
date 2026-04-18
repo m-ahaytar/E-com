@@ -15,7 +15,13 @@ export const AuthProvider = ({ children }) => {
     const storedUser = localStorage.getItem('user');
     const storedToken = localStorage.getItem('token');
     if (storedUser && storedToken) {
-      setUser(JSON.parse(storedUser));
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.warn('Invalid stored user data, clearing auth state.', error);
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+      }
       setToken(storedToken);
     }
   }, []);
