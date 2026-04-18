@@ -2,6 +2,14 @@
 
 A complete full-stack e-commerce website built with microservices architecture.
 
+## Quick Summary
+
+- **Architecture:** React frontend + Spring Boot microservices + API Gateway
+- **Services:** auth, product, order, payment
+- **Technologies:** React, Spring Boot, Oracle Database, Docker, JUnit, Mockito
+- **Run:** `docker-compose up --build`
+- **Database note:** Oracle XE must be running locally on `localhost:1521/XE`
+
 ---
 
 ## 1. PROJECT OVERVIEW
@@ -763,6 +771,8 @@ Docker packages applications with their dependencies into containers. Each conta
 
 ### docker-compose.yml Explained
 
+> Note: this project does not start Oracle inside Docker Compose. Start Oracle XE locally before running the services.
+
 ```yaml
 services:
   # Frontend Container
@@ -885,6 +895,7 @@ jobs:
 2. **Oracle Database** running on `localhost:1521/XE`
    - Username: `noker`
    - Password: `123456789`
+   - Oracle must be started locally before `docker-compose up --build`
 
 ### Step-by-Step Instructions
 

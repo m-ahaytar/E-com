@@ -7,6 +7,7 @@ const CustomerDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState('profile');
 
   useEffect(() => {
     fetchOrders();
@@ -23,72 +24,156 @@ const CustomerDashboard = () => {
     }
   };
 
-  const getStatusColor = (status) => {
-    const colors = {
-      pending: '#ffa500',
-      processing: '#4169e1',
-      shipped: '#9370db',
-      delivered: '#228b22',
-      cancelled: '#dc143c',
+  const getStatusBadge = (status) => {
+    const badgeClasses = {
+      PENDING: 'bg-warning',
+      PROCESSING: 'bg-info',
+      SHIPPED: 'bg-primary',
+      DELIVERED: 'bg-success',
+      CANCELLED: 'bg-danger',
     };
-    return colors[status?.toLowerCase()] || '#666';
+    return badgeClasses[status?.toUpperCase()] || 'bg-secondary';
   };
 
   if (loading) {
-    return <div className="dashboard-page">Loading...</div>;
+    return (
+      <div className="text-center py-5">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="dashboard-page">
-      <h1>My Account</h1>
-      
-      <div className="profile-section">
-        <h2>Profile Information</h2>
-        <div className="profile-info">
-          <p><strong>Name:</strong> {user.firstName} {user.lastName}</p>
-          <p><strong>Email:</strong> {user.email}</p>
-          <p><strong>Role:</strong> {user.role}</p>
-        </div>
-      </div>
+    <div className="customer-dashboard">
+      <h1 className="mb-4">
+        <i className="bi bi-person-circle me-2"></i>My Account
+      </h1>
 
-      <div className="orders-section">
-        <h2>My Orders</h2>
-        {error && <div className="error-message">{error}</div>}
-        
-        {orders.length === 0 ? (
-          <p>You haven't placed any orders yet.</p>
-        ) : (
-          <div className="orders-list">
-            {orders.map((order) => (
-              <div key={order.id} className="order-card">
-                <div className="order-header">
-                  <span className="order-id">Order #{order.id}</span>
-                  <span 
-                    className="order-status"
-                    style={{ color: getStatusColor(order.status), fontWeight: 'bold' }}
-                  >
-                    {order.status}
-                  </span>
-                </div>
-                <div className="order-details">
-                  <p><strong>Date:</strong> {new Date(order.createdAt).toLocaleDateString()}</p>
-                  <p><strong>Total:</strong> ${order.total?.toFixed(2) || '0.00'}</p>
-                  <p><strong>Items:</strong> {order.items?.length || 0}</p>
-                </div>
-                <div className="order-items">
-                  {order.items?.map((item, index) => (
-                    <div key={index} className="order-item">
-                      <span>{item.name || `Product #${item.productId}`}</span>
-                      <span>x{item.quantity}</span>
-                      <span>${item.price?.toFixed(2)}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
+      {/* TABS */}
+      <ul className="nav nav-tabs mb-4" role="tablist">
+        <li className="nav-item" role="presentation">
+          <button
+            className={`nav-link ${activeTab === 'profile' ? 'active' : ''}`}
+            onClick={() => setActiveTab('profile')}
+            role="tab"
+          >
+            <i className="bi bi-person me-2"></i>Profile
+          </button>
+        </li>
+        <li className="nav-item" role="presentation">
+          <button
+            className={`nav-link ${activeTab === 'orders' ? 'active' : ''}`}
+            onClick={() => setActiveTab('orders')}
+            role="tab"
+          >
+            <i className="bi bi-receipt me-2"></i>My Orders
+          </button>
+        </li>
+      </ul>
+
+      {/* PROFILE TAB */}
+      {activeTab === 'profile' && (
+        <div className="card border-0 shadow-sm">
+          <div className="card-header bg-primary text-white fw-bold">
+            <i className="bi bi-person-card me-2"></i>Profile Information
           </div>
-        )}
-      </div>
+          <div className="card-body">
+            <div className="row">
+              <div className="col-md-6 mb-3">
+                <label className="text-muted small">First Name</label>
+                <p className="fw-600">{user.firstName}</p>
+              </div>
+              <div className="col-md-6 mb-3">
+                <label className="text-muted small">Last Name</label>
+                <p className="fw-600">{user.lastName}</p>
+              </div>
+              <div className="col-md-6 mb-3">
+                <label className="text-muted small">Email Address</label>
+                <p className="fw-600">{user.email}</p>
+              </div>
+              <div className="col-md-6 mb-3">
+                <label className="text-muted small">Account Type</label>
+                <p className="fw-600">
+                  <span className="badge bg-primary">{user.role || 'Customer'}</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ORDERS TAB */}
+      {activeTab === 'orders' && (
+        <div>
+          {error && (
+            <div className="alert alert-danger alert-dismissible fade show" role="alert">
+              <i className="bi bi-exclamation-circle me-2"></i>{error}
+              <button type="button" className="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          )}
+
+          {orders.length === 0 ? (
+            <div className="alert alert-info" role="alert">
+              <i className="bi bi-info-circle me-2"></i>You haven't placed any orders yet.
+            </div>
+          ) : (
+            <div className="orders-list">
+              {orders.map((order) => (
+                <div key={order.id} className="card border-0 shadow-sm mb-3">
+                  <div className="card-header bg-light">
+                    <div className="row align-items-center">
+                      <div className="col-md-4">
+                        <h6 className="mb-0">
+                          <i className="bi bi-box-seam me-2"></i>Order #{order.id}
+                        </h6>
+                      </div>
+                      <div className="col-md-4">
+                        <small className="text-muted">
+                          {new Date(order.createdAt).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                          })}
+                        </small>
+                      </div>
+                      <div className="col-md-4 text-end">
+                        <span className={`badge ${getStatusBadge(order.status)}`}>
+                          {order.status}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="card-body">
+                    {/* ITEMS */}
+                    <div className="mb-3 pb-3 border-bottom">
+                      <h6 className="fw-600 mb-2">Items:</h6>
+                      {order.items?.map((item, index) => (
+                        <div key={index} className="d-flex justify-content-between small mb-2">
+                          <span>{item.name || `Product #${item.productId}`}</span>
+                          <span>{item.quantity} × ${item.price?.toFixed(2)}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* TOTAL */}
+                    <div className="row align-items-center">
+                      <div className="col-md-6">
+                        <p className="text-muted small mb-0">Items: {order.items?.length || 0}</p>
+                      </div>
+                      <div className="col-md-6 text-end">
+                        <h5 className="mb-0 text-primary">${order.total?.toFixed(2) || '0.00'}</h5>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

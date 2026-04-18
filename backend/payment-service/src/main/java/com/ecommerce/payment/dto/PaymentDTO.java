@@ -1,13 +1,34 @@
 package com.ecommerce.payment.dto;
 
 import java.time.LocalDateTime;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.DecimalMin;
 
+/**
+ * DTO for payment with validation
+ */
 public class PaymentDTO {
     private Long id;
+    
+    @NotNull(message = "Order ID is required")
     private Long orderId;
+    
+    @NotBlank(message = "Payment method is required")
+    @Pattern(regexp = "CREDIT_CARD|DEBIT_CARD|UPI|WALLET", 
+             message = "Payment method must be one of: CREDIT_CARD, DEBIT_CARD, UPI, WALLET")
     private String method;
+    
+    @NotBlank(message = "Status is required")
+    @Pattern(regexp = "PENDING|COMPLETED|FAILED|REFUNDED", 
+             message = "Status must be one of: PENDING, COMPLETED, FAILED, REFUNDED")
     private String status;
+    
+    @NotNull(message = "Amount is required")
+    @DecimalMin(value = "0.01", message = "Amount must be greater than 0")
     private Double amount;
+    
     private LocalDateTime timestamp;
 
     public PaymentDTO() {}

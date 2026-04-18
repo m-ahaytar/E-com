@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import api from '../services/api';
+import { get } from '../services/api';
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
@@ -12,8 +12,8 @@ const AdminUsers = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await api.get('/users');
-      setUsers(response.data);
+      const data = await get('/users');
+      setUsers(data);
     } catch {
       setError('Failed to load users');
       setUsers([]);

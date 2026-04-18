@@ -20,8 +20,13 @@ services:
       - "8081:8081"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:oracle:thin:@host.docker.internal:1521/XE
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=oracle.jdbc.OracleDriver
       - SPRING_DATASOURCE_USERNAME=noker
       - SPRING_DATASOURCE_PASSWORD=123456789
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.OracleDialect
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.OracleDialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - JAVA_TOOL_OPTIONS=-Duser.timezone=UTC -Doracle.jdbc.timezoneAsRegion=false
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
@@ -36,8 +41,13 @@ services:
       - "8082:8082"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:oracle:thin:@host.docker.internal:1521/XE
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=oracle.jdbc.OracleDriver
       - SPRING_DATASOURCE_USERNAME=noker
       - SPRING_DATASOURCE_PASSWORD=123456789
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.OracleDialect
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.OracleDialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - JAVA_TOOL_OPTIONS=-Duser.timezone=UTC -Doracle.jdbc.timezoneAsRegion=false
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
@@ -52,8 +62,13 @@ services:
       - "8083:8083"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:oracle:thin:@host.docker.internal:1521/XE
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=oracle.jdbc.OracleDriver
       - SPRING_DATASOURCE_USERNAME=noker
       - SPRING_DATASOURCE_PASSWORD=123456789
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.OracleDialect
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.OracleDialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - JAVA_TOOL_OPTIONS=-Duser.timezone=UTC -Doracle.jdbc.timezoneAsRegion=false
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
@@ -68,8 +83,13 @@ services:
       - "8084:8084"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:oracle:thin:@host.docker.internal:1521/XE
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=oracle.jdbc.OracleDriver
       - SPRING_DATASOURCE_USERNAME=noker
       - SPRING_DATASOURCE_PASSWORD=123456789
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.OracleDialect
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.OracleDialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - JAVA_TOOL_OPTIONS=-Duser.timezone=UTC -Doracle.jdbc.timezoneAsRegion=false
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:

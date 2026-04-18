@@ -1,36 +1,37 @@
-import api from './api';
+import { get, post, put, del } from "./api";
 
 export const getProducts = async () => {
-  const response = await api.get('/products');
-  return response.data;
+  return get("/products");
 };
 
 export const getProduct = async (id) => {
-  const response = await api.get(`/products/${id}`);
-  return response.data;
+  return get(`/products/${id}`);
 };
 
 export const createProduct = async (productData) => {
-  const response = await api.post('/products', productData);
-  return response.data;
+  return post("/products", productData);
 };
 
 export const updateProduct = async (id, productData) => {
-  const response = await api.put(`/products/${id}`, productData);
-  return response.data;
+  return put(`/products/${id}`, productData);
 };
 
 export const deleteProduct = async (id) => {
-  const response = await api.delete(`/products/${id}`);
-  return response.data;
+  return del(`/products/${id}`);
 };
 
 export const getCategories = async () => {
-  const response = await api.get('/categories');
-  return response.data;
+  return get("/categories");
 };
 
 export const createCategory = async (categoryData) => {
-  const response = await api.post('/categories', categoryData);
-  return response.data;
+  return post("/categories", categoryData);
+};
+
+export const updateCategory = async (id, categoryData) => {
+  return put(`/categories/${id}`, categoryData);
+};
+
+export const deleteCategory = async (id) => {
+  return del(`/categories/${id}`);
 };

@@ -1,11 +1,9 @@
-import api from './api';
+import { get, post } from "./api";
 
 export const processPayment = async (paymentData) => {
-  const response = await api.post('/payments/process', paymentData);
-  return response.data;
+  return post("/payments/process", paymentData);
 };
 
 export const getPaymentByOrder = async (orderId) => {
-  const response = await api.get(`/payments/order/${orderId}`);
-  return response.data;
+  return get(`/payments/order/${orderId}`);
 };

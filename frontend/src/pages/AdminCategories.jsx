@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import * as productService from '../services/productService';
-import api from '../services/api';
 
 const AdminCategories = () => {
   const [categories, setCategories] = useState([]);
@@ -44,7 +43,8 @@ const AdminCategories = () => {
     if (!window.confirm('Are you sure you want to delete this category?')) return;
 
     try {
-      await api.delete(`/categories/${id}`);
+      // On passe par le service pour garder une logique claire et centralisee.
+      await productService.deleteCategory(id);
       fetchCategories();
     } catch {
       setError('Failed to delete category');

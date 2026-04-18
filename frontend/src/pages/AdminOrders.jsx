@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import api from '../services/api';
+import { get } from '../services/api';
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -13,8 +13,8 @@ const AdminOrders = () => {
 
   const fetchOrders = async () => {
     try {
-      const response = await api.get('/orders');
-      setOrders(response.data);
+      const data = await get('/orders');
+      setOrders(data);
     } catch {
       setError('Failed to load orders');
     } finally {

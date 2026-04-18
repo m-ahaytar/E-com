@@ -1,16 +1,13 @@
-import api from './api';
+import { get, post } from "./api";
 
 export const createOrder = async (orderData) => {
-  const response = await api.post('/orders', orderData);
-  return response.data;
+  return post("/orders", orderData);
 };
 
 export const getUserOrders = async (userId) => {
-  const response = await api.get(`/orders/user/${userId}`);
-  return response.data;
+  return get(`/orders/user/${userId}`);
 };
 
 export const getOrder = async (id) => {
-  const response = await api.get(`/orders/${id}`);
-  return response.data;
+  return get(`/orders/${id}`);
 };

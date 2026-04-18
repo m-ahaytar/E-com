@@ -7,22 +7,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "orders")
+@Table(name = "ORDERS")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Order {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Column(name = "user_id", nullable = false)
     private Long userId;
+
+    @Column(name = "order_number", unique = true, nullable = false, length = 50)
+    private String orderNumber;
 
     @Column(nullable = false)
     private String status;
 
     @Column(name = "order_date", nullable = false)
     private LocalDateTime orderDate;
+
+    @Column(name = "total_amount")
+    private Double totalAmount;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items = new ArrayList<>();
@@ -46,6 +52,14 @@ public class Order {
         this.userId = userId;
     }
 
+    public String getOrderNumber() {
+        return orderNumber;
+    }
+
+    public void setOrderNumber(String orderNumber) {
+        this.orderNumber = orderNumber;
+    }
+
     public String getStatus() {
         return status;
     }
@@ -60,6 +74,14 @@ public class Order {
 
     public void setOrderDate(LocalDateTime orderDate) {
         this.orderDate = orderDate;
+    }
+
+    public Double getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(Double totalAmount) {
+        this.totalAmount = totalAmount;
     }
 
     public List<OrderItem> getItems() {

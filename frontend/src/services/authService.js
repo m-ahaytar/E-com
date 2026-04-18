@@ -1,19 +1,20 @@
-import api from './api';
+import { post } from "./api";
 
 export const login = async (email, password) => {
-  const response = await api.post('/auth/login', { email, password });
-  if (response.data.token) {
-    localStorage.setItem('token', response.data.token);
-    localStorage.setItem('user', JSON.stringify(response.data.user));
+  // Appel simple de l'API d'authentification via fetch.
+  const data = await post("/auth/login", { email, password });
+  if (data.token) {
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
   }
-  return response.data;
+  return data;
 };
 
 export const register = async (userData) => {
-  const response = await api.post('/auth/register', userData);
-  if (response.data.token) {
-    localStorage.setItem('token', response.data.token);
-    localStorage.setItem('user', JSON.stringify(response.data.user));
+  const data = await post("/auth/register", userData);
+  if (data.token) {
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
   }
-  return response.data;
+  return data;
 };

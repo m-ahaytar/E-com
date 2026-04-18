@@ -16,6 +16,7 @@ const AdminProducts = () => {
     categoryId: '',
     imageUrl: '',
   });
+  const [validationErrors, setValidationErrors] = useState({});
 
   useEffect(() => {
     fetchData();
@@ -36,13 +37,64 @@ const AdminProducts = () => {
     }
   };
 
+  const validateForm = () => {
+    const errors = {};
+    
+    if (!formData.name || formData.name.trim().length < 3) {
+      errors.name = 'Product name must be at least 3 characters';
+    }
+    if (formData.name && formData.name.length > 100) {
+      errors.name = 'Product name cannot exceed 100 characters';
+    }
+    
+    if (formData.description && formData.description.length > 1000) {
+      errors.description = 'Description cannot exceed 1000 characters';
+    }
+    
+    const price = parseFloat(formData.price);
+    if (!formData.price || isNaN(price)) {
+      errors.price = 'Price is required and must be a number';
+    } else if (price <= 0) {
+      errors.price = 'Price must be greater than 0';
+    } else if (price > 999999.99) {
+      errors.price = 'Price is too high';
+    }
+    
+    const stock = parseInt(formData.stock);
+    if (formData.stock === '' || isNaN(stock)) {
+      errors.stock = 'Stock is required and must be a number';
+    } else if (stock < 0) {
+      errors.stock = 'Stock cannot be negative';
+    }
+    
+    if (!formData.categoryId) {
+      errors.categoryId = 'Category is required';
+    }
+    
+    if (formData.imageUrl && formData.imageUrl.length > 500) {
+      errors.imageUrl = 'Image URL cannot exceed 500 characters';
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    // Clear validation error for this field when user starts typing
+    if (validationErrors[name]) {
+      setValidationErrors({ ...validationErrors, [name]: '' });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    
+    if (!validateForm()) {
+      return;
+    }
     
     try {
       const productData = {
@@ -60,8 +112,8 @@ const AdminProducts = () => {
 
       resetForm();
       fetchData();
-    } catch {
-      setError('Failed to save product');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to save product');
     }
   };
 
@@ -75,6 +127,7 @@ const AdminProducts = () => {
       categoryId: product.categoryId?.toString() || '',
       imageUrl: product.imageUrl || '',
     });
+    setValidationErrors({});
     setShowForm(true);
   };
 
@@ -100,6 +153,7 @@ const AdminProducts = () => {
       categoryId: '',
       imageUrl: '',
     });
+    setValidationErrors({});
   };
 
   if (loading) {
@@ -125,53 +179,69 @@ const AdminProducts = () => {
           <h2>{editingProduct ? 'Edit Product' : 'Add New Product'}</h2>
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label>Name</label>
+              <label>Name *</label>
               <input
                 type="text"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                required
+                placeholder="Product name (3-100 characters)"
+                maxLength="100"
               />
+              {validationErrors.name && <span className="form-error">{validationErrors.name}</span>}
+              <small className="char-count">{formData.name.length}/100</small>
             </div>
+
             <div className="form-group">
               <label>Description</label>
               <textarea
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
+                placeholder="Product description (max 1000 characters)"
+                maxLength="1000"
+                rows="4"
               />
+              {validationErrors.description && <span className="form-error">{validationErrors.description}</span>}
+              <small className="char-count">{formData.description.length}/1000</small>
             </div>
+
             <div className="form-row">
               <div className="form-group">
-                <label>Price</label>
+                <label>Price * (USD)</label>
                 <input
                   type="number"
                   name="price"
                   step="0.01"
+                  min="0"
+                  max="999999.99"
                   value={formData.price}
                   onChange={handleChange}
-                  required
+                  placeholder="0.00"
                 />
+                {validationErrors.price && <span className="form-error">{validationErrors.price}</span>}
               </div>
+
               <div className="form-group">
-                <label>Stock</label>
+                <label>Stock * (Units)</label>
                 <input
                   type="number"
                   name="stock"
+                  min="0"
                   value={formData.stock}
                   onChange={handleChange}
-                  required
+                  placeholder="0"
                 />
+                {validationErrors.stock && <span className="form-error">{validationErrors.stock}</span>}
               </div>
             </div>
+
             <div className="form-group">
-              <label>Category</label>
+              <label>Category *</label>
               <select
                 name="categoryId"
                 value={formData.categoryId}
                 onChange={handleChange}
-                required
               >
                 <option value="">Select Category</option>
                 {categories.map((cat) => (
@@ -180,16 +250,21 @@ const AdminProducts = () => {
                   </option>
                 ))}
               </select>
+              {validationErrors.categoryId && <span className="form-error">{validationErrors.categoryId}</span>}
             </div>
+
             <div className="form-group">
               <label>Image URL</label>
               <input
-                type="text"
+                type="url"
                 name="imageUrl"
                 value={formData.imageUrl}
                 onChange={handleChange}
+                placeholder="https://example.com/image.jpg"
               />
+              {validationErrors.imageUrl && <span className="form-error">{validationErrors.imageUrl}</span>}
             </div>
+
             <button type="submit" className="btn-primary">
               {editingProduct ? 'Update Product' : 'Add Product'}
             </button>

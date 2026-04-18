@@ -4,7 +4,7 @@ import com.ecommerce.order.controller.OrderController;
 import com.ecommerce.order.dto.CreateOrderDTO;
 import com.ecommerce.order.dto.OrderDTO;
 import com.ecommerce.order.dto.OrderItemDTO;
-import com.ecommerce.order.service.OrderService;
+import com.ecommerce.order.facade.OrderFacade;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -31,7 +31,7 @@ class OrderControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private OrderService orderService;
+    private OrderFacade orderFacade;
 
     @Test
     void createOrder_Success() throws Exception {
@@ -48,7 +48,7 @@ class OrderControllerTest {
         orderDTO.setOrderDate(LocalDateTime.now());
         orderDTO.setItems(Collections.singletonList(itemDTO));
 
-        when(orderService.createOrder(any(CreateOrderDTO.class))).thenReturn(orderDTO);
+        when(orderFacade.createOrder(any(CreateOrderDTO.class))).thenReturn(orderDTO);
 
         mockMvc.perform(post("/orders")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -76,7 +76,7 @@ class OrderControllerTest {
 
         List<OrderDTO> orders = Collections.singletonList(orderDTO);
 
-        when(orderService.getOrdersByUserId(1L)).thenReturn(orders);
+        when(orderFacade.getOrdersByUserId(1L)).thenReturn(orders);
 
         mockMvc.perform(get("/orders/user/1"))
                 .andExpect(status().isOk())
@@ -100,7 +100,7 @@ class OrderControllerTest {
         orderDTO.setOrderDate(LocalDateTime.now());
         orderDTO.setItems(Collections.singletonList(itemDTO));
 
-        when(orderService.getOrderById(1L)).thenReturn(orderDTO);
+        when(orderFacade.getOrderById(1L)).thenReturn(orderDTO);
 
         mockMvc.perform(get("/orders/1"))
                 .andExpect(status().isOk())
@@ -110,9 +110,54 @@ class OrderControllerTest {
 
     @Test
     void getOrderById_NotFound() throws Exception {
-        when(orderService.getOrderById(999L)).thenReturn(null);
+        when(orderFacade.getOrderById(999L)).thenReturn(null);
 
         mockMvc.perform(get("/orders/999"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getAllOrders_Success() throws Exception {
+        OrderDTO order1 = new OrderDTO();
+        order1.setId(1L);
+        order1.setUserId(1L);
+        order1.setStatus("PENDING");
+
+        OrderDTO order2 = new OrderDTO();
+        order2.setId(2L);
+        order2.setUserId(2L);
+        order2.setStatus("PROCESSING");
+
+        when(orderFacade.getAllOrders()).thenReturn(Arrays.asList(order1, order2));
+
+        mockMvc.perform(get("/orders"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[1].id").value(2));
+    }
+
+    @Test
+    void updateOrder_Success() throws Exception {
+        OrderDTO updatedOrder = new OrderDTO();
+        updatedOrder.setId(1L);
+        updatedOrder.setUserId(1L);
+        updatedOrder.setStatus("PROCESSING");
+
+        when(orderFacade.updateOrder(eq(1L), any(CreateOrderDTO.class))).thenReturn(updatedOrder);
+
+        mockMvc.perform(put("/orders/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"userId\":1,\"items\":[{\"productId\":1,\"productName\":\"Produit\",\"quantity\":1,\"price\":9.99}]}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.status").value("PROCESSING"));
+    }
+
+    @Test
+    void deleteOrder_Success() throws Exception {
+        when(orderFacade.deleteOrder(1L)).thenReturn(true);
+
+        mockMvc.perform(delete("/orders/1"))
+                .andExpect(status().isNoContent());
     }
 }

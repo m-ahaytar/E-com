@@ -27,7 +27,7 @@ function App() {
         <BrowserRouter>
           <div className="app">
             <Navbar />
-            <main className="main-content">
+            <main className="main-content container mt-4">
               <Routes>
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/catalogue" element={<CataloguePage />} />
