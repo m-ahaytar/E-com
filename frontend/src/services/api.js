@@ -1,7 +1,12 @@
+const defaultHost =
+  typeof window !== "undefined"
+    ? `${window.location.protocol}//${window.location.hostname}:8085`
+    : "http://localhost:8085";
+
 const API_BASE_URL =
   import.meta.env.VITE_API_URL ||
   import.meta.env.REACT_APP_API_URL ||
-  "http://localhost:8085";
+  defaultHost;
 
 const buildHeaders = (extraHeaders = {}) => {
   const token = localStorage.getItem("token");
@@ -16,6 +21,14 @@ const buildHeaders = (extraHeaders = {}) => {
   }
 
   return headers;
+};
+
+const parseJsonSafely = async (response) => {
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
 };
 
 const handleUnauthorized = (status) => {
@@ -37,7 +50,7 @@ export const request = async (endpoint, options = {}) => {
 
   const contentType = response.headers.get("content-type") || "";
   const isJson = contentType.includes("application/json");
-  const payload = isJson ? await response.json() : await response.text();
+  const payload = isJson ? await parseJsonSafely(response) : await response.text();
 
   if (!response.ok) {
     const errorMessage =

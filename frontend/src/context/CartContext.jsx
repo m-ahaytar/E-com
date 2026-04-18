@@ -14,7 +14,12 @@ export const CartProvider = ({ children }) => {
   useEffect(() => {
     const storedCart = localStorage.getItem('cart');
     if (storedCart) {
-      setItems(JSON.parse(storedCart));
+      try {
+        setItems(JSON.parse(storedCart));
+      } catch (error) {
+        console.warn('Invalid stored cart data, clearing cart.', error);
+        localStorage.removeItem('cart');
+      }
     }
   }, []);
 
