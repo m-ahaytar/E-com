@@ -2,9 +2,9 @@ server:
   port: 8082
 
 spring:
-  # H2 In-Memory Database Configuration
+  # H2 Database Configuration
   datasource:
-    url: jdbc:h2:mem:productdb
+    url: jdbc:h2:tcp://h2-db:1521/ecomdb
     driver-class-name: org.h2.Driver
     username: sa
     password:
@@ -21,7 +21,7 @@ spring:
   jpa:
     # Create/update tables on startup
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     properties:
       hibernate:
         # Use H2 dialect
