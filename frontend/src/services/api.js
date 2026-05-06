@@ -1,12 +1,8 @@
-const defaultHost =
-  typeof window !== "undefined"
-    ? `${window.location.protocol}//${window.location.hostname}:8085`
-    : "http://localhost:8085";
+import { API_BASE_URL } from '../config';
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL ||
-  import.meta.env.REACT_APP_API_URL ||
-  defaultHost;
+const resolveEndpoint = (endpoint) => (
+  endpoint.startsWith('/') ? endpoint : `/${endpoint}`
+);
 
 const buildHeaders = (extraHeaders = {}) => {
   const token = localStorage.getItem("token");
@@ -41,7 +37,7 @@ const handleUnauthorized = (status) => {
 };
 
 export const request = async (endpoint, options = {}) => {
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const response = await fetch(`${API_BASE_URL}${resolveEndpoint(endpoint)}`, {
     ...options,
     headers: buildHeaders(options.headers),
   });

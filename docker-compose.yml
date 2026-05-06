@@ -1,17 +1,4 @@
 services:
-  # --- DATABASE SERVICE (TCP Mode) ---
-  h2-db:
-    image: oscarfonts/h2:latest
-    container_name: h2-db
-    ports:
-      - "1521:1521"
-      - "81:81"
-    environment:
-      - H2_OPTIONS=-tcp -tcpAllowOthers -tcpPort 1521 -web -webAllowOthers -webPort 81 -ifNotExists
-    networks:
-      - ecom-network
-
-  # --- MICROSERVICES ---
   api-gateway:
     build:
       context: ./backend/api-gateway
@@ -32,64 +19,44 @@ services:
     container_name: auth-service
     ports: ["8081:8081"]
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:h2:tcp://h2-db:1521/authdb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
-      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.h2.Driver
-      - SPRING_DATASOURCE_USERNAME=sa
-      - SPRING_DATASOURCE_PASSWORD=
-      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.H2Dialect
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SQLITE_DB_PATH=/data/auth-service.db
+    volumes:
+      - auth-data:/data
     networks:
       - ecom-network
-    depends_on:
-      - h2-db
 
   product-service:
     build: ./backend/product-service
     container_name: product-service
     ports: ["8082:8082"]
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:h2:tcp://h2-db:1521/productdb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
-      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.h2.Driver
-      - SPRING_DATASOURCE_USERNAME=sa
-      - SPRING_DATASOURCE_PASSWORD=
-      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.H2Dialect
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SQLITE_DB_PATH=/data/product-service.db
+    volumes:
+      - product-data:/data
     networks:
       - ecom-network
-    depends_on:
-      - h2-db
 
   order-service:
     build: ./backend/order-service
     container_name: order-service
     ports: ["8083:8083"]
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:h2:tcp://h2-db:1521/orderdb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
-      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.h2.Driver
-      - SPRING_DATASOURCE_USERNAME=sa
-      - SPRING_DATASOURCE_PASSWORD=
-      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.H2Dialect
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SQLITE_DB_PATH=/data/order-service.db
+    volumes:
+      - order-data:/data
     networks:
       - ecom-network
-    depends_on:
-      - h2-db
 
   payment-service:
     build: ./backend/payment-service
     container_name: payment-service
     ports: ["8084:8084"]
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:h2:tcp://h2-db:1521/paymentdb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
-      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.h2.Driver
-      - SPRING_DATASOURCE_USERNAME=sa
-      - SPRING_DATASOURCE_PASSWORD=
-      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.H2Dialect
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SQLITE_DB_PATH=/data/payment-service.db
+    volumes:
+      - payment-data:/data
     networks:
       - ecom-network
-    depends_on:
-      - h2-db
 
   frontend:
     build:
@@ -108,3 +75,9 @@ services:
 networks:
   ecom-network:
     driver: bridge
+
+volumes:
+  auth-data:
+  product-data:
+  order-data:
+  payment-data:

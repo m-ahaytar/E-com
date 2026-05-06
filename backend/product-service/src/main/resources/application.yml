@@ -2,35 +2,20 @@ server:
   port: 8082
 
 spring:
-  # H2 Database Configuration
   datasource:
-    url: jdbc:h2:tcp://h2-db:1521/ecomdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-    # Initialize database with data.sql
-    initialization-mode: always
-    continue-on-error: false
+    url: jdbc:sqlite:${SQLITE_DB_PATH:product-service.db}
+    driver-class-name: org.sqlite.JDBC
 
-  # Alternative: Uncomment below for Oracle Database
-  # datasource:
-  #   url: jdbc:oracle:thin:@localhost:1521:XE
-  #   username: noker
-  #   password: 123456789
+  sql:
+    init:
+      mode: always
+      continue-on-error: false
 
   jpa:
-    # Create/update tables on startup
+    defer-datasource-initialization: true
     hibernate:
       ddl-auto: update
     properties:
       hibernate:
-        # Use H2 dialect
-        dialect: org.hibernate.dialect.H2Dialect
-        # Alternative: org.hibernate.dialect.OracleDialect for Oracle
-    # Show SQL queries in logs
+        dialect: org.hibernate.community.dialect.SQLiteDialect
     show-sql: false
-
-  # H2 Console (for development/debugging)
-  h2:
-    console:
-      enabled: true
