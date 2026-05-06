@@ -10,19 +10,21 @@ const CustomerDashboard = () => {
   const [activeTab, setActiveTab] = useState('profile');
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    const fetchOrders = async () => {
+      try {
+        const data = await orderService.getUserOrders(user.id);
+        setOrders(data);
+      } catch {
+        setError('Failed to load orders');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const fetchOrders = async () => {
-    try {
-      const data = await orderService.getUserOrders(user.id);
-      setOrders(data);
-    } catch {
-      setError('Failed to load orders');
-    } finally {
-      setLoading(false);
+    if (user?.id) {
+      fetchOrders();
     }
-  };
+  }, [user]);
 
   const getStatusBadge = (status) => {
     const badgeClasses = {

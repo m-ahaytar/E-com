@@ -13,6 +13,7 @@ import ThankYouPage from './pages/ThankYouPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import CustomerDashboard from './pages/CustomerDashboard';
+import SellerDashboard from './pages/SellerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminProducts from './pages/AdminProducts';
 import AdminCategories from './pages/AdminCategories';
@@ -27,7 +28,7 @@ function App() {
         <BrowserRouter>
           <div className="app">
             <Navbar />
-            <main className="main-content container mt-4">
+            <main className="main-content">
               <Routes>
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/catalogue" element={<CataloguePage />} />
@@ -42,6 +43,14 @@ function App() {
                   element={
                     <PrivateRoute requiredRole="CUSTOMER">
                       <CustomerDashboard />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/seller"
+                  element={
+                    <PrivateRoute requiredRole="SELLER">
+                      <SellerDashboard />
                     </PrivateRoute>
                   }
                 />

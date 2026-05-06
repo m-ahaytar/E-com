@@ -24,13 +24,13 @@ const AdminOrders = () => {
 
   const getStatusColor = (status) => {
     const colors = {
-      pending: '#ffa500',
-      processing: '#4169e1',
-      shipped: '#9370db',
-      delivered: '#228b22',
-      cancelled: '#dc143c',
+      pending: 'var(--wm-violet)',
+      processing: 'var(--wm-neon)',
+      shipped: 'var(--wm-violet)',
+      delivered: 'var(--wm-neon-2)',
+      cancelled: 'var(--wm-danger)',
     };
-    return colors[status?.toLowerCase()] || '#666';
+    return colors[status?.toLowerCase()] || 'var(--wm-muted)';
   };
 
   if (loading) {

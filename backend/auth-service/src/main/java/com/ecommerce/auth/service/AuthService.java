@@ -5,16 +5,27 @@ import com.ecommerce.auth.dto.LoginRequest;
 import com.ecommerce.auth.dto.RegisterRequest;
 import com.ecommerce.auth.entity.User;
 import com.ecommerce.auth.repository.UserRepository;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.Base64;
+import javax.crypto.SecretKey;
+import java.util.Date;
 
 @Service
 public class AuthService {
     private final UserRepository userRepository;
+    private final SecretKey jwtKey;
+    private final long jwtExpirationMs;
 
-    public AuthService(UserRepository userRepository) {
+    public AuthService(UserRepository userRepository,
+                       @Value("${jwt.secret:ecom-secret-key-for-jwt-signing-2024-minimum-256-bits}") String jwtSecret,
+                       @Value("${jwt.expiration:86400000}") long jwtExpirationMs) {
         this.userRepository = userRepository;
+        this.jwtKey = Keys.hmacShaKeyFor(jwtSecret.getBytes());
+        this.jwtExpirationMs = jwtExpirationMs;
     }
 
     public AuthResponse register(RegisterRequest request) {
@@ -22,7 +33,8 @@ public class AuthService {
             throw new RuntimeException("Username already exists");
         }
 
-        User user = new User(request.getUsername(), request.getPassword(), request.getRole());
+        String role = request.getRole() != null ? request.getRole() : "CUSTOMER";
+        User user = new User(request.getUsername(), request.getPassword(), role);
         userRepository.save(user);
 
         String token = generateToken(user);
@@ -42,7 +54,17 @@ public class AuthService {
     }
 
     private String generateToken(User user) {
-        String tokenData = user.getUsername() + ":" + user.getRole();
-        return Base64.getEncoder().encodeToString(tokenData.getBytes());
+        long now = System.currentTimeMillis();
+        Date issuedAt = new Date(now);
+        Date expiresAt = new Date(now + jwtExpirationMs);
+
+        return Jwts.builder()
+                .setSubject(user.getUsername())
+                .claim("userId", user.getId())
+                .claim("role", user.getRole())
+                .setIssuedAt(issuedAt)
+                .setExpiration(expiresAt)
+                .signWith(jwtKey, SignatureAlgorithm.HS512)
+                .compact();
     }
 }

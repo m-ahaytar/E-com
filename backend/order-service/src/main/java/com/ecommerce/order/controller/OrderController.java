@@ -5,6 +5,7 @@ import com.ecommerce.order.dto.OrderDTO;
 import com.ecommerce.order.facade.OrderFacade;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,23 +21,27 @@ public class OrderController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<OrderDTO> createOrder(@RequestBody CreateOrderDTO createOrderDTO) {
         OrderDTO orderDTO = orderFacade.createOrder(createOrderDTO);
         return new ResponseEntity<>(orderDTO, HttpStatus.CREATED);
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<OrderDTO>> getAllOrders() {
         return ResponseEntity.ok(orderFacade.getAllOrders());
     }
 
     @GetMapping("/user/{userId}")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
     public ResponseEntity<List<OrderDTO>> getOrdersByUserId(@PathVariable Long userId) {
         List<OrderDTO> orders = orderFacade.getOrdersByUserId(userId);
         return ResponseEntity.ok(orders);
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
     public ResponseEntity<OrderDTO> getOrderById(@PathVariable Long id) {
         OrderDTO orderDTO = orderFacade.getOrderById(id);
         if (orderDTO == null) {
@@ -46,6 +51,7 @@ public class OrderController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<OrderDTO> updateOrder(@PathVariable Long id, @RequestBody CreateOrderDTO updateDTO) {
         OrderDTO updated = orderFacade.updateOrder(id, updateDTO);
         if (updated == null) {
@@ -55,6 +61,7 @@ public class OrderController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
         boolean deleted = orderFacade.deleteOrder(id);
         if (!deleted) {

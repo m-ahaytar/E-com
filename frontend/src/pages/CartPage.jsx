@@ -1,19 +1,21 @@
-import { useNavigate, Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import Badge from '../components/Badge';
+import Button from '../components/Button';
+import ProductVisual from '../components/ProductVisual';
 
 const CartPage = () => {
   const navigate = useNavigate();
-  const { items, removeFromCart, getTotal } = useCart();
+  const { items, removeFromCart, updateQuantity, getTotal } = useCart();
+  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 
   if (items.length === 0) {
     return (
-      <div className="cart-page text-center py-5">
-        <i className="bi bi-bag" style={{ fontSize: '4rem', color: '#ccc' }}></i>
-        <h2 className="mt-4">Your Cart is Empty</h2>
-        <p className="text-muted mb-4">Add some items to get started!</p>
-        <Link to="/catalogue" className="btn btn-primary">
-          <i className="bi bi-shop me-2"></i>Continue Shopping
-        </Link>
+      <div className="wm-page wm-empty-state wm-empty-state--page">
+        <i className="bi bi-bag" aria-hidden="true"></i>
+        <h1>Your cart is empty</h1>
+        <p>Add a few future-facing devices to start the mission.</p>
+        <Button icon="bi-shop" to="/catalogue" variant="primary">Continue Shopping</Button>
       </div>
     );
   }
@@ -25,123 +27,101 @@ const CartPage = () => {
   const total = cartSubtotal + tax + shipping;
 
   return (
-    <div className="cart-page">
-      <h1 className="mb-4">
-        <i className="bi bi-bag-fill me-2"></i>Shopping Cart
-      </h1>
+    <div className="wm-page wm-cart">
+      <header className="wm-page-heading">
+        <div>
+          <Badge icon="bi-bag" variant="info">Cart</Badge>
+          <h1>Checkout Array</h1>
+          <p>{totalItems} item{totalItems !== 1 ? 's' : ''} locked in.</p>
+        </div>
+        <Link className="wm-text-link" to="/catalogue">Continue shopping</Link>
+      </header>
 
-      <div className="row g-4">
-        {/* CART ITEMS */}
-        <div className="col-lg-8">
-          <div className="card border-0 shadow-sm">
-            <div className="card-header bg-light">
-              <h5 className="mb-0">{items.length} item{items.length !== 1 ? 's' : ''} in cart</h5>
-            </div>
-            <div className="card-body p-0">
-              {items.map((item, index) => (
-                <div key={item.id} className={`d-flex gap-3 p-4 ${index > 0 ? 'border-top' : ''}`}>
-                  {/* ITEM IMAGE */}
-                  <img
-                    src={`https://picsum.photos/120/120?random=${item.id}`}
-                    alt={item.name}
-                    className="rounded"
-                    style={{ width: '120px', height: '120px', objectFit: 'cover' }}
-                  />
+      <div className="wm-cart__layout">
+        <section className="wm-panel wm-cart__items" aria-label="Cart items">
+          {items.map((item) => {
+            const maxQuantity = Number(item.stock || 99);
+            return (
+              <article className="wm-cart-item" key={item.id}>
+                <ProductVisual product={item} size="cart" />
 
-                  {/* ITEM DETAILS */}
-                  <div className="flex-grow-1">
-                    <h6 className="fw-bold mb-1">{item.name}</h6>
-                    <p className="text-muted small mb-2">${item.price?.toFixed(2)} each</p>
-                    <p className="mb-0">
-                      <span className="badge bg-light text-dark">Qty: {item.quantity}</span>
-                    </p>
-                  </div>
-
-                  {/* SUBTOTAL */}
-                  <div className="text-end" style={{ minWidth: '100px' }}>
-                    <p className="fw-bold mb-3">${(item.price * item.quantity).toFixed(2)}</p>
+                <div className="wm-cart-item__details">
+                  <h2>{item.name}</h2>
+                  <p>${item.price?.toFixed(2)} each</p>
+                  <div className="wm-quantity" aria-label={`Quantity for ${item.name}`}>
                     <button
-                      onClick={() => removeFromCart(item.id)}
-                      className="btn btn-sm btn-outline-danger"
-                      title="Remove from cart"
+                      onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                      type="button"
                     >
-                      <i className="bi bi-trash"></i> Remove
+                      <i className="bi bi-dash" aria-hidden="true"></i>
+                    </button>
+                    <input
+                      min="1"
+                      onChange={(event) => updateQuantity(item.id, Math.min(maxQuantity, Number(event.target.value) || 1))}
+                      type="number"
+                      value={item.quantity}
+                    />
+                    <button
+                      onClick={() => updateQuantity(item.id, Math.min(maxQuantity, item.quantity + 1))}
+                      type="button"
+                    >
+                      <i className="bi bi-plus" aria-hidden="true"></i>
                     </button>
                   </div>
                 </div>
-              ))}
+
+                <div className="wm-cart-item__total">
+                  <strong>${(item.price * item.quantity).toFixed(2)}</strong>
+                  <button onClick={() => removeFromCart(item.id)} type="button">
+                    <i className="bi bi-trash" aria-hidden="true"></i>
+                    Remove
+                  </button>
+                </div>
+              </article>
+            );
+          })}
+        </section>
+
+        <aside className="wm-panel wm-summary" aria-label="Order summary">
+          <div className="wm-panel__header">
+            <h2>Order Summary</h2>
+            <i className="bi bi-receipt" aria-hidden="true"></i>
+          </div>
+
+          <div className="wm-summary__rows">
+            <div>
+              <span>Subtotal</span>
+              <strong>${cartSubtotal.toFixed(2)}</strong>
+            </div>
+            <div>
+              <span>Tax (10%)</span>
+              <strong>${tax.toFixed(2)}</strong>
+            </div>
+            <div>
+              <span>Shipping</span>
+              <strong>{shipping === 0 ? 'FREE' : `$${shipping.toFixed(2)}`}</strong>
             </div>
           </div>
 
-          {/* CONTINUE SHOPPING */}
-          <div className="mt-3">
-            <Link to="/catalogue" className="btn btn-outline-secondary">
-              <i className="bi bi-arrow-left me-2"></i>Continue Shopping
-            </Link>
-          </div>
-        </div>
-
-        {/* ORDER SUMMARY SIDEBAR */}
-        <div className="col-lg-4">
-          <div className="card border-0 shadow-sm sticky-lg-top" style={{ top: '20px' }}>
-            <div className="card-header bg-primary text-white fw-bold">
-              <i className="bi bi-receipt me-2"></i>Order Summary
+          {shipping === 0 && (
+            <div className="wm-alert wm-alert--success" role="alert">
+              <i className="bi bi-truck" aria-hidden="true"></i>
+              Free shipping applied.
             </div>
-            <div className="card-body">
-              {/* SUMMARY ROWS */}
-              <div className="mb-3 pb-3 border-bottom">
-                <div className="d-flex justify-content-between mb-2">
-                  <span>Subtotal</span>
-                  <span>${cartSubtotal.toFixed(2)}</span>
-                </div>
-                <div className="d-flex justify-content-between mb-2">
-                  <span>Tax (10%)</span>
-                  <span>${tax.toFixed(2)}</span>
-                </div>
-                <div className="d-flex justify-content-between">
-                  <span>Shipping</span>
-                  <span>
-                    {shipping === 0 ? (
-                      <><i className="bi bi-check-circle text-success me-1"></i>FREE</>
-                    ) : (
-                      `$${shipping.toFixed(2)}`
-                    )}
-                  </span>
-                </div>
-              </div>
+          )}
 
-              {/* TOTAL */}
-              <div className="mb-4">
-                <div className="d-flex justify-content-between">
-                  <h5 className="mb-0">Total</h5>
-                  <h5 className="text-primary fw-bold mb-0">${total.toFixed(2)}</h5>
-                </div>
-              </div>
-
-              {/* SHIPPING INFO */}
-              {shipping === 0 && (
-                <div className="alert alert-success alert-sm mb-3" role="alert">
-                  <i className="bi bi-truck me-2"></i>
-                  <small>Free shipping applied!</small>
-                </div>
-              )}
-
-              {/* CHECKOUT BUTTONS */}
-              <button
-                onClick={() => navigate('/payment')}
-                className="btn btn-primary w-100 mb-2"
-              >
-                <i className="bi bi-lock-fill me-2"></i>Proceed to Checkout
-              </button>
-              <button
-                onClick={() => navigate('/catalogue')}
-                className="btn btn-outline-secondary w-100"
-              >
-                <i className="bi bi-shop me-2"></i>Continue Shopping
-              </button>
-            </div>
+          <div className="wm-summary__total">
+            <span>Total</span>
+            <strong>${total.toFixed(2)}</strong>
           </div>
-        </div>
+
+          <Button icon="bi-lock" onClick={() => navigate('/payment')} size="lg" variant="primary">
+            Proceed to Checkout
+          </Button>
+          <Button icon="bi-shop" onClick={() => navigate('/catalogue')} variant="outline">
+            Continue Shopping
+          </Button>
+        </aside>
       </div>
     </div>
   );

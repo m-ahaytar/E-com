@@ -1,73 +1,64 @@
 -- ============================================================
--- E-Commerce Sample Data Initialization
--- Categories and Products for realistic testing
+-- TECH & GAMING E-COMMERCE DATABASE SEED (Product Service)
 -- ============================================================
 
--- INSERT CATEGORIES
-INSERT INTO CATEGORY (name) VALUES ('Electronics');
-INSERT INTO CATEGORY (name) VALUES ('Clothing');
-INSERT INTO CATEGORY (name) VALUES ('Accessories');
-INSERT INTO CATEGORY (name) VALUES ('Home & Garden');
-INSERT INTO CATEGORY (name) VALUES ('Books');
+-- Clean old product seed data
+DELETE FROM PRODUCT;
+DELETE FROM CATEGORY;
 
--- INSERT ELECTRONICS PRODUCTS (Category 1)
-INSERT INTO PRODUCT (name, description, price, stock, image_url, category_id) 
-VALUES ('Wireless Headphones', 'Premium noise-canceling wireless headphones with 30-hour battery life', 129.99, 50, 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&h=500&fit=crop', 1);
+-- ========================
+-- CATEGORIES
+-- ========================
+INSERT INTO CATEGORY (id, name) VALUES (1, 'Gaming Hardware');
+INSERT INTO CATEGORY (id, name) VALUES (2, 'PC Components');
+INSERT INTO CATEGORY (id, name) VALUES (3, 'Gaming Accessories');
+INSERT INTO CATEGORY (id, name) VALUES (4, 'Streaming Setup');
+INSERT INTO CATEGORY (id, name) VALUES (5, 'Games');
+INSERT INTO CATEGORY (id, name) VALUES (6, 'Software');
+INSERT INTO CATEGORY (id, name) VALUES (7, 'Networking');
+INSERT INTO CATEGORY (id, name) VALUES (8, 'Smart Devices');
 
-INSERT INTO PRODUCT (name, description, price, stock, image_url, category_id) 
-VALUES ('USB-C Charging Cable', 'Durable 2-meter USB-C to USB-C cable for fast charging', 19.99, 200, 'https://images.unsplash.com/photo-1625948515291-69613efd103f?w=500&h=500&fit=crop', 1);
+-- ========================
+-- PRODUCTS
+-- ========================
+INSERT INTO PRODUCT (id, name, description, price, stock, image_url, category_id) VALUES (1, 'ASUS ROG Laptop RTX 4080', 'High-end gaming laptop 240Hz', 2299.99, 15, 'https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=500&h=500&fit=crop', 1);
 
-INSERT INTO PRODUCT (name, description, price, stock, image_url, category_id) 
-VALUES ('Portable Power Bank', '20000mAh power bank with dual USB ports and LED display', 39.99, 85, 'https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=500&h=500&fit=crop', 1);
+INSERT INTO PRODUCT (id, name, description, price, stock, image_url, category_id) VALUES (2, 'PlayStation 5', 'Next-gen console', 599.99, 40, 'https://images.unsplash.com/photo-1606813907291-d86efa9b94db?w=500&h=500&fit=crop', 1);
 
-INSERT INTO PRODUCT (name, description, price, stock, image_url, category_id) 
-VALUES ('4K Webcam', 'Professional 4K webcam with auto-focus and built-in microphone', 89.99, 30, 'https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=500&h=500&fit=crop', 1);
+INSERT INTO PRODUCT (id, name, description, price, stock, image_url, category_id) VALUES (3, 'Xbox Series X', '4K gaming console', 549.99, 35, 'https://images.unsplash.com/photo-1621259182978-fbf93132d53d?w=500&h=500&fit=crop', 1);
 
-INSERT INTO PRODUCT (name, description, price, stock, image_url, category_id) 
-VALUES ('Bluetooth Speaker', 'Portable Bluetooth speaker with 360-degree sound and waterproof design', 79.99, 65, 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=500&h=500&fit=crop', 1);
+INSERT INTO PRODUCT (id, name, description, price, stock, image_url, category_id) VALUES (4, 'RTX 4070 GPU', 'High-end GPU', 799.99, 50, 'https://images.unsplash.com/photo-1591488320449-011701bb6704?w=500&h=500&fit=crop', 2);
 
--- INSERT CLOTHING PRODUCTS (Category 2)
-INSERT INTO PRODUCT (name, description, price, stock, image_url, category_id) 
-VALUES ('Cotton T-Shirt', 'Classic comfortable cotton t-shirt available in multiple colors', 24.99, 150, 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop', 2);
+INSERT INTO PRODUCT (id, name, description, price, stock, image_url, category_id) VALUES (5, 'Ryzen 7 7800X', 'Gaming CPU', 329.99, 45, 'https://images.unsplash.com/photo-1587202372616-b43abea06c2a?w=500&h=500&fit=crop', 2);
 
-INSERT INTO PRODUCT (name, description, price, stock, image_url, category_id) 
-VALUES ('Denim Jeans', 'Modern fit denim jeans with stretch comfort technology', 59.99, 75, 'https://images.unsplash.com/photo-1604695573706-e9b1e83c66e8?w=500&h=500&fit=crop', 2);
+INSERT INTO PRODUCT (id, name, description, price, stock, image_url, category_id) VALUES (6, '16GB DDR5 RAM', 'Fast RAM', 129.99, 100, 'https://images.unsplash.com/photo-1562976540-1502c2145186?w=500&h=500&fit=crop', 2);
 
-INSERT INTO PRODUCT (name, description, price, stock, image_url, category_id) 
-VALUES ('Winter Jacket', 'Waterproof and insulated winter jacket for extreme cold weather', 149.99, 40, 'https://images.unsplash.com/photo-1551028719-00167b16ebc5?w=500&h=500&fit=crop', 2);
+INSERT INTO PRODUCT (id, name, description, price, stock, image_url, category_id) VALUES (7, '1TB NVMe SSD', 'Fast storage', 109.99, 90, 'https://images.unsplash.com/photo-1593642634367-d91a135587b5?w=500&h=500&fit=crop', 2);
 
-INSERT INTO PRODUCT (name, description, price, stock, image_url, category_id) 
-VALUES ('Running Shoes', 'Lightweight running shoes with advanced cushioning technology', 119.99, 90, 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop', 2);
+INSERT INTO PRODUCT (id, name, description, price, stock, image_url, category_id) VALUES (8, 'Razer Keyboard', 'RGB mechanical keyboard', 149.99, 60, 'https://images.unsplash.com/photo-1587202372634-32705e3bf49c?w=500&h=500&fit=crop', 3);
 
--- INSERT ACCESSORIES PRODUCTS (Category 3)
-INSERT INTO PRODUCT (name, description, price, stock, image_url, category_id) 
-VALUES ('Leather Wallet', 'Premium leather RFID-blocking wallet with card slots', 49.99, 60, 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=500&h=500&fit=crop', 3);
+INSERT INTO PRODUCT (id, name, description, price, stock, image_url, category_id) VALUES (9, 'Logitech Mouse', 'Gaming mouse', 89.99, 80, 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=500&h=500&fit=crop', 3);
 
-INSERT INTO PRODUCT (name, description, price, stock, image_url, category_id) 
-VALUES ('Sunglasses', 'UV-protection polarized sunglasses with stylish frame design', 79.99, 45, 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500&h=500&fit=crop', 3);
+INSERT INTO PRODUCT (id, name, description, price, stock, image_url, category_id) VALUES (10, 'Gaming Headset', 'Surround headset', 99.99, 70, 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=500&h=500&fit=crop', 3);
 
-INSERT INTO PRODUCT (name, description, price, stock, image_url, category_id) 
-VALUES ('Watch', 'Elegant stainless steel watch with waterproof design', 199.99, 25, 'https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=500&h=500&fit=crop', 3);
+INSERT INTO PRODUCT (id, name, description, price, stock, image_url, category_id) VALUES (11, 'Blue Yeti Mic', 'Streaming mic', 129.99, 50, 'https://images.unsplash.com/photo-1580894908361-967195033215?w=500&h=500&fit=crop', 4);
 
-INSERT INTO PRODUCT (name, description, price, stock, image_url, category_id) 
-VALUES ('Backpack', 'Durable canvas backpack with multiple compartments and water-resistant coating', 89.99, 70, 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&h=500&fit=crop', 3);
+INSERT INTO PRODUCT (id, name, description, price, stock, image_url, category_id) VALUES (12, '4K Webcam', 'Streaming webcam', 99.99, 60, 'https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=500&h=500&fit=crop', 4);
 
--- INSERT HOME & GARDEN PRODUCTS (Category 4)
-INSERT INTO PRODUCT (name, description, price, stock, image_url, category_id) 
-VALUES ('LED Desk Lamp', 'Smart LED desk lamp with adjustable brightness and color temperature', 69.99, 55, 'https://images.unsplash.com/photo-1565636192335-14ae0a06e3e1?w=500&h=500&fit=crop', 4);
+INSERT INTO PRODUCT (id, name, description, price, stock, image_url, category_id) VALUES (13, 'Elden Ring', 'RPG game', 59.99, 120, 'https://images.unsplash.com/photo-1605902711622-cfb43c4437d1?w=500&h=500&fit=crop', 5);
 
-INSERT INTO PRODUCT (name, description, price, stock, image_url, category_id) 
-VALUES ('Coffee Maker', 'Programmable coffee maker with thermal carafe and brew timer', 89.99, 35, 'https://images.unsplash.com/photo-1517668808822-9ebb02ae2a0e?w=500&h=500&fit=crop', 4);
+INSERT INTO PRODUCT (id, name, description, price, stock, image_url, category_id) VALUES (14, 'FIFA 25', 'Football game', 69.99, 140, 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=500&h=500&fit=crop', 5);
 
-INSERT INTO PRODUCT (name, description, price, stock, image_url, category_id) 
-VALUES ('Plant Pot Set', 'Set of 3 ceramic plant pots in different sizes with drainage holes', 34.99, 80, 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=500&h=500&fit=crop', 4);
+INSERT INTO PRODUCT (id, name, description, price, stock, image_url, category_id) VALUES (15, 'Call of Duty', 'FPS game', 69.99, 130, 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=500&h=500&fit=crop', 5);
 
--- INSERT BOOKS PRODUCTS (Category 5)
-INSERT INTO PRODUCT (name, description, price, stock, image_url, category_id) 
-VALUES ('Java Programming Guide', 'Comprehensive guide to Java programming with practical examples', 45.99, 120, 'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=500&h=500&fit=crop', 5);
+INSERT INTO PRODUCT (id, name, description, price, stock, image_url, category_id) VALUES (16, 'Windows 11 Pro', 'OS license', 199.99, 100, 'https://images.unsplash.com/photo-1633419461186-7d40a38105ec?w=500&h=500&fit=crop', 6);
 
-INSERT INTO PRODUCT (name, description, price, stock, image_url, category_id) 
-VALUES ('Spring Boot in Action', 'Learn Spring Boot framework with hands-on projects and best practices', 52.99, 95, 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=500&h=500&fit=crop', 5);
+INSERT INTO PRODUCT (id, name, description, price, stock, image_url, category_id) VALUES (17, 'Office 365', 'Office suite', 99.99, 120, 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=500&h=500&fit=crop', 6);
 
-INSERT INTO PRODUCT (name, description, price, stock, image_url, category_id) 
-VALUES ('Microservices Architecture', 'Design and implement scalable microservices with real-world examples', 67.99, 60, 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=500&fit=crop', 5);
+INSERT INTO PRODUCT (id, name, description, price, stock, image_url, category_id) VALUES (18, 'WiFi 6 Router', 'Fast router', 129.99, 70, 'https://images.unsplash.com/photo-1606904825846-647eb07f5be2?w=500&h=500&fit=crop', 7);
+
+INSERT INTO PRODUCT (id, name, description, price, stock, image_url, category_id) VALUES (19, 'Ethernet Cable', '10m cable', 19.99, 200, 'https://images.unsplash.com/photo-1580894732444-8ecded7900cd?w=500&h=500&fit=crop', 7);
+
+INSERT INTO PRODUCT (id, name, description, price, stock, image_url, category_id) VALUES (20, 'Smart LED Strip', 'RGB lighting', 39.99, 110, 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=500&h=500&fit=crop', 8);
+
+INSERT INTO PRODUCT (id, name, description, price, stock, image_url, category_id) VALUES (21, 'Smart Plug', 'WiFi plug', 19.99, 150, 'https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=500&h=500&fit=crop', 8);

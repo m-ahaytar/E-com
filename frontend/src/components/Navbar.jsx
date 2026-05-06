@@ -1,160 +1,135 @@
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import Button from './Button';
+import wmLogo from '../assets/wm-logo.png';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
 const Navbar = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, role } = useAuth();
   const { items } = useCart();
+  const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
 
-  // Calculate total items in cart
-  const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  const userRole = user?.role || role;
+  const displayName = user?.firstName || user?.username || 'Pilot';
+  const cartCount = items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
+  const canShop = !userRole || userRole === 'CUSTOMER';
+
+  const navLinkClass = ({ isActive }) => `wm-nav__link${isActive ? ' active' : ''}`;
+
+  const handleLogout = () => {
+    logout();
+    setAccountOpen(false);
+    setMenuOpen(false);
+    navigate('/login');
+  };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark sticky-top" style={{ background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' }}>
-      <div className="container-fluid">
-        {/* Brand */}
-        <Link className="navbar-brand fw-bold" to="/">
-          <i className="bi bi-shop me-2"></i>E-Shop
-        </Link>
+    <header className="wm-nav">
+      <Link className="wm-nav__brand" to="/" onClick={() => setMenuOpen(false)}>
+        <img alt="WM logo" className="wm-nav__logo" src={wmLogo} />
+        <span className="wm-nav__brand-copy">
+          <strong>WITH ME SHOP</strong>
+          <small>We Move To The Future</small>
+        </span>
+      </Link>
 
-        {/* Hamburger Toggle */}
-        <button
-          className="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarContent"
-          aria-controls="navbarContent"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span className="navbar-toggler-icon"></span>
-        </button>
+      <button
+        aria-expanded={menuOpen}
+        aria-label="Toggle navigation"
+        className="wm-nav__toggle"
+        onClick={() => setMenuOpen((current) => !current)}
+        type="button"
+      >
+        <i className={`bi ${menuOpen ? 'bi-x-lg' : 'bi-list'}`} aria-hidden="true"></i>
+      </button>
 
-        {/* Navbar Content */}
-        <div className="collapse navbar-collapse" id="navbarContent">
-          {/* Left - Main Navigation */}
-          <ul className="navbar-nav me-auto">
-            <li className="nav-item">
-              <Link className="nav-link" to="/">
-                <i className="bi bi-house me-1"></i>Home
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/catalogue">
-                <i className="bi bi-grid-3x3-gap me-1"></i>Catalogue
-              </Link>
-            </li>
-          </ul>
+      <nav className={`wm-nav__links${menuOpen ? ' is-open' : ''}`} aria-label="Primary navigation">
+        <NavLink className={navLinkClass} end onClick={() => setMenuOpen(false)} to="/">
+          Home
+        </NavLink>
+        {canShop && (
+          <>
+            <NavLink className={navLinkClass} onClick={() => setMenuOpen(false)} to="/catalogue">
+              Products
+            </NavLink>
+            <NavLink className={navLinkClass} onClick={() => setMenuOpen(false)} to="/catalogue?category=Gadgets">
+              Deals
+            </NavLink>
+          </>
+        )}
+        {userRole === 'SELLER' && (
+          <NavLink className={navLinkClass} onClick={() => setMenuOpen(false)} to="/seller">
+            Store
+          </NavLink>
+        )}
+        {userRole === 'ADMIN' && (
+          <>
+            <NavLink className={navLinkClass} onClick={() => setMenuOpen(false)} to="/admin">
+              Admin
+            </NavLink>
+            <NavLink className={navLinkClass} onClick={() => setMenuOpen(false)} to="/admin/orders">
+              Orders
+            </NavLink>
+          </>
+        )}
+      </nav>
 
-          {/* Right - User & Cart */}
-          <ul className="navbar-nav ms-auto">
-            {/* Cart Link */}
-            <li className="nav-item">
-              <Link className="nav-link position-relative" to="/cart">
-                <i className="bi bi-cart3"></i>
-                {cartCount > 0 && (
-                  <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                    {cartCount}
-                  </span>
-                )}
-              </Link>
-            </li>
+      <div className="wm-nav__actions">
+        {canShop && (
+          <Link className="wm-icon-button" to="/cart" aria-label="Cart">
+            <i className="bi bi-bag" aria-hidden="true"></i>
+            {cartCount > 0 && <span className="wm-count-badge">{cartCount}</span>}
+          </Link>
+        )}
 
-            {/* Admin Links (if logged in as admin) */}
-            {user?.role === 'ADMIN' && (
-              <li className="nav-item dropdown">
-                <a
-                  className="nav-link dropdown-toggle"
-                  href="#"
-                  id="adminDropdown"
-                  role="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
+        {user ? (
+          <div className="wm-account">
+            <button
+              aria-expanded={accountOpen}
+              className="wm-icon-button"
+              onClick={() => setAccountOpen((current) => !current)}
+              type="button"
+            >
+              <i className="bi bi-person" aria-hidden="true"></i>
+              <span className="visually-hidden">Account menu</span>
+            </button>
+
+            {accountOpen && (
+              <div className="wm-account__menu">
+                <p className="wm-account__eyebrow">Signed in as</p>
+                <strong>{displayName}</strong>
+                <small>{userRole || 'CUSTOMER'}</small>
+                <Link
+                  className="wm-account__item"
+                  onClick={() => setAccountOpen(false)}
+                  to={userRole === 'ADMIN' ? '/admin' : '/dashboard'}
                 >
-                  <i className="bi bi-lock-fill me-1"></i>Admin
-                </a>
-                <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="adminDropdown">
-                  <li>
-                    <Link className="dropdown-item" to="/admin">
-                      <i className="bi bi-graph-up me-2"></i>Dashboard
-                    </Link>
-                  </li>
-                  <li>
-                    <Link className="dropdown-item" to="/admin/products">
-                      <i className="bi bi-box me-2"></i>Products
-                    </Link>
-                  </li>
-                  <li>
-                    <Link className="dropdown-item" to="/admin/categories">
-                      <i className="bi bi-tag me-2"></i>Categories
-                    </Link>
-                  </li>
-                  <li>
-                    <Link className="dropdown-item" to="/admin/orders">
-                      <i className="bi bi-receipt me-2"></i>Orders
-                    </Link>
-                  </li>
-                  <li>
-                    <Link className="dropdown-item" to="/admin/users">
-                      <i className="bi bi-people me-2"></i>Users
-                    </Link>
-                  </li>
-                </ul>
-              </li>
+                  <i className="bi bi-speedometer2" aria-hidden="true"></i>
+                  Dashboard
+                </Link>
+                <button className="wm-account__item" onClick={handleLogout} type="button">
+                  <i className="bi bi-box-arrow-right" aria-hidden="true"></i>
+                  Logout
+                </button>
+              </div>
             )}
-
-            {/* User Menu */}
-            {user ? (
-              <li className="nav-item dropdown">
-                <a
-                  className="nav-link dropdown-toggle"
-                  href="#"
-                  id="userDropdown"
-                  role="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  <i className="bi bi-person-circle me-1"></i>{user.firstName}
-                </a>
-                <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                  <li>
-                    <Link className="dropdown-item" to="/dashboard">
-                      <i className="bi bi-person me-2"></i>My Profile
-                    </Link>
-                  </li>
-                  <li>
-                    <hr className="dropdown-divider" />
-                  </li>
-                  <li>
-                    <button
-                      className="dropdown-item"
-                      onClick={logout}
-                      style={{ border: 'none', background: 'none', cursor: 'pointer', textAlign: 'left' }}
-                    >
-                      <i className="bi bi-box-arrow-left me-2"></i>Logout
-                    </button>
-                  </li>
-                </ul>
-              </li>
-            ) : (
-              <>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/login">
-                    <i className="bi bi-box-arrow-in-right me-1"></i>Login
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/register">
-                    <i className="bi bi-person-plus me-1"></i>Register
-                  </Link>
-                </li>
-              </>
-            )}
-          </ul>
-        </div>
+          </div>
+        ) : (
+          <div className="wm-auth-actions">
+            <Link className="wm-icon-button" to="/login" aria-label="Login">
+              <i className="bi bi-person" aria-hidden="true"></i>
+            </Link>
+            <Button className="wm-nav__join" size="sm" to="/register" variant="outline">
+              Join
+            </Button>
+          </div>
+        )}
       </div>
-    </nav>
+    </header>
   );
 };
 
