@@ -51,13 +51,16 @@ const Navbar = () => {
         <NavLink className={navLinkClass} end onClick={() => setMenuOpen(false)} to="/">
           Home
         </NavLink>
+        <NavLink className={navLinkClass} onClick={() => setMenuOpen(false)} to="/deals">
+          Deals
+        </NavLink>
         {canShop && (
           <>
             <NavLink className={navLinkClass} onClick={() => setMenuOpen(false)} to="/catalogue">
               Products
             </NavLink>
             <NavLink className={navLinkClass} onClick={() => setMenuOpen(false)} to="/catalogue?category=Gadgets">
-              Deals
+              Gadgets
             </NavLink>
           </>
         )}
@@ -81,7 +84,7 @@ const Navbar = () => {
       <div className="wm-nav__actions">
         {canShop && (
           <Link className="wm-icon-button" to="/cart" aria-label="Cart">
-            <i className="bi bi-bag" aria-hidden="true"></i>
+            <i className="bi bi-bag-fill" aria-hidden="true"></i>
             {cartCount > 0 && <span className="wm-count-badge">{cartCount}</span>}
           </Link>
         )}
@@ -94,7 +97,7 @@ const Navbar = () => {
               onClick={() => setAccountOpen((current) => !current)}
               type="button"
             >
-              <i className="bi bi-person" aria-hidden="true"></i>
+              <i className="bi bi-person-fill" aria-hidden="true"></i>
               <span className="visually-hidden">Account menu</span>
             </button>
 
@@ -121,7 +124,7 @@ const Navbar = () => {
         ) : (
           <div className="wm-auth-actions">
             <Link className="wm-icon-button" to="/login" aria-label="Login">
-              <i className="bi bi-person" aria-hidden="true"></i>
+              <i className="bi bi-person-fill" aria-hidden="true"></i>
             </Link>
             <Button className="wm-nav__join" size="sm" to="/register" variant="outline">
               Join
