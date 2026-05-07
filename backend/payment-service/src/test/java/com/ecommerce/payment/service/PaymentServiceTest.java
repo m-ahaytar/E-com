@@ -33,14 +33,14 @@ class PaymentServiceTest {
     @Mock
     private PaymentRepository paymentRepository;
 
+    @org.mockito.InjectMocks
     private PaymentService paymentService;
+    
     private Payment payment;
     private PaymentRequest paymentRequest;
 
     @BeforeEach
     void setUp() {
-        paymentService = new PaymentService(paymentRepository);
-
         payment = new Payment();
         payment.setId(1L);
         payment.setOrderId(100L);
