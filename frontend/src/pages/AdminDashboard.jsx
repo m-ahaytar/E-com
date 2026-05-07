@@ -9,6 +9,7 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState({
     totalProducts: 0,
     totalCategories: 0,
+    totalDeals: 0,
     totalOrders: 0,
     totalRevenue: 0
   });
@@ -17,10 +18,11 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [productsData, categoriesData, ordersData] = await Promise.all([
+        const [productsData, categoriesData, ordersData, dealsData] = await Promise.all([
           productService.getProducts(),
           productService.getCategories(),
-          orderService.getUserOrders(user?.id)
+          orderService.getUserOrders(user?.id),
+          productService.getAllDeals(),
         ]);
         
         const totalRevenue = ordersData.reduce((sum, order) => sum + (order.total || 0), 0);
@@ -28,6 +30,7 @@ const AdminDashboard = () => {
         setStats({
           totalProducts: productsData.length,
           totalCategories: categoriesData.length,
+          totalDeals: dealsData.length,
           totalOrders: ordersData.length,
           totalRevenue: totalRevenue
         });
@@ -166,6 +169,20 @@ const AdminDashboard = () => {
               <h5 className="card-title fw-bold">Users</h5>
               <p className="card-text text-muted small">View registered users</p>
               <small className="text-primary fw-600">View all users →</small>
+            </div>
+          </Link>
+        </div>
+
+        {/* DEALS */}
+        <div className="col-md-6 col-lg-3">
+          <Link to="/admin/deals" className="card border-0 shadow-sm text-decoration-none text-dark h-100" style={{ transition: 'transform 0.3s' }}>
+            <div className="card-body text-center py-4">
+              <div className="mb-3" style={{ fontSize: '2.5rem', color: 'var(--wm-neon-2)' }}>
+                <i className="bi bi-tag-fill"></i>
+              </div>
+              <h5 className="card-title fw-bold">Deals</h5>
+              <p className="card-text text-muted small">Manage time-limited offers</p>
+              <small className="text-primary fw-600">Manage {stats.totalDeals} deals →</small>
             </div>
           </Link>
         </div>

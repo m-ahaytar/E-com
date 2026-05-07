@@ -57,7 +57,7 @@ public class ProductService {
     public ProductDTO update(Long id, ProductCreateDTO createDTO) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
-        
+
         product.setName(createDTO.getName());
         product.setDescription(createDTO.getDescription());
         product.setPrice(createDTO.getPrice());
@@ -83,17 +83,16 @@ public class ProductService {
     @Transactional
     public ProductDTO decreaseStock(Long id, Integer quantity) {
         if (quantity == null || quantity <= 0) {
-            throw new RuntimeException("Quantity must be greater than zero");
+            throw new IllegalArgumentException("Quantity must be greater than zero");
         }
 
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
 
-        if (product.getStock() == null || product.getStock() < quantity) {
-            throw new RuntimeException("Not enough stock for product id: " + id);
+        if (product.getStock() < quantity) {
+            throw new IllegalStateException("Insufficient stock for product: " + id);
         }
 
-        // Keep the logic simple: subtract the quantity and save the product.
         product.setStock(product.getStock() - quantity);
         Product saved = productRepository.save(product);
         return toDTO(saved);

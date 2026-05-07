@@ -2,14 +2,16 @@ package com.ecommerce.auth.dto;
 
 public class AuthResponse {
     private String token;
-    private String username;
+    private String email;
     private String role;
+    private String firstName;
+    private String lastName;
 
     public AuthResponse() {}
 
-    public AuthResponse(String token, String username, String role) {
+    public AuthResponse(String token, String email, String role) {
         this.token = token;
-        this.username = username;
+        this.email = email;
         this.role = role;
     }
 
@@ -21,12 +23,12 @@ public class AuthResponse {
         this.token = token;
     }
 
-    public String getUsername() {
-        return username;
+    public String getEmail() {
+        return email;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getRole() {
@@ -35,5 +37,21 @@ public class AuthResponse {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 }

@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { getProducts, getCategories } from '../services/productService';
+import { getProducts, getCategories, getDeals } from '../services/productService';
 import { useCart } from '../context/CartContext';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
@@ -10,6 +10,7 @@ import { buildCategoryOptions, getRawCategoryName } from '../utils/productTech';
 const CataloguePage = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [deals, setDeals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState('');
@@ -32,12 +33,14 @@ const CataloguePage = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [productsData, categoriesData] = await Promise.all([
+        const [productsData, categoriesData, dealsData] = await Promise.all([
           getProducts(),
           getCategories(),
+          getDeals(),
         ]);
         setProducts(productsData);
         setCategories(categoriesData);
+        setDeals(dealsData);
       } catch (err) {
         setError(err.message || 'Failed to load products');
       } finally {
@@ -218,9 +221,12 @@ const CataloguePage = () => {
 
           {!loading && !error && filteredProducts.length > 0 && (
             <div className={`wm-product-grid${viewMode === 'list' ? ' is-list' : ''}`}>
-              {filteredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} onAddToCart={addToCart} />
-              ))}
+              {filteredProducts.map((product) => {
+                const productDeal = deals.find((d) => d.productId === product.id) ?? null;
+                return (
+                  <ProductCard key={product.id} product={product} deal={productDeal} onAddToCart={addToCart} />
+                );
+              })}
             </div>
           )}
         </section>

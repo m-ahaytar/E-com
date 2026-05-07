@@ -12,6 +12,7 @@ spring:
       continue-on-error: false
 
   jpa:
+    open-in-view: false
     defer-datasource-initialization: true
     hibernate:
       ddl-auto: update
@@ -19,3 +20,6 @@ spring:
       hibernate:
         dialect: org.hibernate.community.dialect.SQLiteDialect
     show-sql: false
+
+jwt:
+  secret: ${JWT_SECRET}

@@ -13,7 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,7 +34,6 @@ class PaymentControllerTest {
 
     @Test
     void processPayment_Success() throws Exception {
-        PaymentRequest request = new PaymentRequest(1L, "CARD", 100.00);
         PaymentDTO paymentDTO = new PaymentDTO(1L, 1L, "CARD", "COMPLETED", 100.00, LocalDateTime.now());
 
         when(paymentService.processPayment(any(PaymentRequest.class))).thenReturn(paymentDTO);
@@ -74,7 +72,6 @@ class PaymentControllerTest {
 
     @Test
     void processPayment_NonCardMethod() throws Exception {
-        PaymentRequest request = new PaymentRequest(1L, "CASH", 50.00);
         PaymentDTO paymentDTO = new PaymentDTO(2L, 1L, "CASH", "PENDING", 50.00, LocalDateTime.now());
 
         when(paymentService.processPayment(any(PaymentRequest.class))).thenReturn(paymentDTO);
@@ -91,7 +88,7 @@ class PaymentControllerTest {
     void getAllPayments_Success() throws Exception {
         PaymentDTO p1 = new PaymentDTO(1L, 1L, "CARD", "COMPLETED", 100.00, LocalDateTime.now());
         PaymentDTO p2 = new PaymentDTO(2L, 2L, "CASH", "PENDING", 55.00, LocalDateTime.now());
-        List<PaymentDTO> payments = Arrays.asList(p1, p2);
+        List<PaymentDTO> payments = List.of(p1, p2);
 
         when(paymentService.getAllPayments()).thenReturn(payments);
 

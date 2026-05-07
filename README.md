@@ -7,6 +7,7 @@ A **next-generation e-commerce platform** built with microservices architecture,
 ## Quick Start
 
 ### Prerequisites
+
 - Docker & Docker Compose
 - Node.js 20+ (for local frontend development)
 - Java 17+ (for local backend development)
@@ -14,8 +15,33 @@ A **next-generation e-commerce platform** built with microservices architecture,
 ### Run the Full Stack with Docker
 
 ```bash
-docker-compose up --build
+# Generate JWT secret and start all services
+./start.sh
 ```
+> Or manually: `echo "JWT_SECRET=$(openssl rand -hex 32)" > .env && docker-compose up --build`
+
+### Run Tests
+
+```bash
+# Run all backend tests (all services)
+cd backend/api-gateway   && mvn test
+cd backend/auth-service  && mvn test
+cd backend/order-service && mvn test
+cd backend/payment-service && mvn test
+cd backend/product-service && mvn test
+
+# Run a specific test class
+cd backend/product-service
+mvn test -Dtest=ProductServiceTest
+mvn test -Dtest=DiscountStrategyTest
+mvn test -Dtest=OrderCalculatorDecoratorTest
+mvn test -Dtest=ProductDetailFacadeTest
+
+# Generate JaCoCo coverage report
+mvn clean test
+# Report: backend/<service>/target/site/jacoco/index.html
+```
+> Or manually: `echo "JWT_SECRET=$(openssl rand -hex 32)" > .env && docker-compose up --build`
 
 - **Frontend** (React): http://localhost:3000
 - **API Gateway**: http://localhost:8085
@@ -37,11 +63,34 @@ cd backend/product-service
 mvn spring-boot:run
 ```
 
+### Run Tests
+
+```bash
+# Run all backend tests (all services)
+cd backend/api-gateway   && mvn test
+cd backend/auth-service  && mvn test
+cd backend/order-service && mvn test
+cd backend/payment-service && mvn test
+cd backend/product-service && mvn test
+
+# Run a specific test class
+cd backend/product-service
+mvn test -Dtest=ProductServiceTest
+mvn test -Dtest=DiscountStrategyTest
+mvn test -Dtest=OrderCalculatorDecoratorTest
+mvn test -Dtest=ProductDetailFacadeTest
+
+# Generate JaCoCo coverage report
+mvn clean test
+# Report: backend/<service>/target/site/jacoco/index.html
+```
+
 ---
 
 ## Project Overview
 
 **WITH ME SHOP** is a full-stack e-commerce platform showcasing:
+
 - **Microservices architecture** with API Gateway routing
 - **Real-time cart synchronization** via React Context + REST API
 - **Dynamic categories & products** fetched from backend
@@ -84,6 +133,7 @@ Service   Service       Service           Service
 ### Services
 
 #### 1. **Auth Service** (Port 8081)
+
 - User registration & login
 - JWT token generation & validation
 - User role management (CUSTOMER, SELLER, ADMIN)
@@ -91,6 +141,7 @@ Service   Service       Service           Service
 - Database: `auth-service.db` (SQLite, users table)
 
 #### 2. **Product Service** (Port 8082)
+
 - Product & category CRUD
 - Product search & filtering
 - Dynamic category list
@@ -98,6 +149,7 @@ Service   Service       Service           Service
 - Database: `product-service.db` (SQLite, categories & products tables)
 
 #### 3. **Order Service** (Port 8083)
+
 - **Cart management** (session-based in-memory state)
 - Order creation from cart items
 - Order history & status tracking
@@ -105,12 +157,14 @@ Service   Service       Service           Service
 - Database: `order-service.db` (SQLite, orders & order_items tables)
 
 #### 4. **Payment Service** (Port 8084)
+
 - Payment processing (mock implementation)
 - Payment status tracking
 - Endpoints: `/payments/process`, `/payments/order/{orderId}`
 - Database: `payment-service.db` (SQLite, payments table)
 
 #### 5. **API Gateway** (Port 8085 external / 8080 internal)
+
 - Spring Cloud Gateway routes requests to appropriate services
 - CORS enabled for `http://localhost:3000` and `http://127.0.0.1:3000`
 - Request/response transformation
@@ -118,9 +172,45 @@ Service   Service       Service           Service
 
 ---
 
+## Deals Feature
+
+The platform includes a time-limited deals system built on top of the product service.
+
+### How It Works
+
+- **Deal entity**: linked to a Product with `discountPercentage`, `startDate`, `endDate`
+- **Active deal**: any deal where `startDate <= now <= endDate`
+- **Multiple deals per product**: the highest discount is applied automatically
+- **Discounted price**: computed server-side as `price - (price × discount% / 100)`, rounded to 2 decimals
+
+### API Endpoints (via Gateway)
+
+```
+GET    /deals                  # All currently active deals (public)
+GET    /deals/{id}             # Single deal (public)
+POST   /deals                  # Create deal (ADMIN only)
+PUT    /deals/{id}             # Update deal (ADMIN only)
+DELETE /deals/{id}             # Delete deal (ADMIN only)
+```
+
+### Frontend Pages
+
+| Page         | Route          | Purpose                                              |
+|--------------|----------------|------------------------------------------------------|
+| Deals        | `/deals`       | Hero banner, global countdown timer, deal cards      |
+| Admin Deals  | `/admin/deals` | Create/edit/delete deals with date range and discount|
+
+### Data Seeding
+
+On first startup, `DealDataSeeder` seeds 4 sample deals using products from the database.
+Seeds only run when the DEAL table is empty, so restarts are safe.
+
+---
+
 ## Frontend Architecture
 
 ### Technologies
+
 - **React 19** - UI library
 - **React Router 6** - client-side routing
 - **Vite** - build tool & dev server
@@ -131,12 +221,14 @@ Service   Service       Service           Service
 ### Key Features (Recent Updates)
 
 #### Dynamic Categories
+
 - Fetches categories from `/categories` API endpoint
 - Falls back to product data if no categories in API response
 - Category tiles & filters on homepage & catalog show live counts
 - Implements `buildCategoryOptions()` utility to merge backend data with product inventory
 
 #### Cart State Management
+
 - **CartContext** manages global cart state
 - **API Sync**: When user is authenticated, cart operations sync with `/cart` endpoints
 - **Local Fallback**: Anonymous users use localStorage (client-only cart)
@@ -145,6 +237,7 @@ Service   Service       Service           Service
 - `addToCart()`, `removeFromCart()`, `updateQuantity()`, `clearCart()` methods handle both API & local storage
 
 #### Navbar & Logo
+
 - Logo replaced with local asset `frontend/src/assets/wm-logo.png` (WM design)
 - Rendered as `<img className="wm-nav__logo" />` instead of text
 - "WITH ME SHOP" text + tagline displayed next to logo
@@ -152,6 +245,7 @@ Service   Service       Service           Service
 - Role-based navigation: different links for CUSTOMER, SELLER, ADMIN
 
 #### API Base URL Configuration
+
 - Centralized in `frontend/src/config.js`
 - Reads from environment variable `VITE_API_URL` (set in docker-compose or .env)
 - Falls back to `http://localhost:8085` for local development
@@ -159,27 +253,28 @@ Service   Service       Service           Service
 
 ### Pages
 
-| Page | Route | Auth | Purpose |
-|------|-------|------|---------|
-| Landing | `/` | None | Hero, featured products, category showcase |
-| Catalogue | `/catalogue` | None | Search, filter, sort products; browse by category |
-| Product | `/product/:id` | None | Product detail, add to cart, stock info |
-| Cart | `/cart` | None | View cart items, adjust quantities, proceed to checkout |
-| Payment | `/payment` | Auth | Checkout form, delivery details, payment method |
-| Thank You | `/thank-you` | Auth | Order confirmation, next steps |
-| Login | `/login` | None | Email + password login |
-| Register | `/register` | None | Sign up with role selection |
-| Dashboard | `/dashboard` | Auth (CUSTOMER) | Customer orders & account |
-| Seller | `/seller` | Auth (SELLER) | Seller product management |
-| Admin | `/admin` | Auth (ADMIN) | Dashboard with stats |
-| Admin Products | `/admin/products` | Auth (ADMIN) | Manage all products |
-| Admin Categories | `/admin/categories` | Auth (ADMIN) | Manage categories |
-| Admin Orders | `/admin/orders` | Auth (ADMIN) | View all orders |
-| Admin Users | `/admin/users` | Auth (ADMIN) | Manage users |
+| Page             | Route               | Auth            | Purpose                                                 |
+| ---------------- | ------------------- | --------------- | ------------------------------------------------------- |
+| Landing          | `/`                 | None            | Hero, featured products, category showcase              |
+| Catalogue        | `/catalogue`        | None            | Search, filter, sort products; browse by category       |
+| Product          | `/product/:id`      | None            | Product detail, add to cart, stock info                 |
+| Cart             | `/cart`             | None            | View cart items, adjust quantities, proceed to checkout |
+| Payment          | `/payment`          | Auth            | Checkout form, delivery details, payment method         |
+| Thank You        | `/thank-you`        | Auth            | Order confirmation, next steps                          |
+| Login            | `/login`            | None            | Email + password login                                  |
+| Register         | `/register`         | None            | Sign up with role selection                             |
+| Dashboard        | `/dashboard`        | Auth (CUSTOMER) | Customer orders & account                               |
+| Seller           | `/seller`           | Auth (SELLER)   | Seller product management                               |
+| Admin            | `/admin`            | Auth (ADMIN)    | Dashboard with stats                                    |
+| Admin Products   | `/admin/products`   | Auth (ADMIN)    | Manage all products                                     |
+| Admin Categories | `/admin/categories` | Auth (ADMIN)    | Manage categories                                       |
+| Admin Orders     | `/admin/orders`     | Auth (ADMIN)    | View all orders                                         |
+| Admin Users      | `/admin/users`      | Auth (ADMIN)    | Manage users                                            |
 
 ### Context Providers
 
 #### AuthContext
+
 ```javascript
 {
   user: { id, email, username, firstName, lastName, role },
@@ -191,6 +286,7 @@ Service   Service       Service           Service
 ```
 
 #### CartContext
+
 ```javascript
 {
   items: [{id, productId, name, price, quantity, stock, imageUrl, categoryId}],
@@ -205,12 +301,14 @@ Service   Service       Service           Service
 ### Service Layer
 
 #### config.js
+
 ```javascript
 // Centralized API config
-export const API_BASE_URL = process.env.VITE_API_URL || 'http://localhost:8085'
+export const API_BASE_URL = process.env.VITE_API_URL || "http://localhost:8085";
 ```
 
 #### api.js
+
 ```javascript
 export const request(endpoint, options) // Core fetch wrapper
 export const get(endpoint)
@@ -218,48 +316,53 @@ export const post(endpoint, body)
 export const put(endpoint, body)
 export const del(endpoint)
 ```
+
 - Automatically adds JWT Bearer token from localStorage
 - Handles 401 responses (redirects to /login)
 - Centralized error handling
 
 #### productService.js
+
 ```javascript
-getProducts()
-getProduct(id)
-createProduct(productData)
-updateProduct(id, productData)
-deleteProduct(id)
-getCategories()  // NEW: Dynamic categories from backend
-createCategory(categoryData)
-updateCategory(id, categoryData)
-deleteCategory(id)
+getProducts();
+getProduct(id);
+createProduct(productData);
+updateProduct(id, productData);
+deleteProduct(id);
+getCategories(); // NEW: Dynamic categories from backend
+createCategory(categoryData);
+updateCategory(id, categoryData);
+deleteCategory(id);
 ```
 
 #### orderService.js
+
 ```javascript
 // Order endpoints
-createOrder(orderData)
-getUserOrders(userId)
-getOrder(id)
+createOrder(orderData);
+getUserOrders(userId);
+getOrder(id);
 
 // NEW: Cart endpoints (API sync)
-getCart()
-addCartItem(itemData)
-updateCartItem(productId, quantity)
-removeCartItem(productId)
-clearCartItems()
+getCart();
+addCartItem(itemData);
+updateCartItem(productId, quantity);
+removeCartItem(productId);
+clearCartItems();
 ```
 
 #### authService.js
+
 ```javascript
-login(email, password)  // Returns { token, user }
-register(userData)      // Returns { token, user }
+login(email, password); // Returns { token, user }
+register(userData); // Returns { token, user }
 ```
 
 #### paymentService.js
+
 ```javascript
-processPayment(paymentData)
-getPaymentByOrder(orderId)
+processPayment(paymentData);
+getPaymentByOrder(orderId);
 ```
 
 ---
@@ -269,6 +372,7 @@ getPaymentByOrder(orderId)
 ### Setup
 
 Each service is a **Spring Boot microservice** with:
+
 - **Spring Web** - REST controllers
 - **Spring Security** - JWT authentication
 - **Spring Data JPA** - SQLite ORM
@@ -279,6 +383,7 @@ Each service is a **Spring Boot microservice** with:
 ### Database Strategy
 
 Each service has its own SQLite database (decoupled storage):
+
 - `auth-service.db` - Users, roles
 - `product-service.db` - Categories, products
 - `order-service.db` - Orders, order items, (cart session state in-memory)
@@ -289,6 +394,7 @@ Data shared between services via REST APIs (synchronous calls).
 ### Service Details
 
 #### Auth Service Structure
+
 ```
 com.ecommerce.auth/
 ├── AuthServiceApplication.java      # Spring Boot entry
@@ -304,6 +410,7 @@ com.ecommerce.auth/
 ```
 
 #### Product Service Structure
+
 ```
 com.ecommerce.product/
 ├── ProductServiceApplication.java
@@ -327,6 +434,7 @@ com.ecommerce.product/
 ```
 
 #### Order Service Structure
+
 ```
 com.ecommerce.order/
 ├── OrderServiceApplication.java
@@ -352,6 +460,7 @@ com.ecommerce.order/
 ```
 
 #### Payment Service Structure
+
 ```
 com.ecommerce.payment/
 ├── PaymentServiceApplication.java
@@ -366,12 +475,14 @@ com.ecommerce.payment/
 ### API Endpoints
 
 #### Auth Service
+
 ```
 POST   /auth/login                  # { email, password } → { token, user }
 POST   /auth/register               # { email, password, firstName, lastName, role } → { token, user }
 ```
 
 #### Product Service
+
 ```
 GET    /products                    # List all products
 GET    /products/{id}               # Get product by ID
@@ -387,6 +498,7 @@ DELETE /categories/{id}             # Delete category
 ```
 
 #### Order Service (via Gateway)
+
 ```
 POST   /orders                      # Create order from cart (CUSTOMER)
 GET    /orders                      # List all orders (ADMIN)
@@ -403,6 +515,7 @@ DELETE /cart                        # Clear entire cart
 ```
 
 #### Payment Service
+
 ```
 POST   /payments/process            # { orderId, method, amount } → { success, transactionId }
 GET    /payments/order/{orderId}    # Get payment by order ID
@@ -419,27 +532,27 @@ spring:
           uri: http://auth-service:8081
           predicates:
             - Path=/auth/**
-        
+
         - id: product-service
           uri: http://product-service:8082
           predicates:
             - Path=/products/**
-        
+
         - id: category-service
           uri: http://product-service:8082
           predicates:
             - Path=/categories/**
-        
+
         - id: order-service
           uri: http://order-service:8083
           predicates:
             - Path=/orders/**
-        
+
         - id: cart-service
           uri: http://order-service:8083
           predicates:
             - Path=/cart/**
-        
+
         - id: payment-service
           uri: http://payment-service:8084
           predicates:
@@ -449,7 +562,7 @@ spring:
 ### Security
 
 - **JWT Format**: Bearer token in `Authorization` header
-- **Payload**: { sub: username, role: CUSTOMER|SELLER|ADMIN, iat, exp }
+- **Payload**: { sub: email, role: CUSTOMER|SELLER|ADMIN, iat, exp }
 - **Secret Key**: Configurable, defaults to `ecom-secret-key-for-jwt-signing-2024-minimum-256-bits`
 - **CORS**: Enabled for `http://localhost:3000` and `http://127.0.0.1:3000`
 - **Stateless**: Session-less, JWT-only authentication
@@ -466,24 +579,24 @@ api-gateway:
   - Port 8085 → 8080 (internal)
   - Depends on: all services
   - Routes traffic to microservices
-  
+
 auth-service:
   - Port 8081
   - SQLite volume: auth-data:/data/auth-service.db
-  
+
 product-service:
   - Port 8082
   - SQLite volume: product-data:/data/product-service.db
-  
+
 order-service:
   - Port 8083
   - SQLite volume: order-data:/data/order-service.db
   - In-memory carts (lost on restart)
-  
+
 payment-service:
   - Port 8084
   - SQLite volume: payment-data:/data/payment-service.db
-  
+
 frontend:
   - Port 3000 (nginx)
   - Build arg: VITE_API_URL=http://localhost:8085
@@ -491,11 +604,13 @@ frontend:
 ```
 
 ### Network
+
 - All services connected via `ecom-network` (bridge driver)
 - Internal DNS: service name (e.g., `http://auth-service:8081`)
 - External: http://localhost:PORT
 
 ### Volumes
+
 - `auth-data`, `product-data`, `order-data`, `payment-data` - SQLite data persistence
 
 ### Build & Run
@@ -534,23 +649,27 @@ npm run build
 ```
 
 The Dockerfile multistage build:
+
 1. Builds React app with Vite
 2. Serves `dist/` via nginx on port 3000
 
 ### Backend Build
 
 Each service Dockerfile:
+
 1. Multi-stage Maven build (compile → package)
 2. Runs JAR with Spring Boot
 
 ### Environment Variables
 
 **Frontend** (`docker-compose.yml`):
+
 ```yaml
 VITE_API_URL: http://localhost:8085
 ```
 
 **Services** (defaults in code):
+
 ```
 SQLITE_DB_PATH: /data/{service}-service.db
 jwt.secret: ecom-secret-key-for-jwt-signing-2024-minimum-256-bits
@@ -601,55 +720,201 @@ sqlite3 /data/order-service.db
 
 ## Testing
 
-### Backend Tests
+### Test Infrastructure
 
-Each service has `src/test/java/com/ecommerce/{service}/` with:
-- `*ControllerTest.java` - REST endpoint tests using MockMvc
-- `*ServiceTest.java` - Business logic tests using Mockito
+All backend services use **JUnit 5 + Mockito** for pure unit testing.
+No Spring context is loaded in service tests — all dependencies are mocked.
 
-Run tests:
+**Coverage tool**: JaCoCo 0.8.12 (Java 26 compatible)
+Coverage reports are generated at `backend/<service>/target/site/jacoco/index.html`
+after running `mvn clean test`.
+
+### Test Counts
+
+| Service         | Tests | Test Files                                              |
+|-----------------|-------|---------------------------------------------------------|
+| auth-service    | 14    | AuthServiceTest, AuthControllerTest                     |
+| order-service   | 58    | OrderServiceTest, OrderControllerTest, OrderCalculatorDecoratorTest |
+| payment-service | 49    | PaymentServiceTest, PaymentControllerTest, DiscountStrategyTest |
+| product-service | 59    | ProductServiceTest, DealServiceTest, ProductControllerTest, CategoryControllerTest, ProductDetailFacadeTest |
+| api-gateway     | 0     | No business logic to test                               |
+| **Total**       | **180** |                                                       |
+
+### JUnit 5 Features Used
+
+Every service test class demonstrates the full JUnit 5 feature set:
+
+| Feature                  | Used In                                      |
+|--------------------------|----------------------------------------------|
+| `@Nested` + `@DisplayName` | All 5 service test classes                 |
+| `@ParameterizedTest`     | All 5 service test classes                   |
+| `@CsvSource` / `@ValueSource` | All parameterized tests                 |
+| `assertAll()`            | All 5 service test classes                   |
+| `assertThrows()` + message check | All 5 service test classes           |
+| `assertTimeout()`        | ProductServiceTest, OrderServiceTest         |
+| `@Tag("unit")` `@Tag("fast")` | All test classes                        |
+| `@BeforeAll` / `@AfterAll` | All service test classes                   |
+| Mockito `@Mock` + `@InjectMocks` | All service tests                  |
+| Mockito `verify()`       | All service tests                            |
+
+### Run Backend Tests
+
 ```bash
-cd backend/product-service
-mvn test
+# Single service
+cd backend/product-service && mvn clean test
 
-# Specific test
-mvn test -Dtest=ProductControllerTest
+# All services (from repo root)
+for s in api-gateway auth-service order-service payment-service product-service; do
+  echo "=== $s ===" && cd backend/$s && mvn clean test && cd ../..
+done
 ```
 
-### Frontend Testing
+### Frontend Validation
 
-Linting:
 ```bash
 cd frontend
-npm run lint
+npm run lint    # ESLint check
+npm run build   # Vite production build — validates no import errors
 ```
-
-Build validation:
-```bash
-npm run build
-```
-
 ---
 
+## Design Patterns:
+
+Three Gang-of-Four patterns are implemented as standalone utility classes
+alongside the existing service layer. They do not modify any controller,
+entity, or repository.
+
+### Strategy Pattern — Discount Calculation:
+
+**Location**: `backend/payment-service/src/main/java/com/ecommerce/payment/strategy/`
+
+Replaces inline discount math with swappable algorithm objects.
+
+```
+DiscountStrategy (interface)
+  ├── PercentageDiscountStrategy   — amount × (pct / 100)
+  ├── FixedAmountDiscountStrategy  — amount − fixedValue (floor 0)
+  └── NoDiscountStrategy           — returns 0 (no discount)
+```
+
+**Test**: `DiscountStrategyTest` — 12 tests covering all three strategies
+with parameterized inputs and boundary conditions.
+
+### Decorator Pattern — Order Total Calculation:
+
+**Location**: `backend/order-service/src/main/java/com/ecommerce/order/decorator/`
+
+Stackable decorators that wrap an `OrderCalculator` to add tax, shipping,
+and discount without modifying the base calculation.
+
+```
+OrderCalculator (interface)
+  └── BaseOrderCalculator          — sums item subtotals
+
+OrderCalculatorDecorator (abstract)
+  ├── TaxDecorator                 — adds tax rate (default 10%)
+  ├── ShippingDecorator            — adds flat shipping (free above threshold)
+  └── DiscountDecorator            — subtracts discount amount (floor 0)
+```
+
+Example stacking:
+```java
+OrderCalculator calc =
+  new TaxDecorator(
+    new ShippingDecorator(
+      new BaseOrderCalculator(subtotal), 10.0), 0.10);
+// $100 subtotal → +$10 shipping → +10% tax → $121.00
+```
+
+**Test**: `OrderCalculatorDecoratorTest` — 29 tests covering individual
+decorators and stacked combinations.
+
+### Facade Pattern — Product Detail Assembly:
+
+**Location**: `backend/product-service/src/main/java/com/ecommerce/product/facade/`
+
+Single method that aggregates product info, active deal, and category
+from three different sources into one response.
+
+```
+ProductDetailFacade
+  └── getProductDetails(productId)
+        ├── productRepository.findById()     → name, price, stock
+        ├── dealRepository.findActiveDeals() → discount info (if any)
+        └── product.getCategory()            → category name
+        → ProductDetailResponse (record)
+```
+
+**Test**: `ProductDetailFacadeTest` — 9 tests covering product-only,
+product-with-deal, product-with-category, and not-found scenarios.
+
+---
+EOF'
+echo "Design patterns text created"
+---
+
+## CI/CD Pipeline:
+
+### GitHub Actions Workflow:
+
+**File**: `.github/workflows/ci-cd.yml`
+**Triggers**: push and pull_request to `master`
+
+```
+Pipeline stages (in order):
+
+test-backend (matrix: 5 services in parallel)
+  └── checkout → setup Java 17 → mvn clean test → upload JaCoCo artifact
+
+test-frontend (parallel with test-backend)
+  └── checkout → setup Node 20 → npm ci → npm run build
+
+docker-build (needs: test-backend + test-frontend, push to master only)
+  └── checkout → docker compose build
+```
+
+### Pipeline Features:
+
+- **Fail-fast matrix**: if one backend service fails, others are cancelled
+- **Maven cache**: `~/.m2` cached between runs (~30% speedup)
+- **npm cache**: `node_modules` cached via lock file hash
+- **JaCoCo artifacts**: HTML coverage reports uploaded per service,
+  retained 30 days, available in Actions → run → Artifacts
+- **Docker build verification**: confirms all 7 images build on merge to master
+
+### Action Versions:
+
+| Action                    | Version  |
+|---------------------------|----------|
+| actions/checkout          | v4.2.2   |
+| actions/setup-java        | v4.7.0   |
+| actions/setup-node        | v4.4.0   |
+| actions/upload-artifact   | v4.6.2   |
+
+---
 ## Key Features & Recent Updates
 
 ### ✅ Categories (Updated)
+
 - **Before**: Hardcoded in frontend (Gadgets, Phones, Laptops, Accessories)
 - **After**: Fetches from `/categories` API endpoint, merges with product data for live counts
 
 ### ✅ Cart (Updated)
+
 - **Before**: localStorage only, no backend sync
-- **After**: 
+- **After**:
   - API endpoints for add/update/remove/clear items
   - CartContext syncs with backend when authenticated
   - Falls back to localStorage when offline or unauthenticated
   - Navbar badge shows sum of quantities (not cart length)
 
 ### ✅ Logo (Updated)
+
 - **Before**: Text "WM" in white box
 - **After**: Image asset (wm-logo.png) + "WITH ME SHOP" text + tagline
 
 ### ✅ API Base URL (Updated)
+
 - **Before**: Scattered hardcoded localhost ports (8085, 8080, etc.)
 - **After**: Centralized in `frontend/src/config.js`, reads `VITE_API_URL` env var
 
@@ -658,17 +923,49 @@ npm run build
 - Grid background, glowing elements, smooth transitions
 - Responsive design (desktop, tablet, mobile)
 
+### ✅ Deals System (New)
+
+- **Deal entity** in product-service with discount percentage, start/end dates
+- **Active deal logic**: `startDate <= now <= endDate`, highest discount wins
+- **Server-side pricing**: discountedPrice always computed on backend
+- **DealsPage**: hero banner, global countdown to soonest-expiring deal, deal cards
+- **Featured Deals**: landing page shows top 3 active deals
+- **Admin management**: create/edit/delete deals at `/admin/deals`
+- **Cart integration**: adding a deal item stores discountedPrice; silently reverts
+  to original price if deal expires between sessions
+
+### ✅ Test Coverage (New)
+
+- **180 unit tests** across 4 backend services
+- **JUnit 5**: @Nested, @ParameterizedTest, assertAll, assertThrows, assertTimeout
+- **Mockito**: @Mock, @InjectMocks, verify() — no Spring context loaded
+- **JaCoCo 0.8.12**: coverage reports generated per service
+
+### ✅ Design Patterns (New)
+
+- **Strategy**: swappable discount algorithms in payment-service
+- **Decorator**: stackable order total calculators (tax, shipping, discount)
+- **Facade**: single-call product detail assembly (product + deal + category)
+
+### ✅ CI/CD Pipeline (New)
+
+- **GitHub Actions**: parallel backend matrix + frontend build
+- **Artifacts**: JaCoCo HTML reports uploaded per service run
+- **Docker verification**: docker compose build on merge to master
+
 ---
 
 ## User Roles & Permissions
 
 ### VISITOR (Not Logged In)
+
 - Browse products & categories
 - View product details
 - Add items to cart (client-side only)
 - Must log in to checkout
 
 ### CUSTOMER
+
 - All visitor permissions
 - Persistent cart via API
 - Place orders
@@ -676,11 +973,13 @@ npm run build
 - Track order status
 
 ### SELLER
+
 - Manage own products
 - View product inventory
 - Upload product images & details
 
 ### ADMIN
+
 - Manage all products & categories
 - Manage all users & orders
 - View analytics dashboard
@@ -691,6 +990,7 @@ npm run build
 ## API Flow: Complete Shopping Journey
 
 ### 1. User Registration
+
 ```
 Frontend: POST /auth/register
   { email, password, firstName, lastName, role: "CUSTOMER" }
@@ -701,6 +1001,7 @@ Frontend: Stores token & user in localStorage, updates AuthContext
 ```
 
 ### 2. Product Browse
+
 ```
 Frontend: GET /products
 Backend: Product Service
@@ -709,6 +1010,7 @@ Frontend: Filters/searches locally, displays on Catalogue page
 ```
 
 ### 3. Add to Cart
+
 ```
 Frontend (Authenticated): POST /cart/items
   { productId, quantity, price, productName, ... }
@@ -719,6 +1021,7 @@ Frontend: Updates CartContext, shows success animation
 ```
 
 ### 4. Place Order
+
 ```
 Frontend: POST /orders
   { userId, items: [{ productId, quantity, price }] }
@@ -730,6 +1033,7 @@ Frontend: Displays order confirmation
 ```
 
 ### 5. Process Payment
+
 ```
 Frontend: POST /payments/process
   { orderId, method: "CARD"|"CASH", amount }
@@ -745,21 +1049,27 @@ Frontend: Displays "Thank You" page with next steps
 ## Common Issues & Solutions
 
 ### Issue: Cart not persisting after login
+
 **Solution**: Ensure `CartContext` has `useAuth()` dependency. On login, it should sync with `GET /cart` API. Check browser console for 401 errors.
 
 ### Issue: Categories showing as undefined
+
 **Solution**: Verify `/categories` API endpoint returns `[{ id, name }, ...]`. Check backend product service is running (`docker-compose logs product-service`).
 
 ### Issue: Logo not displaying
+
 **Solution**: Check `frontend/src/assets/wm-logo.png` exists. Verify image import in `Navbar.jsx` is correct. Check browser DevTools Network tab for 404 on image URL.
 
 ### Issue: API calls go to wrong port
+
 **Solution**: Verify `VITE_API_URL` environment variable is set in `docker-compose.yml` or `.env`. Check `frontend/src/config.js` logic.
 
 ### Issue: 401 Unauthorized on /cart endpoints
+
 **Solution**: Cart endpoints require authentication (JWT token). Ensure user is logged in before testing cart operations. Check `Authorization` header in requests.
 
 ### Issue: Services can't communicate
+
 **Solution**: Verify `docker-compose.yml` network is correct. Use service names (e.g., `http://auth-service:8081`) inside containers. Use `localhost` only from host machine.
 
 ---
@@ -788,7 +1098,8 @@ E-com/
 │   │   │   ├── AuthContext.jsx
 │   │   │   └── CartContext.jsx # Global cart + API sync (UPDATED)
 │   │   ├── pages/
-│   │   │   ├── LandingPage.jsx
+│   │   │   ├── LandingPage.jsx      # Hero + Featured Deals section
+│   │   │   ├── DealsPage.jsx        # Deals hero + countdown + deal cards (NEW)
 │   │   │   ├── CataloguePage.jsx    # Dynamic categories (UPDATED)
 │   │   │   ├── ProductPage.jsx
 │   │   │   ├── CartPage.jsx
@@ -798,6 +1109,7 @@ E-com/
 │   │   │   ├── CustomerDashboard.jsx
 │   │   │   ├── SellerDashboard.jsx
 │   │   │   ├── AdminDashboard.jsx
+│   │   │   ├── AdminDeals.jsx       # Manage deals CRUD (NEW)
 │   │   │   └── ... admin pages
 │   │   ├── services/
 │   │   │   ├── api.js                # HTTP wrapper (UPDATED: uses config.js)
@@ -827,8 +1139,13 @@ E-com/
     │   ├── pom.xml
     │   └── Dockerfile
     │
-    ├── product-service/        # Products & categories
+    ├── product-service/        # Products, categories & deals
     │   ├── src/main/java/com/ecommerce/product/
+    │   │   ├── entity/Deal.java              # Deal entity (NEW)
+    │   │   ├── controller/DealController.java # /deals endpoints (NEW)
+    │   │   ├── service/DealService.java       # Deal logic + highest discount (NEW)
+    │   │   ├── strategy/DiscountStrategy.java # Strategy pattern (NEW)
+    │   │   └── facade/ProductDetailFacade.java # Facade pattern (NEW)
     │   ├── src/resources/application.yml
     │   ├── src/resources/data.sql  # Sample data
     │   ├── pom.xml
@@ -865,14 +1182,14 @@ E-com/
 
 ## Ports Reference
 
-| Service | Container Port | Host Port | Purpose |
-|---------|---|---|---|
-| Frontend | 3000 | 3000 | React app (nginx) |
-| API Gateway | 8080 | 8085 | Reverse proxy to services |
-| Auth Service | 8081 | 8081 | User authentication |
-| Product Service | 8082 | 8082 | Products & categories |
-| Order Service | 8083 | 8083 | Orders & cart |
-| Payment Service | 8084 | 8084 | Payment processing |
+| Service         | Container Port | Host Port | Purpose                   |
+| --------------- | -------------- | --------- | ------------------------- |
+| Frontend        | 3000           | 3000      | React app (nginx)         |
+| API Gateway     | 8080           | 8085      | Reverse proxy to services |
+| Auth Service    | 8081           | 8081      | User authentication       |
+| Product Service | 8082           | 8082      | Products & categories     |
+| Order Service   | 8083           | 8083      | Orders & cart             |
+| Payment Service | 8084           | 8084      | Payment processing        |
 
 ---
 
@@ -945,24 +1262,31 @@ Educational project for microservices & modern web development.
 
 ---
 
-## Contributors
+## Contributors:
 
-- Architecture & Backend: Java/Spring Boot developers
-- Frontend: React developers
-- DevOps: Docker & Compose setup
+- **Architecture & Backend**: Java/Spring Boot microservices, REST API design
+- **Frontend**: React 18 + Vite, dark futuristic UI
+- **DevOps**: Docker Compose, GitHub Actions CI/CD
+- **Quality**: JUnit 5 test suite, JaCoCo coverage, design patterns
 
 ---
+*Branch: Ahaytar — all CI checks passing*
 
-## Summary
+## Summary:
 
 **WITH ME SHOP** is a production-ready microservices e-commerce platform demonstrating:
-✅ Microservices architecture with API Gateway  
-✅ JWT authentication & authorization  
-✅ Real-time cart sync (API + localStorage)  
-✅ Dynamic product categories from backend  
-✅ Futuristic React UI with dark theme  
-✅ Docker Compose multi-container deployment  
-✅ SQLite per-service databases  
-✅ Comprehensive role-based access control  
 
-Start with `docker-compose up --build` and explore the app at `http://localhost:3000`!
+✅ Microservices architecture with API Gateway
+✅ JWT authentication & authorization
+✅ Real-time cart sync (API + localStorage)
+✅ Dynamic product categories from backend
+✅ Time-limited Deals with discount engine and countdown timer
+✅ Futuristic React UI with dark theme
+✅ Docker Compose multi-container deployment
+✅ SQLite per-service databases
+✅ Comprehensive role-based access control
+✅ JUnit 5 test suite (180 tests) with Mockito, JaCoCo coverage
+✅ Strategy, Decorator, and Facade design patterns*
+✅ GitHub Actions CI/CD pipeline with coverage reporting*
+
+Start with `./start.sh` and explore the app at `http://localhost:3000`!

@@ -7,9 +7,14 @@ spring:
     driver-class-name: org.sqlite.JDBC
 
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.community.dialect.SQLiteDialect
     show-sql: false
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:86400000}

@@ -32,12 +32,14 @@ const normalizeCartItem = (item) => {
     name: item?.name || item?.productName || 'Product',
     description: item?.description || '',
     price: Number(item?.price || 0),
+    originalPrice: item?.originalPrice ? Number(item.originalPrice) : null,
     quantity: safeQuantity(item?.quantity),
     stock: Number(item?.stock ?? 0),
     imageUrl: item?.imageUrl || '',
     categoryId: item?.categoryId ?? item?.category?.id ?? null,
     category: categoryName,
     categoryName,
+    dealId: item?.dealId ?? null,
   };
 };
 
@@ -72,11 +74,13 @@ const toApiCartItem = (product, quantity) => {
     productName: normalizedProduct.name,
     description: normalizedProduct.description,
     price: normalizedProduct.price,
+    originalPrice: normalizedProduct.originalPrice,
     quantity: normalizedProduct.quantity,
     stock: normalizedProduct.stock,
     imageUrl: normalizedProduct.imageUrl,
     categoryId: normalizedProduct.categoryId,
     categoryName: normalizedProduct.categoryName,
+    dealId: normalizedProduct.dealId,
   };
 };
 
@@ -119,10 +123,10 @@ export const CartProvider = ({ children }) => {
     }
 
     setItems((prev) => {
-      const existing = prev.find((item) => item.id === normalizedProduct.id);
+      const existing = prev.find((item) => item.id === normalizedProduct.id && item.dealId === normalizedProduct.dealId);
       if (existing) {
         return prev.map((item) => (
-          item.id === normalizedProduct.id
+          item.id === normalizedProduct.id && item.dealId === normalizedProduct.dealId
             ? { ...item, quantity: item.quantity + normalizedProduct.quantity }
             : item
         ));

@@ -1,20 +1,23 @@
 package com.ecommerce.product;
 
+import com.ecommerce.product.SecurityConfig;
 import com.ecommerce.product.controller.ProductController;
 import com.ecommerce.product.dto.ProductCreateDTO;
 import com.ecommerce.product.dto.ProductDTO;
 import com.ecommerce.product.service.ProductService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import jakarta.servlet.ServletException;
-import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -22,9 +25,10 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @WebMvcTest(ProductController.class)
+@AutoConfigureMockMvc(addFilters = false)
+@TestPropertySource(properties = "jwt.secret=test-secret-key-that-is-long-enough-for-hmac-sha256")
 class ProductControllerTest {
 
     @Autowired
@@ -33,11 +37,12 @@ class ProductControllerTest {
     @MockBean
     private ProductService productService;
 
+
     @Test
     void findAll_Success() throws Exception {
         ProductDTO product1 = new ProductDTO(1L, "Product 1", "Description 1", 10.99, 100, null, 1L, "Category 1");
         ProductDTO product2 = new ProductDTO(2L, "Product 2", "Description 2", 20.99, 50, null, 1L, "Category 1");
-        List<ProductDTO> products = Arrays.asList(product1, product2);
+        List<ProductDTO> products = List.of(product1, product2);
 
         when(productService.findAll()).thenReturn(products);
 
@@ -64,7 +69,6 @@ class ProductControllerTest {
 
     @Test
     void save_Success() throws Exception {
-        ProductCreateDTO createDTO = new ProductCreateDTO("New Product", "Description", 15.99, 50, null, 1L);
         ProductDTO savedProduct = new ProductDTO(1L, "New Product", "Description", 15.99, 50, null, 1L, "Category 1");
 
         when(productService.save(any(ProductCreateDTO.class))).thenReturn(savedProduct);
@@ -79,7 +83,6 @@ class ProductControllerTest {
 
     @Test
     void update_Success() throws Exception {
-        ProductCreateDTO updateDTO = new ProductCreateDTO("Updated Product", "Updated Description", 25.99, 75, null, 1L);
         ProductDTO updatedProduct = new ProductDTO(1L, "Updated Product", "Updated Description", 25.99, 75, null, 1L, "Category 1");
 
         when(productService.update(eq(1L), any(ProductCreateDTO.class))).thenReturn(updatedProduct);
@@ -94,10 +97,11 @@ class ProductControllerTest {
     }
 
     @Test
-    void findById_NotFound() throws Exception {
+    void findById_NotFound() {
         when(productService.findById(999L)).thenThrow(new RuntimeException("Product not found with id: 999"));
 
-        assertThrows(ServletException.class, () -> mockMvc.perform(get("/products/999")));
+        assertThrows(jakarta.servlet.ServletException.class, () ->
+            mockMvc.perform(get("/products/999")));
     }
 
     @Test
