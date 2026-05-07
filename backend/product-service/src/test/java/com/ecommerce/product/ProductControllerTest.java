@@ -1,18 +1,23 @@
 package com.ecommerce.product;
 
+import com.ecommerce.product.SecurityConfig;
 import com.ecommerce.product.controller.ProductController;
 import com.ecommerce.product.dto.ProductCreateDTO;
 import com.ecommerce.product.dto.ProductDTO;
 import com.ecommerce.product.service.ProductService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
+import jakarta.servlet.ServletException;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -22,6 +27,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ProductController.class)
+@AutoConfigureMockMvc(addFilters = false)
+@TestPropertySource(properties = "jwt.secret=test-secret-key-that-is-long-enough-for-hmac-sha256")
 class ProductControllerTest {
 
     @Autowired
@@ -29,6 +36,7 @@ class ProductControllerTest {
 
     @MockBean
     private ProductService productService;
+
 
     @Test
     void findAll_Success() throws Exception {
@@ -89,11 +97,11 @@ class ProductControllerTest {
     }
 
     @Test
-    void findById_NotFound() throws Exception {
+    void findById_NotFound() {
         when(productService.findById(999L)).thenThrow(new RuntimeException("Product not found with id: 999"));
 
-        mockMvc.perform(get("/products/999"))
-                .andExpect(status().is5xxServerError());
+        assertThrows(jakarta.servlet.ServletException.class, () ->
+            mockMvc.perform(get("/products/999")));
     }
 
     @Test

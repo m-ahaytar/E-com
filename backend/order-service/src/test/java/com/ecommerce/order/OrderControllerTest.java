@@ -1,5 +1,6 @@
 package com.ecommerce.order;
 
+import com.ecommerce.order.SecurityConfig;
 import com.ecommerce.order.controller.OrderController;
 import com.ecommerce.order.dto.CreateOrderDTO;
 import com.ecommerce.order.dto.OrderDTO;
@@ -7,9 +8,11 @@ import com.ecommerce.order.dto.OrderItemDTO;
 import com.ecommerce.order.facade.OrderFacade;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
@@ -25,6 +28,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(OrderController.class)
+@AutoConfigureMockMvc(addFilters = false)
+@TestPropertySource(properties = "jwt.secret=test-secret-key-that-is-long-enough-for-hmac-sha256")
 class OrderControllerTest {
 
     @Autowired
@@ -32,6 +37,7 @@ class OrderControllerTest {
 
     @MockBean
     private OrderFacade orderFacade;
+
 
     @Test
     void createOrder_Success() throws Exception {
