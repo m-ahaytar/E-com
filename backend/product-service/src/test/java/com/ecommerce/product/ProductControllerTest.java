@@ -11,8 +11,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import jakarta.servlet.ServletException;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -22,7 +20,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @WebMvcTest(ProductController.class)
 class ProductControllerTest {
@@ -37,7 +34,7 @@ class ProductControllerTest {
     void findAll_Success() throws Exception {
         ProductDTO product1 = new ProductDTO(1L, "Product 1", "Description 1", 10.99, 100, null, 1L, "Category 1");
         ProductDTO product2 = new ProductDTO(2L, "Product 2", "Description 2", 20.99, 50, null, 1L, "Category 1");
-        List<ProductDTO> products = Arrays.asList(product1, product2);
+        List<ProductDTO> products = List.of(product1, product2);
 
         when(productService.findAll()).thenReturn(products);
 
@@ -64,7 +61,6 @@ class ProductControllerTest {
 
     @Test
     void save_Success() throws Exception {
-        ProductCreateDTO createDTO = new ProductCreateDTO("New Product", "Description", 15.99, 50, null, 1L);
         ProductDTO savedProduct = new ProductDTO(1L, "New Product", "Description", 15.99, 50, null, 1L, "Category 1");
 
         when(productService.save(any(ProductCreateDTO.class))).thenReturn(savedProduct);
@@ -79,7 +75,6 @@ class ProductControllerTest {
 
     @Test
     void update_Success() throws Exception {
-        ProductCreateDTO updateDTO = new ProductCreateDTO("Updated Product", "Updated Description", 25.99, 75, null, 1L);
         ProductDTO updatedProduct = new ProductDTO(1L, "Updated Product", "Updated Description", 25.99, 75, null, 1L, "Category 1");
 
         when(productService.update(eq(1L), any(ProductCreateDTO.class))).thenReturn(updatedProduct);
@@ -97,7 +92,8 @@ class ProductControllerTest {
     void findById_NotFound() throws Exception {
         when(productService.findById(999L)).thenThrow(new RuntimeException("Product not found with id: 999"));
 
-        assertThrows(ServletException.class, () -> mockMvc.perform(get("/products/999")));
+        mockMvc.perform(get("/products/999"))
+                .andExpect(status().is5xxServerError());
     }
 
     @Test
