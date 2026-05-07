@@ -2,9 +2,9 @@ name: Ecom CI/CD
 
 on:
   push:
-    branches: [main]
+    branches: [Ahaytar]
   pull_request:
-    branches: [main]
+    branches: [Ahaytar]
 
 jobs:
   test-backend:
@@ -68,7 +68,7 @@ jobs:
 
   docker-build:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ahaytar'
     needs: [test-backend, test-frontend]
     steps:
       - name: Checkout
