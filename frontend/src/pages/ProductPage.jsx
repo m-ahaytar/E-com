@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { getProduct } from '../services/productService';
+import { getProduct, getDeals } from '../services/productService';
 import { useCart } from '../context/CartContext';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
@@ -11,6 +11,7 @@ const ProductPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
+  const [deal, setDeal] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -23,6 +24,12 @@ const ProductPage = () => {
         setLoading(true);
         const data = await getProduct(id);
         setProduct(data);
+
+        const dealsData = await getDeals();
+        const productDeal = dealsData.find((d) => d.productId === data.id);
+        if (productDeal) {
+          setDeal(productDeal);
+        }
       } catch (err) {
         setError(err.message || 'Failed to load product');
       } finally {
@@ -34,7 +41,16 @@ const ProductPage = () => {
   }, [id]);
 
   const handleAddToCart = () => {
-    addToCart(product, quantity);
+    if (deal) {
+      addToCart({
+        ...product,
+        price: deal.discountedPrice,
+        originalPrice: product.price,
+        dealId: deal.id,
+      }, quantity);
+    } else {
+      addToCart(product, quantity);
+    }
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
     setQuantity(1);
@@ -98,6 +114,7 @@ const ProductPage = () => {
           <div className="wm-product-detail__header">
             <Badge icon="bi-cpu" variant="info">{category}</Badge>
             {stockBadge}
+            {deal && <Badge icon="bi-lightning-charge-fill" variant="danger">-{deal.discountPercentage}% OFF</Badge>}
           </div>
 
           <h1>{product.name}</h1>
@@ -107,8 +124,20 @@ const ProductPage = () => {
 
           <div className="wm-price-panel">
             <span>Current Price</span>
-            <strong>${product.price?.toFixed(2)}</strong>
-            <small>Inclusive of all taxes</small>
+            {deal ? (
+              <>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', flexWrap: 'wrap' }}>
+                  <s className="wm-price-original" style={{ fontSize: '1.4rem' }}>${product.price?.toFixed(2)}</s>
+                  <strong className="wm-price-deal">${deal.discountedPrice.toFixed(2)}</strong>
+                </div>
+                <small>Deal ends {new Date(deal.endDate).toLocaleDateString()}</small>
+              </>
+            ) : (
+              <>
+                <strong>${product.price?.toFixed(2)}</strong>
+                <small>Inclusive of all taxes</small>
+              </>
+            )}
           </div>
 
           <div className="wm-spec-list">

@@ -2,6 +2,10 @@ server:
   port: 8080
 
 spring:
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
   cloud:
     gateway:
       globalcors:
@@ -13,10 +17,20 @@ spring:
             allowedMethods: "*"
             allowedHeaders: "*"
       routes:
+        - id: deals-route
+          uri: http://product-service:8082
+          predicates:
+            - Path=/deals/**
         - id: auth-service
           uri: http://auth-service:8081
           predicates:
             - Path=/auth/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+                key-resolver: "#{@userKeyResolver}"
         - id: product-service
           uri: http://product-service:8082
           predicates:

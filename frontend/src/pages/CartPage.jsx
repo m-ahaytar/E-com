@@ -47,7 +47,15 @@ const CartPage = () => {
 
                 <div className="wm-cart-item__details">
                   <h2>{item.name}</h2>
-                  <p>${item.price?.toFixed(2)} each</p>
+                  {item.originalPrice && item.originalPrice !== item.price ? (
+                    <div className="wm-cart-item__price-row">
+                      <span className="wm-price-original">${item.originalPrice.toFixed(2)}</span>
+                      <span className="wm-price-deal">${item.price.toFixed(2)} each</span>
+                      <span className="text-success small">Deal applied</span>
+                    </div>
+                  ) : (
+                    <p>${item.price?.toFixed(2)} each</p>
+                  )}
                   <div className="wm-quantity" aria-label={`Quantity for ${item.name}`}>
                     <button
                       onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}

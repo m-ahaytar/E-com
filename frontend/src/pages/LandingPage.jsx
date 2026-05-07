@@ -1,16 +1,16 @@
 import { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getProducts, getCategories } from '../services/productService';
+import { getProducts, getCategories, getDeals } from '../services/productService';
 import { useCart } from '../context/CartContext';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
 import ProductCard from '../components/ProductCard';
-import ProductVisual from '../components/ProductVisual';
 import { buildCategoryOptions, getRawCategoryName } from '../utils/productTech';
 
 const LandingPage = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [featuredDeals, setFeaturedDeals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -20,12 +20,14 @@ const LandingPage = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [productsData, categoriesData] = await Promise.all([
+        const [productsData, categoriesData, dealsData] = await Promise.all([
           getProducts(),
           getCategories(),
+          getDeals(),
         ]);
         setProducts(productsData);
         setCategories(categoriesData);
+        setFeaturedDeals(dealsData.slice(0, 3));
       } catch (err) {
         setError(err.message || 'Failed to load data');
       } finally {
@@ -74,7 +76,12 @@ const LandingPage = () => {
 
         <div className="wm-hero__showcase">
           <div className="wm-hero__orbit" aria-hidden="true"></div>
-          <ProductVisual product={spotlightProduct} size="hero" />
+          <div className="wm-hero__abstract" aria-hidden="true">
+            <div className="wm-hero__abstract-ring wm-hero__abstract-ring--1"></div>
+            <div className="wm-hero__abstract-ring wm-hero__abstract-ring--2"></div>
+            <div className="wm-hero__abstract-ring wm-hero__abstract-ring--3"></div>
+            <div className="wm-hero__abstract-core"></div>
+          </div>
           <div className="wm-hero__product">
             <span>Featured Signal</span>
             <strong>{spotlightProduct?.name || 'Quantum Tech Drop'}</strong>
@@ -82,6 +89,46 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
+
+      {featuredDeals.length > 0 && (
+        <section className="wm-featured-deals">
+          <div className="wm-section__header">
+            <div>
+              <Badge icon="bi-lightning-charge-fill" variant="danger">Deals</Badge>
+              <h2>Featured Deals</h2>
+            </div>
+            <Link className="wm-text-link" to="/deals">View all deals</Link>
+          </div>
+          <div className="wm-product-grid">
+            {featuredDeals.map((deal) => (
+              <article className="wm-deal-card wm-deal-card--compact" key={deal.id}>
+                <div className="wm-deal-card__img-wrap">
+                  {deal.imageUrl ? (
+                    <img src={deal.imageUrl} alt={deal.productName} className="wm-deal-card__img" />
+                  ) : (
+                    <div className="wm-deal-card__img-placeholder">
+                      <i className="bi bi-image" aria-hidden="true"></i>
+                    </div>
+                  )}
+                  <span className="wm-deal-badge">-{deal.discountPercentage}%</span>
+                </div>
+                <div className="wm-deal-card__body">
+                  <Link to={`/product/${deal.productId}`} className="wm-deal-card__name">
+                    {deal.productName}
+                  </Link>
+                  <div className="wm-deal-card__prices">
+                    <s className="wm-price-original">${deal.originalPrice.toFixed(2)}</s>
+                    <span className="wm-price-deal">${deal.discountedPrice.toFixed(2)}</span>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+          <div className="text-center mt-3">
+            <Button icon="bi-lightning-charge" to="/deals" variant="outline">View All Deals</Button>
+          </div>
+        </section>
+      )}
 
       <section className="wm-metrics" aria-label="Store metrics">
         <div>

@@ -5,7 +5,7 @@ import Button from './Button';
 import ProductVisual from './ProductVisual';
 import { getTechCategory } from '../utils/productTech';
 
-const ProductCard = ({ product, onAddToCart }) => {
+const ProductCard = ({ product, onAddToCart, deal }) => {
   const [added, setAdded] = useState(false);
   const category = getTechCategory(product);
 
@@ -27,7 +27,16 @@ const ProductCard = ({ product, onAddToCart }) => {
       return;
     }
 
-    onAddToCart(product);
+    if (deal) {
+      onAddToCart({
+        ...product,
+        price: deal.discountedPrice,
+        originalPrice: product.price,
+        dealId: deal.id,
+      });
+    } else {
+      onAddToCart(product);
+    }
     setAdded(true);
   };
 
@@ -51,7 +60,15 @@ const ProductCard = ({ product, onAddToCart }) => {
             : 'Precision-built tech gear for your next upgrade.'}
         </p>
         <div className="wm-product-card__footer">
-          <strong className="wm-product-card__price">${product.price?.toFixed(2)}</strong>
+          {deal ? (
+            <div className="wm-product-card__price-wrap">
+              <s className="wm-price-original" style={{ fontSize: '0.8rem' }}>${product.price?.toFixed(2)}</s>
+              <strong className="wm-product-card__price wm-price-deal" style={{ fontSize: '1.1rem' }}>${deal.discountedPrice.toFixed(2)}</strong>
+              <span className="wm-deal-badge" style={{ position: 'static', marginLeft: '6px', fontSize: '0.7rem', padding: '2px 6px' }}>-{deal.discountPercentage}%</span>
+            </div>
+          ) : (
+            <strong className="wm-product-card__price">${product.price?.toFixed(2)}</strong>
+          )}
           <Button
             disabled={stock === 0}
             icon={added ? 'bi-check2' : 'bi-cart-plus'}

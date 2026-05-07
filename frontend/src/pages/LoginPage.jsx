@@ -53,7 +53,15 @@ const LoginPage = () => {
 
     try {
       const data = await authService.login(formData.email, formData.password);
-      login(data.user, data.token);
+      login(
+        {
+          email: data.email,
+          role: data.role,
+          firstName: data.firstName,
+          lastName: data.lastName,
+        },
+        data.token
+      );
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please try again.');

@@ -6,10 +6,12 @@ import com.ecommerce.auth.dto.RegisterRequest;
 import com.ecommerce.auth.entity.User;
 import com.ecommerce.auth.repository.UserRepository;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -17,40 +19,54 @@ import java.util.Date;
 @Service
 public class AuthService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
     private final SecretKey jwtKey;
     private final long jwtExpirationMs;
 
     public AuthService(UserRepository userRepository,
-                       @Value("${jwt.secret:ecom-secret-key-for-jwt-signing-2024-minimum-256-bits}") String jwtSecret,
+                       PasswordEncoder passwordEncoder,
+                       @Value("${jwt.secret:}") String jwtSecret,
                        @Value("${jwt.expiration:86400000}") long jwtExpirationMs) {
+        if (jwtSecret == null || jwtSecret.isBlank()) {
+            throw new IllegalStateException("jwt.secret must be configured");
+        }
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
         this.jwtKey = Keys.hmacShaKeyFor(jwtSecret.getBytes());
         this.jwtExpirationMs = jwtExpirationMs;
     }
 
     public AuthResponse register(RegisterRequest request) {
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username already exists");
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
         }
 
         String role = request.getRole() != null ? request.getRole() : "CUSTOMER";
-        User user = new User(request.getUsername(), request.getPassword(), role);
+        User user = new User(request.getEmail(), passwordEncoder.encode(request.getPassword()), role);
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
         userRepository.save(user);
 
         String token = generateToken(user);
-        return new AuthResponse(token, user.getUsername(), user.getRole());
+        AuthResponse response = new AuthResponse(token, user.getEmail(), user.getRole());
+        response.setFirstName(user.getFirstName());
+        response.setLastName(user.getLastName());
+        return response;
     }
 
     public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials"));
 
-        if (!user.getPassword().equals(request.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
         }
 
         String token = generateToken(user);
-        return new AuthResponse(token, user.getUsername(), user.getRole());
+        AuthResponse response = new AuthResponse(token, user.getEmail(), user.getRole());
+        response.setFirstName(user.getFirstName());
+        response.setLastName(user.getLastName());
+        return response;
     }
 
     private String generateToken(User user) {
@@ -59,12 +75,12 @@ public class AuthService {
         Date expiresAt = new Date(now + jwtExpirationMs);
 
         return Jwts.builder()
-                .setSubject(user.getUsername())
+                .subject(user.getEmail())
                 .claim("userId", user.getId())
                 .claim("role", user.getRole())
-                .setIssuedAt(issuedAt)
-                .setExpiration(expiresAt)
-                .signWith(jwtKey, SignatureAlgorithm.HS512)
+                .issuedAt(issuedAt)
+                .expiration(expiresAt)
+                .signWith(jwtKey)
                 .compact();
     }
 }

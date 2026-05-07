@@ -35,3 +35,23 @@ export const updateCategory = async (id, categoryData) => {
 export const deleteCategory = async (id) => {
   return del(`/categories/${id}`);
 };
+
+export const getDeals = async () => {
+  return get("/deals");
+};
+
+export const getAllDeals = async () => {
+  return get("/deals/all");
+};
+
+export const createDeal = async (data) => {
+  return post("/deals", data);
+};
+
+export const updateDeal = async (id, data) => {
+  return put(`/deals/${id}`, data);
+};
+
+export const deleteDeal = async (id) => {
+  return del(`/deals/${id}`);
+};

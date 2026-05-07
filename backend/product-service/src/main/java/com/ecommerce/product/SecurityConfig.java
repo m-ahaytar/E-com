@@ -34,7 +34,10 @@ public class SecurityConfig {
 
     private final String jwtSecret;
 
-    public SecurityConfig(@Value("${jwt.secret:ecom-secret-key-for-jwt-signing-2024-minimum-256-bits}") String jwtSecret) {
+    public SecurityConfig(@Value("${jwt.secret:}") String jwtSecret) {
+        if (jwtSecret == null || jwtSecret.isBlank()) {
+            throw new IllegalStateException("jwt.secret must be configured");
+        }
         this.jwtSecret = jwtSecret;
     }
 
@@ -47,6 +50,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/products").permitAll()
                         .requestMatchers("/categories").permitAll()
+                        .requestMatchers("/deals").permitAll()
+                        .requestMatchers("/deals/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtFilter(jwtSecret), UsernamePasswordAuthenticationFilter.class);

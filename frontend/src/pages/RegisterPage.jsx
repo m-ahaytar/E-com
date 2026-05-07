@@ -12,6 +12,7 @@ const RegisterPage = () => {
     confirmPassword: '',
     firstName: '',
     lastName: '',
+    role: 'CUSTOMER',
   });
   const [validationErrors, setValidationErrors] = useState({});
   const [error, setError] = useState('');
@@ -71,7 +72,11 @@ const RegisterPage = () => {
 
     try {
       const { confirmPassword: _confirmPassword, ...registerData } = formData;
-      await authService.register(registerData);
+      const data = await authService.register(registerData);
+      if (data?.token) {
+        navigate('/');
+        return;
+      }
       navigate('/login');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed. Please try again.');

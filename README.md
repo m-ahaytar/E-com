@@ -7,6 +7,7 @@ A **next-generation e-commerce platform** built with microservices architecture,
 ## Quick Start
 
 ### Prerequisites
+
 - Docker & Docker Compose
 - Node.js 20+ (for local frontend development)
 - Java 17+ (for local backend development)
@@ -42,6 +43,7 @@ mvn spring-boot:run
 ## Project Overview
 
 **WITH ME SHOP** is a full-stack e-commerce platform showcasing:
+
 - **Microservices architecture** with API Gateway routing
 - **Real-time cart synchronization** via React Context + REST API
 - **Dynamic categories & products** fetched from backend
@@ -84,6 +86,7 @@ Service   Service       Service           Service
 ### Services
 
 #### 1. **Auth Service** (Port 8081)
+
 - User registration & login
 - JWT token generation & validation
 - User role management (CUSTOMER, SELLER, ADMIN)
@@ -91,6 +94,7 @@ Service   Service       Service           Service
 - Database: `auth-service.db` (SQLite, users table)
 
 #### 2. **Product Service** (Port 8082)
+
 - Product & category CRUD
 - Product search & filtering
 - Dynamic category list
@@ -98,6 +102,7 @@ Service   Service       Service           Service
 - Database: `product-service.db` (SQLite, categories & products tables)
 
 #### 3. **Order Service** (Port 8083)
+
 - **Cart management** (session-based in-memory state)
 - Order creation from cart items
 - Order history & status tracking
@@ -105,12 +110,14 @@ Service   Service       Service           Service
 - Database: `order-service.db` (SQLite, orders & order_items tables)
 
 #### 4. **Payment Service** (Port 8084)
+
 - Payment processing (mock implementation)
 - Payment status tracking
 - Endpoints: `/payments/process`, `/payments/order/{orderId}`
 - Database: `payment-service.db` (SQLite, payments table)
 
 #### 5. **API Gateway** (Port 8085 external / 8080 internal)
+
 - Spring Cloud Gateway routes requests to appropriate services
 - CORS enabled for `http://localhost:3000` and `http://127.0.0.1:3000`
 - Request/response transformation
@@ -121,6 +128,7 @@ Service   Service       Service           Service
 ## Frontend Architecture
 
 ### Technologies
+
 - **React 19** - UI library
 - **React Router 6** - client-side routing
 - **Vite** - build tool & dev server
@@ -131,12 +139,14 @@ Service   Service       Service           Service
 ### Key Features (Recent Updates)
 
 #### Dynamic Categories
+
 - Fetches categories from `/categories` API endpoint
 - Falls back to product data if no categories in API response
 - Category tiles & filters on homepage & catalog show live counts
 - Implements `buildCategoryOptions()` utility to merge backend data with product inventory
 
 #### Cart State Management
+
 - **CartContext** manages global cart state
 - **API Sync**: When user is authenticated, cart operations sync with `/cart` endpoints
 - **Local Fallback**: Anonymous users use localStorage (client-only cart)
@@ -145,6 +155,7 @@ Service   Service       Service           Service
 - `addToCart()`, `removeFromCart()`, `updateQuantity()`, `clearCart()` methods handle both API & local storage
 
 #### Navbar & Logo
+
 - Logo replaced with local asset `frontend/src/assets/wm-logo.png` (WM design)
 - Rendered as `<img className="wm-nav__logo" />` instead of text
 - "WITH ME SHOP" text + tagline displayed next to logo
@@ -152,6 +163,7 @@ Service   Service       Service           Service
 - Role-based navigation: different links for CUSTOMER, SELLER, ADMIN
 
 #### API Base URL Configuration
+
 - Centralized in `frontend/src/config.js`
 - Reads from environment variable `VITE_API_URL` (set in docker-compose or .env)
 - Falls back to `http://localhost:8085` for local development
@@ -159,27 +171,28 @@ Service   Service       Service           Service
 
 ### Pages
 
-| Page | Route | Auth | Purpose |
-|------|-------|------|---------|
-| Landing | `/` | None | Hero, featured products, category showcase |
-| Catalogue | `/catalogue` | None | Search, filter, sort products; browse by category |
-| Product | `/product/:id` | None | Product detail, add to cart, stock info |
-| Cart | `/cart` | None | View cart items, adjust quantities, proceed to checkout |
-| Payment | `/payment` | Auth | Checkout form, delivery details, payment method |
-| Thank You | `/thank-you` | Auth | Order confirmation, next steps |
-| Login | `/login` | None | Email + password login |
-| Register | `/register` | None | Sign up with role selection |
-| Dashboard | `/dashboard` | Auth (CUSTOMER) | Customer orders & account |
-| Seller | `/seller` | Auth (SELLER) | Seller product management |
-| Admin | `/admin` | Auth (ADMIN) | Dashboard with stats |
-| Admin Products | `/admin/products` | Auth (ADMIN) | Manage all products |
-| Admin Categories | `/admin/categories` | Auth (ADMIN) | Manage categories |
-| Admin Orders | `/admin/orders` | Auth (ADMIN) | View all orders |
-| Admin Users | `/admin/users` | Auth (ADMIN) | Manage users |
+| Page             | Route               | Auth            | Purpose                                                 |
+| ---------------- | ------------------- | --------------- | ------------------------------------------------------- |
+| Landing          | `/`                 | None            | Hero, featured products, category showcase              |
+| Catalogue        | `/catalogue`        | None            | Search, filter, sort products; browse by category       |
+| Product          | `/product/:id`      | None            | Product detail, add to cart, stock info                 |
+| Cart             | `/cart`             | None            | View cart items, adjust quantities, proceed to checkout |
+| Payment          | `/payment`          | Auth            | Checkout form, delivery details, payment method         |
+| Thank You        | `/thank-you`        | Auth            | Order confirmation, next steps                          |
+| Login            | `/login`            | None            | Email + password login                                  |
+| Register         | `/register`         | None            | Sign up with role selection                             |
+| Dashboard        | `/dashboard`        | Auth (CUSTOMER) | Customer orders & account                               |
+| Seller           | `/seller`           | Auth (SELLER)   | Seller product management                               |
+| Admin            | `/admin`            | Auth (ADMIN)    | Dashboard with stats                                    |
+| Admin Products   | `/admin/products`   | Auth (ADMIN)    | Manage all products                                     |
+| Admin Categories | `/admin/categories` | Auth (ADMIN)    | Manage categories                                       |
+| Admin Orders     | `/admin/orders`     | Auth (ADMIN)    | View all orders                                         |
+| Admin Users      | `/admin/users`      | Auth (ADMIN)    | Manage users                                            |
 
 ### Context Providers
 
 #### AuthContext
+
 ```javascript
 {
   user: { id, email, username, firstName, lastName, role },
@@ -191,6 +204,7 @@ Service   Service       Service           Service
 ```
 
 #### CartContext
+
 ```javascript
 {
   items: [{id, productId, name, price, quantity, stock, imageUrl, categoryId}],
@@ -205,12 +219,14 @@ Service   Service       Service           Service
 ### Service Layer
 
 #### config.js
+
 ```javascript
 // Centralized API config
-export const API_BASE_URL = process.env.VITE_API_URL || 'http://localhost:8085'
+export const API_BASE_URL = process.env.VITE_API_URL || "http://localhost:8085";
 ```
 
 #### api.js
+
 ```javascript
 export const request(endpoint, options) // Core fetch wrapper
 export const get(endpoint)
@@ -218,48 +234,53 @@ export const post(endpoint, body)
 export const put(endpoint, body)
 export const del(endpoint)
 ```
+
 - Automatically adds JWT Bearer token from localStorage
 - Handles 401 responses (redirects to /login)
 - Centralized error handling
 
 #### productService.js
+
 ```javascript
-getProducts()
-getProduct(id)
-createProduct(productData)
-updateProduct(id, productData)
-deleteProduct(id)
-getCategories()  // NEW: Dynamic categories from backend
-createCategory(categoryData)
-updateCategory(id, categoryData)
-deleteCategory(id)
+getProducts();
+getProduct(id);
+createProduct(productData);
+updateProduct(id, productData);
+deleteProduct(id);
+getCategories(); // NEW: Dynamic categories from backend
+createCategory(categoryData);
+updateCategory(id, categoryData);
+deleteCategory(id);
 ```
 
 #### orderService.js
+
 ```javascript
 // Order endpoints
-createOrder(orderData)
-getUserOrders(userId)
-getOrder(id)
+createOrder(orderData);
+getUserOrders(userId);
+getOrder(id);
 
 // NEW: Cart endpoints (API sync)
-getCart()
-addCartItem(itemData)
-updateCartItem(productId, quantity)
-removeCartItem(productId)
-clearCartItems()
+getCart();
+addCartItem(itemData);
+updateCartItem(productId, quantity);
+removeCartItem(productId);
+clearCartItems();
 ```
 
 #### authService.js
+
 ```javascript
-login(email, password)  // Returns { token, user }
-register(userData)      // Returns { token, user }
+login(email, password); // Returns { token, user }
+register(userData); // Returns { token, user }
 ```
 
 #### paymentService.js
+
 ```javascript
-processPayment(paymentData)
-getPaymentByOrder(orderId)
+processPayment(paymentData);
+getPaymentByOrder(orderId);
 ```
 
 ---
@@ -269,6 +290,7 @@ getPaymentByOrder(orderId)
 ### Setup
 
 Each service is a **Spring Boot microservice** with:
+
 - **Spring Web** - REST controllers
 - **Spring Security** - JWT authentication
 - **Spring Data JPA** - SQLite ORM
@@ -279,6 +301,7 @@ Each service is a **Spring Boot microservice** with:
 ### Database Strategy
 
 Each service has its own SQLite database (decoupled storage):
+
 - `auth-service.db` - Users, roles
 - `product-service.db` - Categories, products
 - `order-service.db` - Orders, order items, (cart session state in-memory)
@@ -289,6 +312,7 @@ Data shared between services via REST APIs (synchronous calls).
 ### Service Details
 
 #### Auth Service Structure
+
 ```
 com.ecommerce.auth/
 ├── AuthServiceApplication.java      # Spring Boot entry
@@ -304,6 +328,7 @@ com.ecommerce.auth/
 ```
 
 #### Product Service Structure
+
 ```
 com.ecommerce.product/
 ├── ProductServiceApplication.java
@@ -327,6 +352,7 @@ com.ecommerce.product/
 ```
 
 #### Order Service Structure
+
 ```
 com.ecommerce.order/
 ├── OrderServiceApplication.java
@@ -352,6 +378,7 @@ com.ecommerce.order/
 ```
 
 #### Payment Service Structure
+
 ```
 com.ecommerce.payment/
 ├── PaymentServiceApplication.java
@@ -366,12 +393,14 @@ com.ecommerce.payment/
 ### API Endpoints
 
 #### Auth Service
+
 ```
 POST   /auth/login                  # { email, password } → { token, user }
 POST   /auth/register               # { email, password, firstName, lastName, role } → { token, user }
 ```
 
 #### Product Service
+
 ```
 GET    /products                    # List all products
 GET    /products/{id}               # Get product by ID
@@ -387,6 +416,7 @@ DELETE /categories/{id}             # Delete category
 ```
 
 #### Order Service (via Gateway)
+
 ```
 POST   /orders                      # Create order from cart (CUSTOMER)
 GET    /orders                      # List all orders (ADMIN)
@@ -403,6 +433,7 @@ DELETE /cart                        # Clear entire cart
 ```
 
 #### Payment Service
+
 ```
 POST   /payments/process            # { orderId, method, amount } → { success, transactionId }
 GET    /payments/order/{orderId}    # Get payment by order ID
@@ -419,27 +450,27 @@ spring:
           uri: http://auth-service:8081
           predicates:
             - Path=/auth/**
-        
+
         - id: product-service
           uri: http://product-service:8082
           predicates:
             - Path=/products/**
-        
+
         - id: category-service
           uri: http://product-service:8082
           predicates:
             - Path=/categories/**
-        
+
         - id: order-service
           uri: http://order-service:8083
           predicates:
             - Path=/orders/**
-        
+
         - id: cart-service
           uri: http://order-service:8083
           predicates:
             - Path=/cart/**
-        
+
         - id: payment-service
           uri: http://payment-service:8084
           predicates:
@@ -449,7 +480,7 @@ spring:
 ### Security
 
 - **JWT Format**: Bearer token in `Authorization` header
-- **Payload**: { sub: username, role: CUSTOMER|SELLER|ADMIN, iat, exp }
+- **Payload**: { sub: email, role: CUSTOMER|SELLER|ADMIN, iat, exp }
 - **Secret Key**: Configurable, defaults to `ecom-secret-key-for-jwt-signing-2024-minimum-256-bits`
 - **CORS**: Enabled for `http://localhost:3000` and `http://127.0.0.1:3000`
 - **Stateless**: Session-less, JWT-only authentication
@@ -466,24 +497,24 @@ api-gateway:
   - Port 8085 → 8080 (internal)
   - Depends on: all services
   - Routes traffic to microservices
-  
+
 auth-service:
   - Port 8081
   - SQLite volume: auth-data:/data/auth-service.db
-  
+
 product-service:
   - Port 8082
   - SQLite volume: product-data:/data/product-service.db
-  
+
 order-service:
   - Port 8083
   - SQLite volume: order-data:/data/order-service.db
   - In-memory carts (lost on restart)
-  
+
 payment-service:
   - Port 8084
   - SQLite volume: payment-data:/data/payment-service.db
-  
+
 frontend:
   - Port 3000 (nginx)
   - Build arg: VITE_API_URL=http://localhost:8085
@@ -491,11 +522,13 @@ frontend:
 ```
 
 ### Network
+
 - All services connected via `ecom-network` (bridge driver)
 - Internal DNS: service name (e.g., `http://auth-service:8081`)
 - External: http://localhost:PORT
 
 ### Volumes
+
 - `auth-data`, `product-data`, `order-data`, `payment-data` - SQLite data persistence
 
 ### Build & Run
@@ -534,23 +567,27 @@ npm run build
 ```
 
 The Dockerfile multistage build:
+
 1. Builds React app with Vite
 2. Serves `dist/` via nginx on port 3000
 
 ### Backend Build
 
 Each service Dockerfile:
+
 1. Multi-stage Maven build (compile → package)
 2. Runs JAR with Spring Boot
 
 ### Environment Variables
 
 **Frontend** (`docker-compose.yml`):
+
 ```yaml
 VITE_API_URL: http://localhost:8085
 ```
 
 **Services** (defaults in code):
+
 ```
 SQLITE_DB_PATH: /data/{service}-service.db
 jwt.secret: ecom-secret-key-for-jwt-signing-2024-minimum-256-bits
@@ -604,10 +641,12 @@ sqlite3 /data/order-service.db
 ### Backend Tests
 
 Each service has `src/test/java/com/ecommerce/{service}/` with:
+
 - `*ControllerTest.java` - REST endpoint tests using MockMvc
 - `*ServiceTest.java` - Business logic tests using Mockito
 
 Run tests:
+
 ```bash
 cd backend/product-service
 mvn test
@@ -619,12 +658,14 @@ mvn test -Dtest=ProductControllerTest
 ### Frontend Testing
 
 Linting:
+
 ```bash
 cd frontend
 npm run lint
 ```
 
 Build validation:
+
 ```bash
 npm run build
 ```
@@ -634,26 +675,31 @@ npm run build
 ## Key Features & Recent Updates
 
 ### ✅ Categories (Updated)
+
 - **Before**: Hardcoded in frontend (Gadgets, Phones, Laptops, Accessories)
 - **After**: Fetches from `/categories` API endpoint, merges with product data for live counts
 
 ### ✅ Cart (Updated)
+
 - **Before**: localStorage only, no backend sync
-- **After**: 
+- **After**:
   - API endpoints for add/update/remove/clear items
   - CartContext syncs with backend when authenticated
   - Falls back to localStorage when offline or unauthenticated
   - Navbar badge shows sum of quantities (not cart length)
 
 ### ✅ Logo (Updated)
+
 - **Before**: Text "WM" in white box
 - **After**: Image asset (wm-logo.png) + "WITH ME SHOP" text + tagline
 
 ### ✅ API Base URL (Updated)
+
 - **Before**: Scattered hardcoded localhost ports (8085, 8080, etc.)
 - **After**: Centralized in `frontend/src/config.js`, reads `VITE_API_URL` env var
 
 ### ✅ Dark Futuristic UI
+
 - Maintains existing Orbitron fonts, cyan/neon color scheme
 - Grid background, glowing elements, smooth transitions
 - Responsive design (desktop, tablet, mobile)
@@ -663,12 +709,14 @@ npm run build
 ## User Roles & Permissions
 
 ### VISITOR (Not Logged In)
+
 - Browse products & categories
 - View product details
 - Add items to cart (client-side only)
 - Must log in to checkout
 
 ### CUSTOMER
+
 - All visitor permissions
 - Persistent cart via API
 - Place orders
@@ -676,11 +724,13 @@ npm run build
 - Track order status
 
 ### SELLER
+
 - Manage own products
 - View product inventory
 - Upload product images & details
 
 ### ADMIN
+
 - Manage all products & categories
 - Manage all users & orders
 - View analytics dashboard
@@ -691,6 +741,7 @@ npm run build
 ## API Flow: Complete Shopping Journey
 
 ### 1. User Registration
+
 ```
 Frontend: POST /auth/register
   { email, password, firstName, lastName, role: "CUSTOMER" }
@@ -701,6 +752,7 @@ Frontend: Stores token & user in localStorage, updates AuthContext
 ```
 
 ### 2. Product Browse
+
 ```
 Frontend: GET /products
 Backend: Product Service
@@ -709,6 +761,7 @@ Frontend: Filters/searches locally, displays on Catalogue page
 ```
 
 ### 3. Add to Cart
+
 ```
 Frontend (Authenticated): POST /cart/items
   { productId, quantity, price, productName, ... }
@@ -719,6 +772,7 @@ Frontend: Updates CartContext, shows success animation
 ```
 
 ### 4. Place Order
+
 ```
 Frontend: POST /orders
   { userId, items: [{ productId, quantity, price }] }
@@ -730,6 +784,7 @@ Frontend: Displays order confirmation
 ```
 
 ### 5. Process Payment
+
 ```
 Frontend: POST /payments/process
   { orderId, method: "CARD"|"CASH", amount }
@@ -745,21 +800,27 @@ Frontend: Displays "Thank You" page with next steps
 ## Common Issues & Solutions
 
 ### Issue: Cart not persisting after login
+
 **Solution**: Ensure `CartContext` has `useAuth()` dependency. On login, it should sync with `GET /cart` API. Check browser console for 401 errors.
 
 ### Issue: Categories showing as undefined
+
 **Solution**: Verify `/categories` API endpoint returns `[{ id, name }, ...]`. Check backend product service is running (`docker-compose logs product-service`).
 
 ### Issue: Logo not displaying
+
 **Solution**: Check `frontend/src/assets/wm-logo.png` exists. Verify image import in `Navbar.jsx` is correct. Check browser DevTools Network tab for 404 on image URL.
 
 ### Issue: API calls go to wrong port
+
 **Solution**: Verify `VITE_API_URL` environment variable is set in `docker-compose.yml` or `.env`. Check `frontend/src/config.js` logic.
 
 ### Issue: 401 Unauthorized on /cart endpoints
+
 **Solution**: Cart endpoints require authentication (JWT token). Ensure user is logged in before testing cart operations. Check `Authorization` header in requests.
 
 ### Issue: Services can't communicate
+
 **Solution**: Verify `docker-compose.yml` network is correct. Use service names (e.g., `http://auth-service:8081`) inside containers. Use `localhost` only from host machine.
 
 ---
@@ -865,14 +926,14 @@ E-com/
 
 ## Ports Reference
 
-| Service | Container Port | Host Port | Purpose |
-|---------|---|---|---|
-| Frontend | 3000 | 3000 | React app (nginx) |
-| API Gateway | 8080 | 8085 | Reverse proxy to services |
-| Auth Service | 8081 | 8081 | User authentication |
-| Product Service | 8082 | 8082 | Products & categories |
-| Order Service | 8083 | 8083 | Orders & cart |
-| Payment Service | 8084 | 8084 | Payment processing |
+| Service         | Container Port | Host Port | Purpose                   |
+| --------------- | -------------- | --------- | ------------------------- |
+| Frontend        | 3000           | 3000      | React app (nginx)         |
+| API Gateway     | 8080           | 8085      | Reverse proxy to services |
+| Auth Service    | 8081           | 8081      | User authentication       |
+| Product Service | 8082           | 8082      | Products & categories     |
+| Order Service   | 8083           | 8083      | Orders & cart             |
+| Payment Service | 8084           | 8084      | Payment processing        |
 
 ---
 
@@ -963,6 +1024,6 @@ Educational project for microservices & modern web development.
 ✅ Futuristic React UI with dark theme  
 ✅ Docker Compose multi-container deployment  
 ✅ SQLite per-service databases  
-✅ Comprehensive role-based access control  
+✅ Comprehensive role-based access control
 
 Start with `docker-compose up --build` and explore the app at `http://localhost:3000`!
