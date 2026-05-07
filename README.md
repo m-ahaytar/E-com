@@ -15,8 +15,33 @@ A **next-generation e-commerce platform** built with microservices architecture,
 ### Run the Full Stack with Docker
 
 ```bash
-docker-compose up --build
+# Generate JWT secret and start all services
+./start.sh
 ```
+> Or manually: `echo "JWT_SECRET=$(openssl rand -hex 32)" > .env && docker-compose up --build`
+
+### Run Tests
+
+```bash
+# Run all backend tests (all services)
+cd backend/api-gateway   && mvn test
+cd backend/auth-service  && mvn test
+cd backend/order-service && mvn test
+cd backend/payment-service && mvn test
+cd backend/product-service && mvn test
+
+# Run a specific test class
+cd backend/product-service
+mvn test -Dtest=ProductServiceTest
+mvn test -Dtest=DiscountStrategyTest
+mvn test -Dtest=OrderCalculatorDecoratorTest
+mvn test -Dtest=ProductDetailFacadeTest
+
+# Generate JaCoCo coverage report
+mvn clean test
+# Report: backend/<service>/target/site/jacoco/index.html
+```
+> Or manually: `echo "JWT_SECRET=$(openssl rand -hex 32)" > .env && docker-compose up --build`
 
 - **Frontend** (React): http://localhost:3000
 - **API Gateway**: http://localhost:8085
@@ -36,6 +61,28 @@ npm run dev
 # Terminal 3: Local backend service (e.g., product-service)
 cd backend/product-service
 mvn spring-boot:run
+```
+
+### Run Tests
+
+```bash
+# Run all backend tests (all services)
+cd backend/api-gateway   && mvn test
+cd backend/auth-service  && mvn test
+cd backend/order-service && mvn test
+cd backend/payment-service && mvn test
+cd backend/product-service && mvn test
+
+# Run a specific test class
+cd backend/product-service
+mvn test -Dtest=ProductServiceTest
+mvn test -Dtest=DiscountStrategyTest
+mvn test -Dtest=OrderCalculatorDecoratorTest
+mvn test -Dtest=ProductDetailFacadeTest
+
+# Generate JaCoCo coverage report
+mvn clean test
+# Report: backend/<service>/target/site/jacoco/index.html
 ```
 
 ---
@@ -122,6 +169,41 @@ Service   Service       Service           Service
 - CORS enabled for `http://localhost:3000` and `http://127.0.0.1:3000`
 - Request/response transformation
 - Security filter integration
+
+---
+
+## Deals Feature
+
+The platform includes a time-limited deals system built on top of the product service.
+
+### How It Works
+
+- **Deal entity**: linked to a Product with `discountPercentage`, `startDate`, `endDate`
+- **Active deal**: any deal where `startDate <= now <= endDate`
+- **Multiple deals per product**: the highest discount is applied automatically
+- **Discounted price**: computed server-side as `price - (price × discount% / 100)`, rounded to 2 decimals
+
+### API Endpoints (via Gateway)
+
+```
+GET    /deals                  # All currently active deals (public)
+GET    /deals/{id}             # Single deal (public)
+POST   /deals                  # Create deal (ADMIN only)
+PUT    /deals/{id}             # Update deal (ADMIN only)
+DELETE /deals/{id}             # Delete deal (ADMIN only)
+```
+
+### Frontend Pages
+
+| Page         | Route          | Purpose                                              |
+|--------------|----------------|------------------------------------------------------|
+| Deals        | `/deals`       | Hero banner, global countdown timer, deal cards      |
+| Admin Deals  | `/admin/deals` | Create/edit/delete deals with date range and discount|
+
+### Data Seeding
+
+On first startup, `DealDataSeeder` seeds 4 sample deals using products from the database.
+Seeds only run when the DEAL table is empty, so restarts are safe.
 
 ---
 
@@ -638,40 +720,178 @@ sqlite3 /data/order-service.db
 
 ## Testing
 
-### Backend Tests
+### Test Infrastructure
 
-Each service has `src/test/java/com/ecommerce/{service}/` with:
+All backend services use **JUnit 5 + Mockito** for pure unit testing.
+No Spring context is loaded in service tests — all dependencies are mocked.
 
-- `*ControllerTest.java` - REST endpoint tests using MockMvc
-- `*ServiceTest.java` - Business logic tests using Mockito
+**Coverage tool**: JaCoCo 0.8.12 (Java 26 compatible)
+Coverage reports are generated at `backend/<service>/target/site/jacoco/index.html`
+after running `mvn clean test`.
 
-Run tests:
+### Test Counts
+
+| Service         | Tests | Test Files                                              |
+|-----------------|-------|---------------------------------------------------------|
+| auth-service    | 14    | AuthServiceTest, AuthControllerTest                     |
+| order-service   | 58    | OrderServiceTest, OrderControllerTest, OrderCalculatorDecoratorTest |
+| payment-service | 49    | PaymentServiceTest, PaymentControllerTest, DiscountStrategyTest |
+| product-service | 59    | ProductServiceTest, DealServiceTest, ProductControllerTest, CategoryControllerTest, ProductDetailFacadeTest |
+| api-gateway     | 0     | No business logic to test                               |
+| **Total**       | **180** |                                                       |
+
+### JUnit 5 Features Used
+
+Every service test class demonstrates the full JUnit 5 feature set:
+
+| Feature                  | Used In                                      |
+|--------------------------|----------------------------------------------|
+| `@Nested` + `@DisplayName` | All 5 service test classes                 |
+| `@ParameterizedTest`     | All 5 service test classes                   |
+| `@CsvSource` / `@ValueSource` | All parameterized tests                 |
+| `assertAll()`            | All 5 service test classes                   |
+| `assertThrows()` + message check | All 5 service test classes           |
+| `assertTimeout()`        | ProductServiceTest, OrderServiceTest         |
+| `@Tag("unit")` `@Tag("fast")` | All test classes                        |
+| `@BeforeAll` / `@AfterAll` | All service test classes                   |
+| Mockito `@Mock` + `@InjectMocks` | All service tests                  |
+| Mockito `verify()`       | All service tests                            |
+
+### Run Backend Tests
 
 ```bash
-cd backend/product-service
-mvn test
+# Single service
+cd backend/product-service && mvn clean test
 
-# Specific test
-mvn test -Dtest=ProductControllerTest
+# All services (from repo root)
+for s in api-gateway auth-service order-service payment-service product-service; do
+  echo "=== $s ===" && cd backend/$s && mvn clean test && cd ../..
+done
 ```
 
-### Frontend Testing
-
-Linting:
+### Frontend Validation
 
 ```bash
 cd frontend
-npm run lint
+npm run lint    # ESLint check
+npm run build   # Vite production build — validates no import errors
 ```
-
-Build validation:
-
-```bash
-npm run build
-```
-
 ---
 
+## Design Patterns:
+
+Three Gang-of-Four patterns are implemented as standalone utility classes
+alongside the existing service layer. They do not modify any controller,
+entity, or repository.
+
+### Strategy Pattern — Discount Calculation:
+
+**Location**: `backend/payment-service/src/main/java/com/ecommerce/payment/strategy/`
+
+Replaces inline discount math with swappable algorithm objects.
+
+```
+DiscountStrategy (interface)
+  ├── PercentageDiscountStrategy   — amount × (pct / 100)
+  ├── FixedAmountDiscountStrategy  — amount − fixedValue (floor 0)
+  └── NoDiscountStrategy           — returns 0 (no discount)
+```
+
+**Test**: `DiscountStrategyTest` — 12 tests covering all three strategies
+with parameterized inputs and boundary conditions.
+
+### Decorator Pattern — Order Total Calculation:
+
+**Location**: `backend/order-service/src/main/java/com/ecommerce/order/decorator/`
+
+Stackable decorators that wrap an `OrderCalculator` to add tax, shipping,
+and discount without modifying the base calculation.
+
+```
+OrderCalculator (interface)
+  └── BaseOrderCalculator          — sums item subtotals
+
+OrderCalculatorDecorator (abstract)
+  ├── TaxDecorator                 — adds tax rate (default 10%)
+  ├── ShippingDecorator            — adds flat shipping (free above threshold)
+  └── DiscountDecorator            — subtracts discount amount (floor 0)
+```
+
+Example stacking:
+```java
+OrderCalculator calc =
+  new TaxDecorator(
+    new ShippingDecorator(
+      new BaseOrderCalculator(subtotal), 10.0), 0.10);
+// $100 subtotal → +$10 shipping → +10% tax → $121.00
+```
+
+**Test**: `OrderCalculatorDecoratorTest` — 29 tests covering individual
+decorators and stacked combinations.
+
+### Facade Pattern — Product Detail Assembly:
+
+**Location**: `backend/product-service/src/main/java/com/ecommerce/product/facade/`
+
+Single method that aggregates product info, active deal, and category
+from three different sources into one response.
+
+```
+ProductDetailFacade
+  └── getProductDetails(productId)
+        ├── productRepository.findById()     → name, price, stock
+        ├── dealRepository.findActiveDeals() → discount info (if any)
+        └── product.getCategory()            → category name
+        → ProductDetailResponse (record)
+```
+
+**Test**: `ProductDetailFacadeTest` — 9 tests covering product-only,
+product-with-deal, product-with-category, and not-found scenarios.
+
+---
+EOF'
+echo "Design patterns text created"
+---
+
+## CI/CD Pipeline:
+
+### GitHub Actions Workflow:
+
+**File**: `.github/workflows/ci-cd.yml`
+**Triggers**: push and pull_request to `master`
+
+```
+Pipeline stages (in order):
+
+test-backend (matrix: 5 services in parallel)
+  └── checkout → setup Java 17 → mvn clean test → upload JaCoCo artifact
+
+test-frontend (parallel with test-backend)
+  └── checkout → setup Node 20 → npm ci → npm run build
+
+docker-build (needs: test-backend + test-frontend, push to master only)
+  └── checkout → docker compose build
+```
+
+### Pipeline Features:
+
+- **Fail-fast matrix**: if one backend service fails, others are cancelled
+- **Maven cache**: `~/.m2` cached between runs (~30% speedup)
+- **npm cache**: `node_modules` cached via lock file hash
+- **JaCoCo artifacts**: HTML coverage reports uploaded per service,
+  retained 30 days, available in Actions → run → Artifacts
+- **Docker build verification**: confirms all 7 images build on merge to master
+
+### Action Versions:
+
+| Action                    | Version  |
+|---------------------------|----------|
+| actions/checkout          | v4.2.2   |
+| actions/setup-java        | v4.7.0   |
+| actions/setup-node        | v4.4.0   |
+| actions/upload-artifact   | v4.6.2   |
+
+---
 ## Key Features & Recent Updates
 
 ### ✅ Categories (Updated)
@@ -699,10 +919,39 @@ npm run build
 - **After**: Centralized in `frontend/src/config.js`, reads `VITE_API_URL` env var
 
 ### ✅ Dark Futuristic UI
-
 - Maintains existing Orbitron fonts, cyan/neon color scheme
 - Grid background, glowing elements, smooth transitions
 - Responsive design (desktop, tablet, mobile)
+
+### ✅ Deals System (New)
+
+- **Deal entity** in product-service with discount percentage, start/end dates
+- **Active deal logic**: `startDate <= now <= endDate`, highest discount wins
+- **Server-side pricing**: discountedPrice always computed on backend
+- **DealsPage**: hero banner, global countdown to soonest-expiring deal, deal cards
+- **Featured Deals**: landing page shows top 3 active deals
+- **Admin management**: create/edit/delete deals at `/admin/deals`
+- **Cart integration**: adding a deal item stores discountedPrice; silently reverts
+  to original price if deal expires between sessions
+
+### ✅ Test Coverage (New)
+
+- **180 unit tests** across 4 backend services
+- **JUnit 5**: @Nested, @ParameterizedTest, assertAll, assertThrows, assertTimeout
+- **Mockito**: @Mock, @InjectMocks, verify() — no Spring context loaded
+- **JaCoCo 0.8.12**: coverage reports generated per service
+
+### ✅ Design Patterns (New)
+
+- **Strategy**: swappable discount algorithms in payment-service
+- **Decorator**: stackable order total calculators (tax, shipping, discount)
+- **Facade**: single-call product detail assembly (product + deal + category)
+
+### ✅ CI/CD Pipeline (New)
+
+- **GitHub Actions**: parallel backend matrix + frontend build
+- **Artifacts**: JaCoCo HTML reports uploaded per service run
+- **Docker verification**: docker compose build on merge to master
 
 ---
 
@@ -849,7 +1098,8 @@ E-com/
 │   │   │   ├── AuthContext.jsx
 │   │   │   └── CartContext.jsx # Global cart + API sync (UPDATED)
 │   │   ├── pages/
-│   │   │   ├── LandingPage.jsx
+│   │   │   ├── LandingPage.jsx      # Hero + Featured Deals section
+│   │   │   ├── DealsPage.jsx        # Deals hero + countdown + deal cards (NEW)
 │   │   │   ├── CataloguePage.jsx    # Dynamic categories (UPDATED)
 │   │   │   ├── ProductPage.jsx
 │   │   │   ├── CartPage.jsx
@@ -859,6 +1109,7 @@ E-com/
 │   │   │   ├── CustomerDashboard.jsx
 │   │   │   ├── SellerDashboard.jsx
 │   │   │   ├── AdminDashboard.jsx
+│   │   │   ├── AdminDeals.jsx       # Manage deals CRUD (NEW)
 │   │   │   └── ... admin pages
 │   │   ├── services/
 │   │   │   ├── api.js                # HTTP wrapper (UPDATED: uses config.js)
@@ -888,8 +1139,13 @@ E-com/
     │   ├── pom.xml
     │   └── Dockerfile
     │
-    ├── product-service/        # Products & categories
+    ├── product-service/        # Products, categories & deals
     │   ├── src/main/java/com/ecommerce/product/
+    │   │   ├── entity/Deal.java              # Deal entity (NEW)
+    │   │   ├── controller/DealController.java # /deals endpoints (NEW)
+    │   │   ├── service/DealService.java       # Deal logic + highest discount (NEW)
+    │   │   ├── strategy/DiscountStrategy.java # Strategy pattern (NEW)
+    │   │   └── facade/ProductDetailFacade.java # Facade pattern (NEW)
     │   ├── src/resources/application.yml
     │   ├── src/resources/data.sql  # Sample data
     │   ├── pom.xml
@@ -1006,24 +1262,31 @@ Educational project for microservices & modern web development.
 
 ---
 
-## Contributors
+## Contributors:
 
-- Architecture & Backend: Java/Spring Boot developers
-- Frontend: React developers
-- DevOps: Docker & Compose setup
+- **Architecture & Backend**: Java/Spring Boot microservices, REST API design
+- **Frontend**: React 18 + Vite, dark futuristic UI
+- **DevOps**: Docker Compose, GitHub Actions CI/CD
+- **Quality**: JUnit 5 test suite, JaCoCo coverage, design patterns
 
 ---
+*Branch: Ahaytar — all CI checks passing*
 
-## Summary
+## Summary:
 
 **WITH ME SHOP** is a production-ready microservices e-commerce platform demonstrating:
-✅ Microservices architecture with API Gateway  
-✅ JWT authentication & authorization  
-✅ Real-time cart sync (API + localStorage)  
-✅ Dynamic product categories from backend  
-✅ Futuristic React UI with dark theme  
-✅ Docker Compose multi-container deployment  
-✅ SQLite per-service databases  
-✅ Comprehensive role-based access control
 
-Start with `docker-compose up --build` and explore the app at `http://localhost:3000`!
+✅ Microservices architecture with API Gateway
+✅ JWT authentication & authorization
+✅ Real-time cart sync (API + localStorage)
+✅ Dynamic product categories from backend
+✅ Time-limited Deals with discount engine and countdown timer
+✅ Futuristic React UI with dark theme
+✅ Docker Compose multi-container deployment
+✅ SQLite per-service databases
+✅ Comprehensive role-based access control
+✅ JUnit 5 test suite (180 tests) with Mockito, JaCoCo coverage
+✅ Strategy, Decorator, and Facade design patterns*
+✅ GitHub Actions CI/CD pipeline with coverage reporting*
+
+Start with `./start.sh` and explore the app at `http://localhost:3000`!
