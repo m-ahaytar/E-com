@@ -1,22 +1,26 @@
 package com.ecommerce.product.service;
 
-import com.ecommerce.product.dto.ProductCreateDTO;
-import com.ecommerce.product.dto.ProductDTO;
-import com.ecommerce.product.entity.Category;
-import com.ecommerce.product.entity.Product;
-import com.ecommerce.product.repository.CategoryRepository;
-import com.ecommerce.product.repository.ProductRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+    import com.ecommerce.product.dto.ProductCreateDTO;
+    import com.ecommerce.product.dto.ProductDTO;
+    import com.ecommerce.product.entity.Category;
+    import com.ecommerce.product.entity.Product;
+    import com.ecommerce.product.repository.CategoryRepository;
+    import com.ecommerce.product.repository.ProductRepository;
+    import org.junit.jupiter.api.BeforeAll;
+    import org.junit.jupiter.api.AfterAll;
+    import org.junit.jupiter.api.BeforeEach;
+    import org.junit.jupiter.api.DisplayName;
+    import org.junit.jupiter.api.Nested;
+    import org.junit.jupiter.api.Tag;
+    import org.junit.jupiter.api.Test;
+    import org.junit.jupiter.api.extension.ExtendWith;
+    import org.junit.jupiter.params.ParameterizedTest;
+    import org.junit.jupiter.params.provider.ValueSource;
+    import org.mockito.InjectMocks;
+    import org.mockito.Mock;
+    import org.mockito.junit.jupiter.MockitoExtension;
+
+    import java.time.Duration;
 
 import java.util.Arrays;
 import java.util.List;
@@ -45,6 +49,16 @@ class ProductServiceTest {
     private Product product;
     private Category category;
     private ProductCreateDTO createDTO;
+
+    @BeforeAll
+    static void beforeAll() {
+        System.out.println("Starting tests for ProductService");
+    }
+
+    @AfterAll
+    static void afterAll() {
+        System.out.println("Finished tests for ProductService");
+    }
 
     @BeforeEach
     void setUp() {
@@ -88,6 +102,28 @@ class ProductServiceTest {
             () -> assertEquals("Laptop", results.get(0).getName(), "First product should be Laptop"),
             () -> assertEquals("Desktop", results.get(1).getName(), "Second product should be Desktop")
         );
+        verify(productRepository).findAll();
+    }
+
+    @Test
+    @DisplayName("findAll should complete within 100ms")
+    void findAll_completesWithinTimeout() {
+        // Arrange
+        Product product2 = new Product();
+        product2.setId(2L);
+        product2.setName("Desktop");
+        product2.setCategory(category);
+        when(productRepository.findAll()).thenReturn(Arrays.asList(product, product2));
+
+        // Assert
+        assertTimeout(Duration.ofMillis(100), () -> {
+            // Act
+            List<ProductDTO> results = productService.findAll();
+            // Assertions inside the timeout block
+            assertEquals(2, results.size(), "Should return 2 products");
+            assertEquals("Laptop", results.get(0).getName(), "First product should be Laptop");
+            assertEquals("Desktop", results.get(1).getName(), "Second product should be Desktop");
+        });
         verify(productRepository).findAll();
     }
 

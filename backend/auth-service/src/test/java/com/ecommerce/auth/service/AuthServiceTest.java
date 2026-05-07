@@ -5,6 +5,8 @@ import com.ecommerce.auth.dto.LoginRequest;
 import com.ecommerce.auth.dto.RegisterRequest;
 import com.ecommerce.auth.entity.User;
 import com.ecommerce.auth.repository.UserRepository;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -41,10 +43,20 @@ class AuthServiceTest {
 
     private User testUser;
     private RegisterRequest registerRequest;
-    private LoginRequest loginRequest;
+       private LoginRequest loginRequest;
 
-    @BeforeEach
-    void setUp() {
+       @BeforeAll
+       static void beforeAll() {
+           System.out.println("Starting tests for AuthService");
+       }
+
+       @AfterAll
+       static void afterAll() {
+           System.out.println("Finished tests for AuthService");
+       }
+
+       @BeforeEach
+       void setUp() {
         // Initialize AuthService with JWT configuration
         authService = new AuthService(
             userRepository,

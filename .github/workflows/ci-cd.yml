@@ -68,7 +68,7 @@ jobs:
 
   docker-build:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ahaytar'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: [test-backend, test-frontend]
     steps:
       - name: Checkout

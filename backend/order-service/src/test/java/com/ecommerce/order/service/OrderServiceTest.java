@@ -5,6 +5,8 @@ import com.ecommerce.order.dto.OrderDTO;
 import com.ecommerce.order.entity.Order;
 import com.ecommerce.order.entity.OrderItem;
 import com.ecommerce.order.repository.OrderRepository;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -18,11 +20,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+    import java.time.Duration;
+    import java.time.LocalDateTime;
+    import java.util.ArrayList;
+    import java.util.Arrays;
+    import java.util.List;
+    import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,10 +44,20 @@ class OrderServiceTest {
     private OrderService orderService;
 
     private Order order;
-    private CreateOrderDTO createOrderDTO;
+       private CreateOrderDTO createOrderDTO;
 
-    @BeforeEach
-    void setUp() {
+       @BeforeAll
+       static void beforeAll() {
+           System.out.println("Starting tests for OrderService");
+       }
+
+       @AfterAll
+       static void afterAll() {
+           System.out.println("Finished tests for OrderService");
+       }
+
+       @BeforeEach
+       void setUp() {
         order = new Order();
         order.setId(1L);
         order.setUserId(100L);
@@ -175,32 +188,59 @@ class OrderServiceTest {
     @Nested
     @DisplayName("Retrieve Order Tests")
     class RetrieveOrderTests {
-        @Test
-        @DisplayName("get all orders returns list of orders")
-        void getAllOrders_returnsListOfOrders() {
-            // Arrange
-            Order order2 = new Order();
-            order2.setId(2L);
-            order2.setUserId(101L);
-            order2.setStatus("COMPLETED");
-            order2.setOrderNumber("ORD-9876543-XYZ54321");
-            order2.setTotalAmount(200.0);
-            order2.setOrderDate(LocalDateTime.now());
-            order2.setItems(new ArrayList<>());
-            
-            when(orderRepository.findAll()).thenReturn(Arrays.asList(order, order2));
+    @Test
+    @DisplayName("get all orders returns list of orders")
+    void getAllOrders_returnsListOfOrders() {
+        // Arrange
+        Order order2 = new Order();
+        order2.setId(2L);
+        order2.setUserId(101L);
+        order2.setStatus("COMPLETED");
+        order2.setOrderNumber("ORD-9876543-XYZ54321");
+        order2.setTotalAmount(200.0);
+        order2.setOrderDate(LocalDateTime.now());
+        order2.setItems(new ArrayList<>());
+        
+        when(orderRepository.findAll()).thenReturn(Arrays.asList(order, order2));
 
+        // Act
+        List<OrderDTO> results = orderService.getAllOrders();
+
+        // Assert
+        assertAll(
+            () -> assertEquals(2, results.size(), "Should return 2 orders"),
+            () -> assertEquals("PENDING", results.get(0).getStatus(), "First order should be PENDING"),
+            () -> assertEquals("COMPLETED", results.get(1).getStatus(), "Second order should be COMPLETED"),
+            () -> verify(orderRepository).findAll()
+        );
+    }
+
+    @Test
+    @DisplayName("getAllOrders should complete within 100ms")
+    void getAllOrders_completesWithinTimeout() {
+        // Arrange
+        Order order2 = new Order();
+        order2.setId(2L);
+        order2.setUserId(101L);
+        order2.setStatus("COMPLETED");
+        order2.setOrderNumber("ORD-9876543-XYZ54321");
+        order2.setTotalAmount(200.0);
+        order2.setOrderDate(LocalDateTime.now());
+        order2.setItems(new ArrayList<>());
+        
+        when(orderRepository.findAll()).thenReturn(Arrays.asList(order, order2));
+
+        // Assert
+        assertTimeout(Duration.ofMillis(100), () -> {
             // Act
             List<OrderDTO> results = orderService.getAllOrders();
-
-            // Assert
-            assertAll(
-                () -> assertEquals(2, results.size(), "Should return 2 orders"),
-                () -> assertEquals("PENDING", results.get(0).getStatus(), "First order should be PENDING"),
-                () -> assertEquals("COMPLETED", results.get(1).getStatus(), "Second order should be COMPLETED"),
-                () -> verify(orderRepository).findAll()
-            );
-        }
+            // Assertions inside the timeout block
+            assertEquals(2, results.size(), "Should return 2 orders");
+            assertEquals("PENDING", results.get(0).getStatus(), "First order should be PENDING");
+            assertEquals("COMPLETED", results.get(1).getStatus(), "Second order should be COMPLETED");
+        });
+        verify(orderRepository).findAll();
+    }
 
         @Test
         @DisplayName("get orders by valid user ID returns orders")

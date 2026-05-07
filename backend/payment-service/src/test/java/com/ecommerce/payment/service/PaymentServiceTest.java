@@ -11,6 +11,8 @@ import com.ecommerce.payment.pattern.decorator.PaymentProcessor;
 import com.ecommerce.payment.pattern.factory.PaymentStrategyFactory;
 import com.ecommerce.payment.pattern.proxy.PaymentRepositoryProxy;
 import com.ecommerce.payment.repository.PaymentRepository;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -44,9 +46,19 @@ class PaymentServiceTest {
 
     @InjectMocks
     private PaymentService paymentService;
-    
+     
     private Payment payment;
     private PaymentRequest paymentRequest;
+
+    @BeforeAll
+    static void beforeAll() {
+        System.out.println("Starting tests for PaymentService");
+    }
+
+    @AfterAll
+    static void afterAll() {
+        System.out.println("Finished tests for PaymentService");
+    }
 
     @BeforeEach
     void setUp() {
