@@ -10,7 +10,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -34,7 +33,7 @@ class CategoryControllerTest {
     void findAll_Success() throws Exception {
         CategoryDTO category1 = new CategoryDTO(1L, "Electronics");
         CategoryDTO category2 = new CategoryDTO(2L, "Clothing");
-        List<CategoryDTO> categories = Arrays.asList(category1, category2);
+        List<CategoryDTO> categories = List.of(category1, category2);
 
         when(categoryService.findAll()).thenReturn(categories);
 
@@ -60,7 +59,6 @@ class CategoryControllerTest {
 
     @Test
     void save_Success() throws Exception {
-        CategoryDTO newCategory = new CategoryDTO(null, "Books");
         CategoryDTO savedCategory = new CategoryDTO(3L, "Books");
 
         when(categoryService.save(any(CategoryDTO.class))).thenReturn(savedCategory);
@@ -75,7 +73,6 @@ class CategoryControllerTest {
 
     @Test
     void update_Success() throws Exception {
-        CategoryDTO updateCategory = new CategoryDTO(1L, "Updated Electronics");
         CategoryDTO updatedCategory = new CategoryDTO(1L, "Updated Electronics");
 
         when(categoryService.update(eq(1L), any(CategoryDTO.class))).thenReturn(updatedCategory);

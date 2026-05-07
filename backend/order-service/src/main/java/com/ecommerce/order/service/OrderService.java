@@ -1,5 +1,13 @@
 package com.ecommerce.order.service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.ecommerce.order.dto.CreateOrderDTO;
 import com.ecommerce.order.dto.OrderDTO;
 import com.ecommerce.order.dto.OrderItemDTO;
@@ -9,13 +17,6 @@ import com.ecommerce.order.pattern.builder.OrderBuilder;
 import com.ecommerce.order.pattern.factory.OrderStatusFactory;
 import com.ecommerce.order.pattern.singleton.OrderClockSingleton;
 import com.ecommerce.order.repository.OrderRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
@@ -37,7 +38,7 @@ public class OrderService {
                 .build();
 
         // Simple order number for submission and tests.
-        order.setOrderNumber(generateOrderNumber(createOrderDTO.getUserId()));
+        order.setOrderNumber(generateOrderNumber());
 
         Order savedOrder = orderRepository.save(order);
         return convertToDTO(savedOrder);
@@ -58,21 +59,23 @@ public class OrderService {
     public OrderDTO getOrderById(Long id) {
         return orderRepository.findById(id)
                 .map(this::convertToDTO)
-                .orElse(null);
+                .orElseThrow(() -> new RuntimeException("Order not found with id: " + id));
     }
 
     @Transactional
     public OrderDTO updateOrder(Long id, CreateOrderDTO updateDTO) {
-        Optional<Order> existingOptional = orderRepository.findById(id);
-        if (existingOptional.isEmpty()) {
-            return null;
-        }
+        Order existing = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found with id: " + id));
 
-        Order existing = existingOptional.get();
         existing.setUserId(updateDTO.getUserId());
         existing.setStatus(OrderStatusFactory.createUpdatedStatus(existing.getStatus()));
 
-        existing.getItems().clear();
+        if (existing.getItems() != null) {
+            existing.getItems().clear();
+        } else {
+            existing.setItems(new ArrayList<>());
+        }
+
         double totalAmount = 0.0;
         if (updateDTO.getItems() != null) {
             for (CreateOrderDTO.CreateOrderItemDTO itemDTO : updateDTO.getItems()) {
@@ -100,8 +103,10 @@ public class OrderService {
         return true;
     }
 
-    private String generateOrderNumber(Long userId) {
-        return "ORD-" + userId + "-" + System.currentTimeMillis();
+    private String generateOrderNumber() {
+        long timestamp = System.currentTimeMillis() / 1000;
+        String random = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        return "ORD-" + timestamp + "-" + random;
     }
 
     private OrderDTO convertToDTO(Order order) {
