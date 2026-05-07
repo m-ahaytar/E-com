@@ -1,0 +1,16 @@
+server:
+  port: 8084
+
+spring:
+  datasource:
+    url: jdbc:sqlite:${SQLITE_DB_PATH:payment-service.db}
+    driver-class-name: org.sqlite.JDBC
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.community.dialect.SQLiteDialect
+    show-sql: false

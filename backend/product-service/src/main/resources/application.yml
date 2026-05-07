@@ -1,0 +1,25 @@
+server:
+  port: 8082
+
+spring:
+  datasource:
+    url: jdbc:sqlite:${SQLITE_DB_PATH:product-service.db}
+    driver-class-name: org.sqlite.JDBC
+
+  sql:
+    init:
+      mode: always
+      continue-on-error: false
+
+  jpa:
+    open-in-view: false
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.community.dialect.SQLiteDialect
+    show-sql: false
+
+jwt:
+  secret: ${JWT_SECRET}
