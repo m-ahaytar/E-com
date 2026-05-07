@@ -7,8 +7,13 @@ import com.ecommerce.product.entity.Product;
 import com.ecommerce.product.repository.CategoryRepository;
 import com.ecommerce.product.repository.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -23,6 +28,9 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("ProductService Tests")
+@Tag("unit")
+@Tag("fast")
 class ProductServiceTest {
 
     @Mock
@@ -75,13 +83,16 @@ class ProductServiceTest {
         List<ProductDTO> results = productService.findAll();
 
         // Assert
-        assertEquals(2, results.size());
-        assertEquals("Laptop", results.get(0).getName());
-        assertEquals("Desktop", results.get(1).getName());
+        assertAll(
+            () -> assertEquals(2, results.size(), "Should return 2 products"),
+            () -> assertEquals("Laptop", results.get(0).getName(), "First product should be Laptop"),
+            () -> assertEquals("Desktop", results.get(1).getName(), "Second product should be Desktop")
+        );
         verify(productRepository).findAll();
     }
 
     @Test
+    @DisplayName("find by valid ID should return product")
     void findById_validId_returnsProduct() {
         // Arrange
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
@@ -90,13 +101,16 @@ class ProductServiceTest {
         ProductDTO result = productService.findById(1L);
 
         // Assert
-        assertNotNull(result);
-        assertEquals("Laptop", result.getName());
-        assertEquals(999.99, result.getPrice());
+        assertAll(
+            () -> assertNotNull(result, "Product should not be null"),
+            () -> assertEquals("Laptop", result.getName(), "Product name should match"),
+            () -> assertEquals(999.99, result.getPrice(), "Product price should match")
+        );
         verify(productRepository).findById(1L);
     }
 
     @Test
+    @DisplayName("find by invalid ID should throw exception")
     void findById_invalidId_throws() {
         // Arrange
         when(productRepository.findById(999L)).thenReturn(Optional.empty());
@@ -104,131 +118,213 @@ class ProductServiceTest {
         // Act & Assert
         RuntimeException exception = assertThrows(
             RuntimeException.class,
-            () -> productService.findById(999L)
+            () -> productService.findById(999L),
+            "Should throw RuntimeException for invalid product ID"
         );
-        assertTrue(exception.getMessage().contains("Product not found"));
+        assertTrue(exception.getMessage().contains("Product not found"), "Exception message should mention 'Product not found'");
     }
 
-    @Test
-    void save_validDTO_createsProduct() {
-        // Arrange
-        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
-        when(productRepository.save(any(Product.class))).thenReturn(product);
+    @Nested
+    @DisplayName("Create Product Tests")
+    class CreateProductTests {
+        @Test
+        @DisplayName("save with valid DTO creates product successfully")
+        void save_validDTO_createsProduct() {
+            // Arrange
+            when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+            when(productRepository.save(any(Product.class))).thenReturn(product);
 
-        // Act
-        ProductDTO result = productService.save(createDTO);
+            // Act
+            ProductDTO result = productService.save(createDTO);
 
-        // Assert
-        assertNotNull(result);
-        assertEquals("Laptop", result.getName());
-        verify(categoryRepository).findById(1L);
-        verify(productRepository).save(any(Product.class));
+            // Assert
+            assertAll(
+                () -> assertNotNull(result, "Saved product should not be null"),
+                () -> assertEquals("Laptop", result.getName(), "Product name should match"),
+                () -> verify(categoryRepository).findById(1L),
+                () -> verify(productRepository).save(any(Product.class))
+            );
+        }
+
+        @Test
+        @DisplayName("save with non-existent category throws exception")
+        void save_categoryNotFound_throws() {
+            // Arrange
+            when(categoryRepository.findById(1L)).thenReturn(Optional.empty());
+
+            // Act & Assert
+            RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> productService.save(createDTO),
+                "Should throw RuntimeException when category not found"
+            );
+            assertTrue(exception.getMessage().contains("Category not found"), 
+                "Exception message should mention 'Category not found'");
+            verify(productRepository, never()).save(any(Product.class));
+        }
+
+        @ParameterizedTest
+        @ValueSource(longs = { 1L, 2L, 5L })
+        @DisplayName("save product with different category IDs")
+        void save_withVariousCategoryIds(Long categoryId) {
+            // Arrange
+            Category testCategory = new Category();
+            testCategory.setId(categoryId);
+            testCategory.setName("Category " + categoryId);
+            when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(testCategory));
+            Product testProduct = new Product();
+            testProduct.setId(1L);
+            testProduct.setName("Test Product");
+            testProduct.setCategory(testCategory);
+            when(productRepository.save(any(Product.class))).thenReturn(testProduct);
+            createDTO.setCategoryId(categoryId);
+
+            // Act
+            ProductDTO result = productService.save(createDTO);
+
+            // Assert
+            assertNotNull(result, "Product should be created for category " + categoryId);
+            verify(categoryRepository).findById(categoryId);
+        }
     }
 
-    @Test
-    void save_categoryNotFound_throws() {
-        // Arrange
-        when(categoryRepository.findById(1L)).thenReturn(Optional.empty());
+    @Nested
+    @DisplayName("Update Product Tests")
+    class UpdateProductTests {
+        @Test
+        @DisplayName("update with valid DTO updates product successfully")
+        void update_validDTO_updatesProduct() {
+            // Arrange
+            when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+            when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+            when(productRepository.save(any(Product.class))).thenReturn(product);
 
-        // Act & Assert
-        RuntimeException exception = assertThrows(
-            RuntimeException.class,
-            () -> productService.save(createDTO)
-        );
-        assertTrue(exception.getMessage().contains("Category not found"));
-        verify(productRepository, never()).save(any(Product.class));
+            createDTO.setName("Updated Laptop");
+            createDTO.setPrice(1299.99);
+
+            // Act
+            ProductDTO result = productService.update(1L, createDTO);
+
+            // Assert
+            assertAll(
+                () -> assertNotNull(result, "Updated product should not be null"),
+                () -> verify(productRepository).findById(1L),
+                () -> verify(productRepository).save(any(Product.class))
+            );
+        }
     }
 
-    @Test
-    void update_validDTO_updatesProduct() {
-        // Arrange
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
-        when(productRepository.save(any(Product.class))).thenReturn(product);
+    @Nested
+    @DisplayName("Delete Product Tests")
+    class DeleteProductTests {
+        @Test
+        @DisplayName("delete with valid ID deletes product successfully")
+        void deleteById_validId_deletesProduct() {
+            // Arrange
+            when(productRepository.existsById(1L)).thenReturn(true);
 
-        createDTO.setName("Updated Laptop");
-        createDTO.setPrice(1299.99);
+            // Act
+            productService.deleteById(1L);
 
-        // Act
-        ProductDTO result = productService.update(1L, createDTO);
+            // Assert
+            verify(productRepository).deleteById(1L);
+        }
 
-        // Assert
-        assertNotNull(result);
-        verify(productRepository).findById(1L);
-        verify(productRepository).save(any(Product.class));
+        @Test
+        @DisplayName("delete with invalid ID throws exception")
+        void deleteById_invalidId_throws() {
+            // Arrange
+            when(productRepository.existsById(999L)).thenReturn(false);
+
+            // Act & Assert
+            RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> productService.deleteById(999L),
+                "Should throw RuntimeException for non-existent product"
+            );
+            assertTrue(exception.getMessage().contains("Product not found"), 
+                "Exception message should mention 'Product not found'");
+            verify(productRepository, never()).deleteById(anyLong());
+        }
     }
 
-    @Test
-    void deleteById_validId_deletesProduct() {
-        // Arrange
-        when(productRepository.existsById(1L)).thenReturn(true);
+    @Nested
+    @DisplayName("Stock Management Tests")
+    class StockManagementTests {
+        @Test
+        @DisplayName("decrease stock with sufficient inventory succeeds")
+        void decreaseStock_sufficientStock_updatesStock() {
+            // Arrange
+            product.setStock(10);
+            when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+            when(productRepository.save(any(Product.class))).thenReturn(product);
 
-        // Act
-        productService.deleteById(1L);
+            // Act
+            ProductDTO result = productService.decreaseStock(1L, 3);
 
-        // Assert
-        verify(productRepository).deleteById(1L);
-    }
+            // Assert
+            assertAll(
+                () -> assertNotNull(result, "Result should not be null"),
+                () -> verify(productRepository).findById(1L),
+                () -> verify(productRepository).save(any(Product.class))
+            );
+        }
 
-    @Test
-    void deleteById_invalidId_throws() {
-        // Arrange
-        when(productRepository.existsById(999L)).thenReturn(false);
+        @Test
+        @DisplayName("decrease stock with insufficient inventory throws exception")
+        void decreaseStock_insufficientStock_throws() {
+            // Arrange
+            product.setStock(2);
+            when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
-        // Act & Assert
-        RuntimeException exception = assertThrows(
-            RuntimeException.class,
-            () -> productService.deleteById(999L)
-        );
-        assertTrue(exception.getMessage().contains("Product not found"));
-        verify(productRepository, never()).deleteById(anyLong());
-    }
+            // Act & Assert
+            IllegalStateException exception = assertThrows(
+                IllegalStateException.class,
+                () -> productService.decreaseStock(1L, 5),
+                "Should throw IllegalStateException when stock is insufficient"
+            );
+            assertTrue(exception.getMessage().contains("Insufficient stock"), 
+                "Exception message should mention 'Insufficient stock'");
+            verify(productRepository, never()).save(any(Product.class));
+        }
 
-    @Test
-    void decreaseStock_sufficientStock_updatesStock() {
-        // Arrange
-        product.setStock(10);
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-        when(productRepository.save(any(Product.class))).thenReturn(product);
+        @Test
+        @DisplayName("decrease stock with invalid quantity throws exception")
+        void decreaseStock_invalidQuantity_throws() {
+            // Act & Assert - zero quantity
+            IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> productService.decreaseStock(1L, 0),
+                "Should throw IllegalArgumentException for zero quantity"
+            );
+            assertTrue(exception.getMessage().contains("Quantity must be greater than zero"), 
+                "Exception message should mention quantity requirement");
 
-        // Act
-        ProductDTO result = productService.decreaseStock(1L, 3);
+            // Act & Assert - null quantity
+            exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> productService.decreaseStock(1L, null),
+                "Should throw IllegalArgumentException for null quantity"
+            );
+            assertTrue(exception.getMessage().contains("Quantity must be greater than zero"), 
+                "Exception message should mention quantity requirement");
+        }
 
-        // Assert
-        assertNotNull(result);
-        verify(productRepository).findById(1L);
-        verify(productRepository).save(any(Product.class));
-    }
+        @ParameterizedTest
+        @ValueSource(ints = { 1, 2, 5, 10 })
+        @DisplayName("decrease stock with various quantities")
+        void decreaseStock_multipleQuantities(int quantity) {
+            // Arrange
+            product.setStock(20);
+            when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+            when(productRepository.save(any(Product.class))).thenReturn(product);
 
-    @Test
-    void decreaseStock_insufficientStock_throws() {
-        // Arrange
-        product.setStock(2);
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+            // Act
+            ProductDTO result = productService.decreaseStock(1L, quantity);
 
-        // Act & Assert
-        IllegalStateException exception = assertThrows(
-            IllegalStateException.class,
-            () -> productService.decreaseStock(1L, 5)
-        );
-        assertTrue(exception.getMessage().contains("Insufficient stock"));
-        verify(productRepository, never()).save(any(Product.class));
-    }
-
-    @Test
-    void decreaseStock_invalidQuantity_throws() {
-        // Act & Assert - zero quantity
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> productService.decreaseStock(1L, 0)
-        );
-        assertTrue(exception.getMessage().contains("Quantity must be greater than zero"));
-
-        // Act & Assert - null quantity
-        exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> productService.decreaseStock(1L, null)
-        );
-        assertTrue(exception.getMessage().contains("Quantity must be greater than zero"));
+            // Assert
+            assertNotNull(result, "Should successfully decrease stock by " + quantity);
+            verify(productRepository).save(any(Product.class));
+        }
     }
 }
