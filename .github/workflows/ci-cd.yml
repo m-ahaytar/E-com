@@ -2,9 +2,9 @@ name: Ecom CI/CD
 
 on:
   push:
-    branches: [Ahaytar]
+    branches: [main]
   pull_request:
-    branches: [Ahaytar]
+    branches: [main]
 
 jobs:
   test-backend:
