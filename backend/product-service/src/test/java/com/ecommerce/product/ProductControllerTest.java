@@ -44,7 +44,7 @@ class ProductControllerTest {
         ProductDTO product2 = new ProductDTO(2L, "Product 2", "Description 2", 20.99, 50, null, 1L, "Category 1");
         List<ProductDTO> products = List.of(product1, product2);
 
-        when(productService.findAll()).thenReturn(products);
+        when(productService.findAll(null)).thenReturn(products);
 
         mockMvc.perform(get("/products"))
                 .andExpect(status().isOk())
@@ -52,6 +52,17 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$[0].name").value("Product 1"))
                 .andExpect(jsonPath("$[1].id").value(2))
                 .andExpect(jsonPath("$[1].name").value("Product 2"));
+    }
+
+    @Test
+    void findAll_WithCategoryId_Success() throws Exception {
+        ProductDTO product = new ProductDTO(1L, "Product 1", "Description 1", 10.99, 100, null, 2L, "Category 2");
+        when(productService.findAll(2L)).thenReturn(List.of(product));
+
+        mockMvc.perform(get("/products").param("categoryId", "2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].categoryId").value(2));
     }
 
     @Test

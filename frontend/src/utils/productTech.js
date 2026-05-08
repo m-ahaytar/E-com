@@ -8,7 +8,7 @@ export const TECH_CATEGORY_OPTIONS = [
 const normalizeCategoryName = (value) => String(value || '').trim().toLowerCase();
 
 export const getRawCategoryName = (product) => (
-  product?.category?.name || product?.category || 'Gadgets'
+  product?.category?.name || product?.categoryName || product?.category || 'Gadgets'
 );
 
 export const getCategoryIcon = (categoryName) => {

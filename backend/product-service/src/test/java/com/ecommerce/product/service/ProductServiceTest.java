@@ -106,6 +106,20 @@ class ProductServiceTest {
     }
 
     @Test
+    void findAll_withCategoryId_returnsProductsForCategory() {
+        when(productRepository.findByCategory_Id(1L)).thenReturn(List.of(product));
+
+        List<ProductDTO> results = productService.findAll(1L);
+
+        assertAll(
+            () -> assertEquals(1, results.size(), "Should return products for one category"),
+            () -> assertEquals(1L, results.get(0).getCategoryId(), "Category id should match")
+        );
+        verify(productRepository).findByCategory_Id(1L);
+        verify(productRepository, never()).findAll();
+    }
+
+    @Test
     @DisplayName("findAll should complete within 100ms")
     void findAll_completesWithinTimeout() {
         // Arrange

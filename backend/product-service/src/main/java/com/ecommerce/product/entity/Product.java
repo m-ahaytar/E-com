@@ -3,9 +3,9 @@ package com.ecommerce.product.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "PRODUCT", indexes = {
-    @Index(name = "idx_product_category_id", columnList = "category_id"),
-    @Index(name = "idx_product_name", columnList = "name")
+@Table(name = "products", indexes = {
+    @Index(name = "idx_products_category_id", columnList = "category_id"),
+    @Index(name = "idx_products_name", columnList = "name")
 })
 public class Product {
     @Id
