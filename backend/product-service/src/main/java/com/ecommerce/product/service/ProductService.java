@@ -30,6 +30,16 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
+    public List<ProductDTO> findAll(Long categoryId) {
+        if (categoryId == null) {
+            return findAll();
+        }
+        return productRepository.findByCategory_Id(categoryId).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public ProductDTO findById(Long id) {
         return productRepository.findById(id)
                 .map(this::toDTO)

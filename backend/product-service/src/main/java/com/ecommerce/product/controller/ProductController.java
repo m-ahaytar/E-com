@@ -20,8 +20,8 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ProductDTO>> findAll() {
-        return ResponseEntity.ok(productService.findAll());
+    public ResponseEntity<List<ProductDTO>> findAll(@RequestParam(required = false) Long categoryId) {
+        return ResponseEntity.ok(productService.findAll(categoryId));
     }
 
     @GetMapping("/{id}")

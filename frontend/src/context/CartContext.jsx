@@ -102,7 +102,7 @@ export const CartProvider = ({ children }) => {
         const remoteCart = await getCart();
         setItems(mapApiCartToItems(remoteCart));
       } catch (error) {
-        console.error('Failed to sync cart from cart API.', error);
+        console.warn('Failed to sync cart from cart API, using local cart state.', error);
       }
     };
 
