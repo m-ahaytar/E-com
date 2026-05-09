@@ -58,7 +58,7 @@ const PaymentPage = () => {
       const realOrderId = createdOrder.id;
       const orderNumber = createdOrder.orderNumber;
 
-      const paymentResult = await processPayment({
+      await processPayment({
         orderId: realOrderId,
         method: paymentMethod,
         amount: total,
