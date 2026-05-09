@@ -19,7 +19,7 @@ public class RegisterRequest {
     private String password;
     
     @NotBlank(message = "Role is required")
-    @Pattern(regexp = "CUSTOMER|ADMIN", message = "Role must be either CUSTOMER or ADMIN")
+    @Pattern(regexp = "CUSTOMER|SELLER|ADMIN", message = "Role must be either CUSTOMER, SELLER, or ADMIN")
     private String role;
 
     @Size(max = 50, message = "First name must be 50 characters or less")

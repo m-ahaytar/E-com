@@ -68,7 +68,7 @@ const LandingPage = () => {
           </p>
           <div className="wm-hero__actions">
             <Button icon="bi-bag" to="/catalogue" variant="primary">Shop Now</Button>
-            <Button icon="bi-lightning-charge" to="/catalogue?category=Gadgets" variant="outline">
+            <Button icon="bi-lightning-charge" to="/deals" variant="outline">
               View Deals
             </Button>
           </div>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { processPayment } from '../services/paymentService';
+import { createOrder } from '../services/orderService';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import Badge from '../components/Badge';
@@ -12,7 +13,7 @@ const PaymentPage = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState('CARD');
+  const [paymentMethod, setPaymentMethod] = useState('CREDIT_CARD');
   const [formData, setFormData] = useState({
     fullName: `${user?.firstName || ''} ${user?.lastName || ''}`.trim(),
     address: '',
@@ -39,20 +40,33 @@ const PaymentPage = () => {
       return;
     }
 
-    const orderId = Date.now();
-
     try {
       setLoading(true);
       setError(null);
-      const paymentResult = await processPayment({
-        orderId,
+
+      const orderPayload = {
+        userId: user?.id,
+        items: items.map(item => ({
+          productId: item.productId,
+          productName: item.name,
+          quantity: item.quantity,
+          price: item.price,
+        })),
+      };
+
+      const createdOrder = await createOrder(orderPayload);
+      const realOrderId = createdOrder.id;
+      const orderNumber = createdOrder.orderNumber;
+
+      await processPayment({
+        orderId: realOrderId,
         method: paymentMethod,
         amount: total,
       });
 
       await clearCart();
       navigate('/thank-you', {
-        state: { orderNumber: paymentResult?.orderId ?? paymentResult?.id ?? orderId },
+        state: { orderNumber: orderNumber ?? realOrderId },
       });
     } catch (err) {
       setError(err.message || 'Payment failed');
@@ -123,10 +137,10 @@ const PaymentPage = () => {
                 name="paymentMethod"
                 onChange={(event) => setPaymentMethod(event.target.value)}
                 type="radio"
-                value="CARD"
+                value="CREDIT_CARD"
               />
               <i className="bi bi-credit-card" aria-hidden="true"></i>
-              Card
+              Credit Card
             </label>
             <label className={`wm-payment-option${paymentMethod === 'CASH' ? ' active' : ''}`}>
               <input

@@ -21,7 +21,7 @@ const AdminDashboard = () => {
         const [productsData, categoriesData, ordersData, dealsData] = await Promise.all([
           productService.getProducts(),
           productService.getCategories(),
-          orderService.getUserOrders(user?.id),
+          orderService.getAllOrders(),
           productService.getAllDeals(),
         ]);
         

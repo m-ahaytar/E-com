@@ -8,6 +8,10 @@ export const getUserOrders = async (userId) => {
   return get(`/orders/user/${userId}`);
 };
 
+export const getAllOrders = async () => {
+  return get('/orders');
+};
+
 export const getOrder = async (id) => {
   return get(`/orders/${id}`);
 };

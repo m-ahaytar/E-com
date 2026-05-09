@@ -13,8 +13,8 @@ public class PaymentRequest {
     private Long orderId;
     
     @NotBlank(message = "Payment method is required")
-    @Pattern(regexp = "CREDIT_CARD|DEBIT_CARD|UPI|WALLET", 
-             message = "Payment method must be one of: CREDIT_CARD, DEBIT_CARD, UPI, WALLET")
+    @Pattern(regexp = "CREDIT_CARD|DEBIT_CARD|UPI|WALLET|CASH", 
+             message = "Payment method must be one of: CREDIT_CARD, DEBIT_CARD, UPI, WALLET, CASH")
     private String method;
     
     @NotNull(message = "Amount is required")

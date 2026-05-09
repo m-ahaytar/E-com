@@ -34,24 +34,24 @@ class PaymentControllerTest {
 
     @Test
     void processPayment_Success() throws Exception {
-        PaymentDTO paymentDTO = new PaymentDTO(1L, 1L, "CARD", "COMPLETED", 100.00, LocalDateTime.now());
+        PaymentDTO paymentDTO = new PaymentDTO(1L, 1L, "CREDIT_CARD", "COMPLETED", 100.00, LocalDateTime.now());
 
         when(paymentService.processPayment(any(PaymentRequest.class))).thenReturn(paymentDTO);
 
         mockMvc.perform(post("/payments/process")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"orderId\":1,\"method\":\"CARD\",\"amount\":100.00}"))
+                .content("{\"orderId\":1,\"method\":\"CREDIT_CARD\",\"amount\":100.00}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.orderId").value(1))
-                .andExpect(jsonPath("$.method").value("CARD"))
+                .andExpect(jsonPath("$.method").value("CREDIT_CARD"))
                 .andExpect(jsonPath("$.status").value("COMPLETED"))
                 .andExpect(jsonPath("$.amount").value(100.00));
     }
 
     @Test
     void getPaymentByOrderId_Success() throws Exception {
-        PaymentDTO paymentDTO = new PaymentDTO(1L, 1L, "CARD", "COMPLETED", 100.00, LocalDateTime.now());
+        PaymentDTO paymentDTO = new PaymentDTO(1L, 1L, "CREDIT_CARD", "COMPLETED", 100.00, LocalDateTime.now());
 
         when(paymentService.getPaymentByOrderId(1L)).thenReturn(Optional.of(paymentDTO));
 
@@ -86,7 +86,7 @@ class PaymentControllerTest {
 
     @Test
     void getAllPayments_Success() throws Exception {
-        PaymentDTO p1 = new PaymentDTO(1L, 1L, "CARD", "COMPLETED", 100.00, LocalDateTime.now());
+        PaymentDTO p1 = new PaymentDTO(1L, 1L, "CREDIT_CARD", "COMPLETED", 100.00, LocalDateTime.now());
         PaymentDTO p2 = new PaymentDTO(2L, 2L, "CASH", "PENDING", 55.00, LocalDateTime.now());
         List<PaymentDTO> payments = List.of(p1, p2);
 
@@ -100,7 +100,7 @@ class PaymentControllerTest {
 
     @Test
     void getPaymentById_Success() throws Exception {
-        PaymentDTO paymentDTO = new PaymentDTO(10L, 4L, "CARD", "COMPLETED", 80.00, LocalDateTime.now());
+        PaymentDTO paymentDTO = new PaymentDTO(10L, 4L, "CREDIT_CARD", "COMPLETED", 80.00, LocalDateTime.now());
         when(paymentService.getPaymentById(10L)).thenReturn(Optional.of(paymentDTO));
 
         mockMvc.perform(get("/payments/10"))
@@ -111,12 +111,12 @@ class PaymentControllerTest {
 
     @Test
     void updatePayment_Success() throws Exception {
-        PaymentDTO updated = new PaymentDTO(3L, 1L, "CARD", "COMPLETED", 120.00, LocalDateTime.now());
+        PaymentDTO updated = new PaymentDTO(3L, 1L, "CREDIT_CARD", "COMPLETED", 120.00, LocalDateTime.now());
         when(paymentService.updatePayment(eq(3L), any(PaymentUpdateRequest.class))).thenReturn(Optional.of(updated));
 
         mockMvc.perform(put("/payments/3")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"method\":\"CARD\",\"status\":\"COMPLETED\",\"amount\":120.0}"))
+                .content("{\"method\":\"CREDIT_CARD\",\"status\":\"COMPLETED\",\"amount\":120.0}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(3))
                 .andExpect(jsonPath("$.amount").value(120.0));
