@@ -30,6 +30,8 @@ jobs:
           cache: maven
 
       - name: Run unit tests (${{ matrix.service }})
+        env:
+          JWT_SECRET: "test-secret-key-for-testing-purposes-only-32chars"
         working-directory: backend/${{ matrix.service }}
         run: mvn clean test
 
