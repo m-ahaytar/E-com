@@ -79,7 +79,7 @@ const RegisterPage = () => {
       }
       navigate('/login');
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      setError(err.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { get } from '../services/api';
+import * as authService from '../services/authService';
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
@@ -12,7 +12,7 @@ const AdminUsers = () => {
 
   const fetchUsers = async () => {
     try {
-      const data = await get('/users');
+      const data = await authService.getUsers();
       setUsers(data);
     } catch {
       setError('Failed to load users');

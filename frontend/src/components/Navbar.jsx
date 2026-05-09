@@ -3,6 +3,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import Button from './Button';
+import SearchBar from './SearchBar';
 import wmLogo from '../assets/wm-logo.png';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
@@ -55,14 +56,9 @@ const Navbar = () => {
           Deals
         </NavLink>
         {canShop && (
-          <>
-            <NavLink className={navLinkClass} onClick={() => setMenuOpen(false)} to="/catalogue">
-              Products
-            </NavLink>
-            <NavLink className={navLinkClass} onClick={() => setMenuOpen(false)} to="/catalogue?category=Gadgets">
-              Gadgets
-            </NavLink>
-          </>
+          <NavLink className={navLinkClass} onClick={() => setMenuOpen(false)} to="/catalogue">
+            Products
+          </NavLink>
         )}
         {userRole === 'SELLER' && (
           <NavLink className={navLinkClass} onClick={() => setMenuOpen(false)} to="/seller">
@@ -80,6 +76,8 @@ const Navbar = () => {
           </>
         )}
       </nav>
+
+      <SearchBar />
 
       <div className="wm-nav__actions">
         {canShop && (

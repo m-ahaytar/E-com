@@ -1,4 +1,4 @@
-import { post } from "./api";
+import { get, post } from "./api";
 
 export const login = async (email, password) => {
   // Appel simple de l'API d'authentification via fetch.
@@ -45,4 +45,8 @@ export const register = async (userData) => {
       lastName: data.lastName,
     },
   };
+};
+
+export const getUsers = async () => {
+  return get("/users");
 };

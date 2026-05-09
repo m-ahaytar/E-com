@@ -27,6 +27,10 @@ const CataloguePage = () => {
     if (categoryFromUrl) {
       setSelectedCategory(categoryFromUrl);
     }
+    const searchFromUrl = params.get('search');
+    if (searchFromUrl) {
+      setSearch(searchFromUrl);
+    }
   }, [location.search]);
 
   useEffect(() => {

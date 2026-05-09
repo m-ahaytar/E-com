@@ -4,6 +4,7 @@ import com.ecommerce.payment.dto.PaymentDTO;
 import com.ecommerce.payment.dto.PaymentRequest;
 import com.ecommerce.payment.dto.PaymentUpdateRequest;
 import com.ecommerce.payment.service.PaymentService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +21,7 @@ public class PaymentController {
     }
 
     @PostMapping("/process")
-    public ResponseEntity<PaymentDTO> processPayment(@RequestBody PaymentRequest request) {
+    public ResponseEntity<PaymentDTO> processPayment(@Valid @RequestBody PaymentRequest request) {
         PaymentDTO result = paymentService.processPayment(request);
         return ResponseEntity.ok(result);
     }
