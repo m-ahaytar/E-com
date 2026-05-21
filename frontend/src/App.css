@@ -82,8 +82,9 @@ p {
 .seller-dashboard {
   margin: 0 auto;
   max-width: 1220px;
-  padding: 42px 24px 64px;
+  padding: 28px 20px 48px;
   width: 100%;
+  animation: wm-fade-in 500ms ease both;
 }
 
 .wm-page.wm-catalogue,
@@ -112,8 +113,8 @@ p {
 .wm-page-heading h1,
 .wm-section__header h2,
 .wm-cta-band h2 {
-  font-size: clamp(2rem, 4vw, 4rem);
-  margin: 12px 0 10px;
+  font-size: clamp(1.25rem, 3vw, 2.5rem);
+  margin: 8px 0 6px;
   text-transform: uppercase;
 }
 
@@ -155,13 +156,14 @@ p {
   box-shadow: 0 8px 34px rgba(0, 0, 0, 0.32);
   backdrop-filter: blur(16px) saturate(180%);
   display: grid;
-  gap: 24px;
+  gap: 20px;
   grid-template-columns: auto auto 1fr auto;
-  min-height: 88px;
-  padding: 14px 34px;
+  min-height: 72px;
+  padding: 10px 24px;
   position: sticky;
   top: 0;
   z-index: 1000;
+  transition: min-height 220ms ease, padding 220ms ease;
 }
 
 .wm-search-bar {
@@ -226,10 +228,11 @@ p {
   box-shadow: var(--space-glow-cyan);
   display: block;
   flex: 0 0 auto;
-  height: 54px;
+  height: 44px;
   object-fit: contain;
   padding: 4px;
-  width: 84px;
+  transition: height 220ms ease, width 220ms ease;
+  width: 68px;
 }
 
 .wm-nav__brand-copy {
@@ -240,8 +243,8 @@ p {
 .wm-nav__brand-copy strong {
   color: var(--space-cyan);
   font-family: var(--font-display);
-  font-size: 1.1rem;
-  letter-spacing: 0.22em;
+  font-size: 0.85rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   white-space: nowrap;
   text-shadow: var(--space-glow-cyan);
@@ -267,10 +270,10 @@ p {
 .wm-nav__link {
   color: var(--space-muted);
   font-family: var(--font-display);
-  font-size: 0.78rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.18em;
-  padding: 12px 0;
+  letter-spacing: 0.12em;
+  padding: 8px 0;
   position: relative;
   text-transform: uppercase;
   transition: color var(--wm-speed);
@@ -321,6 +324,31 @@ p {
   min-width: 48px;
   position: relative;
   transition: border-color var(--wm-speed), box-shadow var(--wm-speed), transform var(--wm-speed);
+}
+
+.wm-icon-button:focus-visible,
+.wm-nav__toggle:focus-visible {
+  outline: 2px solid var(--space-cyan);
+  outline-offset: 3px;
+}
+
+.wm-nav--condensed {
+  min-height: 60px;
+  padding: 6px 24px;
+}
+
+.wm-nav--condensed .wm-nav__logo {
+  height: 36px;
+  width: 56px;
+}
+
+.wm-nav--condensed .wm-nav__brand-copy strong {
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+}
+
+.wm-nav--condensed .wm-nav__brand-copy small {
+  font-size: 0.55rem;
 }
 
 .wm-nav__toggle {
@@ -416,15 +444,20 @@ p {
   border-radius: var(--wm-radius-sm);
   display: inline-flex;
   font-family: var(--font-display);
-  font-size: 0.82rem;
-  font-weight: 800;
-  gap: 9px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  gap: 8px;
   justify-content: center;
-  letter-spacing: 0.08em;
-  min-height: 42px;
-  padding: 0.72rem 1.1rem;
+  letter-spacing: 0.04em;
+  min-height: 36px;
+  padding: 0.5rem 1.1rem;
   text-transform: uppercase;
   transition: background var(--wm-speed), border-color var(--wm-speed), box-shadow var(--wm-speed), color var(--wm-speed), transform var(--wm-speed);
+}
+
+.wm-button:active,
+.btn:active {
+  transform: scale(0.98);
 }
 
 .wm-button:hover,
@@ -437,7 +470,12 @@ p {
 .btn-delete:hover,
 .btn-back:hover,
 .admin-page .btn-primary:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1.5px);
+}
+
+.wm-button:focus-visible {
+  outline: 2px solid var(--space-cyan);
+  outline-offset: 3px;
 }
 
 .wm-button--primary,
@@ -446,7 +484,7 @@ p {
 .btn-edit {
   background: linear-gradient(135deg, var(--space-purple), var(--space-cyan));
   border: none;
-  box-shadow: var(--space-glow-cyan);
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.25);
   color: #ffffff;
 }
 
@@ -456,7 +494,7 @@ p {
 .btn-edit:hover {
   background: linear-gradient(135deg, rgba(108, 39, 192, 0.92), rgba(0, 212, 255, 0.92));
   color: #ffffff;
-  box-shadow: var(--space-glow-cyan);
+  box-shadow: 0 0 16px rgba(0, 212, 255, 0.3);
 }
 
 .wm-button--outline,
@@ -493,14 +531,14 @@ p {
 }
 
 .wm-button--sm {
-  font-size: 0.7rem;
-  min-height: 36px;
-  padding: 0.55rem 0.82rem;
+  font-size: 0.65rem;
+  min-height: 32px;
+  padding: 0.4rem 0.75rem;
 }
 
 .wm-button--lg {
-  min-height: 52px;
-  padding: 0.92rem 1.3rem;
+  min-height: 44px;
+  padding: 0.65rem 1.2rem;
 }
 
 .wm-button:disabled,
@@ -508,7 +546,7 @@ p {
 button:disabled {
   cursor: not-allowed;
   opacity: 0.48;
-  transform: none;
+  transform: none !important;
 }
 
 .wm-badge,
@@ -738,6 +776,60 @@ textarea.form-control,
   min-height: 220px;
 }
 
+.wm-loading--skeleton {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  min-height: auto;
+}
+
+.wm-skeleton {
+  background: var(--space-glass);
+  border: 1px solid var(--space-border);
+  border-radius: var(--wm-radius);
+  overflow: hidden;
+  min-height: 360px;
+}
+
+.wm-skeleton__img {
+  height: 210px;
+  background: linear-gradient(90deg, rgba(0,212,255,0.04) 25%, rgba(0,212,255,0.12) 50%, rgba(0,212,255,0.04) 75%);
+  background-size: 200% 100%;
+  animation: wm-shimmer 1.5s ease-in-out infinite;
+}
+
+.wm-skeleton__body {
+  padding: 20px;
+  display: grid;
+  gap: 12px;
+}
+
+.wm-skeleton__line {
+  height: 14px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, rgba(0,212,255,0.04) 25%, rgba(0,212,255,0.12) 50%, rgba(0,212,255,0.04) 75%);
+  background-size: 200% 100%;
+  animation: wm-shimmer 1.5s ease-in-out infinite;
+}
+
+.wm-skeleton__line--short {
+  width: 60%;
+}
+
+.wm-skeleton__line--long {
+  width: 85%;
+}
+
+.wm-skeleton__action {
+  height: 36px;
+  width: 100%;
+  border-radius: var(--wm-radius-sm);
+  margin-top: 4px;
+  background: linear-gradient(90deg, rgba(0,212,255,0.06) 25%, rgba(0,212,255,0.14) 50%, rgba(0,212,255,0.06) 75%);
+  background-size: 200% 100%;
+  animation: wm-shimmer 1.5s ease-in-out infinite;
+}
+
 .spinner-border {
   color: var(--space-cyan) !important;
 }
@@ -753,14 +845,33 @@ textarea.form-control,
   border: 1px solid var(--space-border);
   border-radius: var(--wm-radius);
   box-shadow: var(--wm-shadow);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px);
   display: grid;
-  gap: 38px;
+  gap: 24px;
   grid-template-columns: minmax(0, 1.05fr) minmax(340px, 0.95fr);
-  min-height: 560px;
+  min-height: 440px;
   overflow: hidden;
-  padding: 64px;
+  padding: 40px;
   position: relative;
+}
+
+.wm-parallax {
+  will-change: transform;
+}
+
+.wm-reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 600ms ease, transform 600ms ease;
+}
+
+.wm-reveal-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.wm-hero {
+  perspective: 1px;
 }
 
 .wm-hero::before {
@@ -783,9 +894,9 @@ textarea.form-control,
 
 .wm-hero h1 {
   font-family: var(--font-display);
-  font-size: clamp(2.5rem, 6vw, 5rem);
-  margin: 20px 0 12px;
-  max-width: 800px;
+  font-size: clamp(1.75rem, 4.5vw, 3.5rem);
+  margin: 12px 0 8px;
+  max-width: 700px;
   text-transform: uppercase;
   background: linear-gradient(135deg, #ffffff 0%, var(--space-cyan) 50%, var(--space-purple) 100%);
   -webkit-background-clip: text;
@@ -800,16 +911,16 @@ textarea.form-control,
 .wm-hero__tagline {
   color: var(--space-violet);
   font-family: var(--font-display);
-  font-size: 0.95rem;
+  font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.26em;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   text-transform: uppercase;
 }
 
 .wm-hero__text {
-  font-size: 1.04rem;
-  max-width: 620px;
+  font-size: 0.88rem;
+  max-width: 540px;
 }
 
 .wm-hero__actions,
@@ -825,30 +936,31 @@ textarea.form-control,
   align-items: center;
   display: grid;
   justify-items: center;
-  min-height: 440px;
+  min-height: 360px;
   position: relative;
 }
 
 .wm-hero__scroll i {
   text-shadow: var(--space-glow-cyan);
+  will-change: transform;
 }
 
 .wm-hero__orbit {
   border: 1px solid rgba(0, 212, 255, 0.34);
   border-radius: 50%;
-  height: 330px;
+  height: 260px;
   position: absolute;
   transform: rotate(-18deg) scaleX(1.28);
-  width: 330px;
+  width: 260px;
 }
 
 .wm-hero__abstract {
   align-items: center;
   display: flex;
-  height: 360px;
+  height: 280px;
   justify-content: center;
   position: relative;
-  width: 360px;
+  width: 280px;
 }
 
 .wm-hero__abstract-ring {
@@ -858,54 +970,64 @@ textarea.form-control,
 
 .wm-hero__abstract-ring--1 {
   border: 2px solid rgba(0, 212, 255, 0.28);
-  height: 300px;
-  width: 300px;
+  height: 240px;
+  width: 240px;
   animation: wm-pulse 3s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 
 .wm-hero__abstract-ring--2 {
   border: 1px solid rgba(0, 255, 157, 0.18);
-  height: 220px;
-  width: 220px;
+  height: 175px;
+  width: 175px;
   animation: wm-pulse 3s ease-in-out 0.5s infinite;
+  will-change: transform, opacity;
 }
 
 .wm-hero__abstract-ring--3 {
   border: 1px solid rgba(157, 124, 255, 0.22);
-  height: 140px;
-  width: 140px;
+  height: 110px;
+  width: 110px;
   animation: wm-pulse 3s ease-in-out 1s infinite;
+  will-change: transform, opacity;
 }
 
 .wm-hero__abstract-core {
   background: radial-gradient(circle, rgba(0, 212, 255, 0.35), rgba(0, 255, 157, 0.12) 60%, transparent 80%);
   border-radius: 50%;
   box-shadow: 0 0 40px rgba(0, 212, 255, 0.28), inset 0 0 24px rgba(0, 212, 255, 0.12);
-  height: 72px;
-  width: 72px;
+  height: 56px;
+  width: 56px;
   animation: wm-glow-pulse 2.4s ease-in-out infinite;
+  will-change: box-shadow;
 }
 
 .wm-hero__orb {
   position: absolute;
-  width: 160px;
-  height: 160px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   right: 10%;
   top: 12%;
   background: radial-gradient(circle, rgba(0, 212, 255, 0.5), rgba(108, 39, 192, 0.2) 60%, transparent 70%);
   box-shadow: 0 0 60px rgba(0, 212, 255, 0.45);
   animation: wm-orb-pulse 4s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 
 .wm-hero__scroll {
   position: absolute;
   left: 50%;
   bottom: 24px;
-  transform: translateX(-50%);
   color: var(--space-cyan);
   font-size: 1.4rem;
   animation: wm-bounce 2s ease-in-out infinite;
+  transition: opacity 300ms ease;
+}
+
+.wm-hero__scroll--hidden {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .wm-hero__product {
@@ -939,7 +1061,7 @@ textarea.form-control,
   border-radius: var(--wm-radius);
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  margin: 24px 0 44px;
+  margin: 20px 0 28px;
   overflow: hidden;
 }
 
@@ -948,7 +1070,7 @@ textarea.form-control,
   display: grid;
   gap: 4px;
   justify-items: center;
-  padding: 24px;
+  padding: 18px;
 }
 
 .wm-metrics div + div {
@@ -958,7 +1080,7 @@ textarea.form-control,
 .wm-metrics strong {
   color: var(--space-cyan);
   font-family: var(--font-display);
-  font-size: 1.7rem;
+  font-size: 1.3rem;
 }
 
 .wm-metrics span {
@@ -969,7 +1091,7 @@ textarea.form-control,
 }
 
 .wm-section {
-  margin: 44px 0;
+  margin: 28px 0;
 }
 
 .wm-section__header {
@@ -992,9 +1114,9 @@ textarea.form-control,
   border-radius: var(--wm-radius);
   color: var(--space-star);
   display: grid;
-  gap: 10px;
-  min-height: 158px;
-  padding: 24px;
+  gap: 8px;
+  min-height: 120px;
+  padding: 18px;
   text-align: left;
   transition: border-color var(--wm-speed), box-shadow var(--wm-speed), transform var(--wm-speed);
 }
@@ -1002,6 +1124,15 @@ textarea.form-control,
 .wm-category-tile i {
   color: var(--space-cyan);
   font-size: 2rem;
+  animation: wm-float 3s ease-in-out infinite;
+}
+
+.wm-category-tile:nth-child(2n) i {
+  animation-delay: 0.5s;
+}
+
+.wm-category-tile:nth-child(3n) i {
+  animation-delay: 1s;
 }
 
 .wm-category-tile strong {
@@ -1066,7 +1197,7 @@ textarea.form-control,
   display: flex;
   gap: 24px;
   justify-content: space-between;
-  padding: 30px;
+  padding: 24px;
 }
 
 .wm-cta-band h2 {
@@ -1101,6 +1232,12 @@ textarea.form-control,
   position: relative;
   z-index: 1;
   filter: saturate(0.86) contrast(1.06) drop-shadow(0 20px 36px rgba(0, 0, 0, 0.55));
+  transition: transform 400ms ease, filter 400ms ease;
+}
+
+.wm-product-card:hover .wm-product-visual img {
+  transform: scale(1.06);
+  filter: saturate(1) contrast(1.12) drop-shadow(0 20px 36px rgba(0, 0, 0, 0.55));
 }
 
 .wm-product-visual__fallback {
@@ -1180,7 +1317,7 @@ textarea.form-control,
   border-radius: var(--wm-radius);
   display: flex;
   flex-direction: column;
-  min-height: 450px;
+  min-height: 360px;
   overflow: hidden;
   position: relative;
   transition: border-color var(--wm-speed), box-shadow var(--wm-speed), transform var(--wm-speed);
@@ -1663,7 +1800,7 @@ textarea.form-control,
   max-width: 520px;
   padding: 34px;
   width: 100%;
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(10px);
 }
 
 .wm-cart__layout,
@@ -1676,7 +1813,7 @@ textarea.form-control,
 .wm-checkout-form {
   background: var(--space-glass);
   border: 1px solid var(--space-border);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(10px);
 }
 
 .wm-auth-card--wide {
@@ -1725,15 +1862,6 @@ textarea.form-control,
 
 .wm-auth-card__footer span {
   color: var(--wm-muted);
-}
-
-@media (max-width: 768px) {
-  .wm-hero__orb {
-    width: 110px;
-    height: 110px;
-    right: 6%;
-    top: 18%;
-  }
 }
 
 .wm-success-panel {
@@ -2187,7 +2315,7 @@ textarea.form-control,
 }
 
 .wm-featured-deals {
-  margin: 44px 0;
+  margin: 28px 0;
 }
 
 .wm-cart-item__price-row {
@@ -2216,11 +2344,11 @@ textarea.form-control,
 @keyframes wm-pulse {
   0%, 100% {
     opacity: 0.5;
-    transform: scale(1);
+    transform: scale(1) rotate(0deg);
   }
   50% {
     opacity: 1;
-    transform: scale(1.06);
+    transform: scale(1.06) rotate(8deg);
   }
 }
 
@@ -2246,10 +2374,57 @@ textarea.form-control,
 
 @keyframes wm-bounce {
   0%, 100% {
-    transform: translate(-50%, 0);
+    transform: translateX(-50%) translateY(0);
   }
   50% {
-    transform: translate(-50%, -10px);
+    transform: translateX(-50%) translateY(-10px);
+  }
+}
+
+@keyframes wm-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes wm-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes wm-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@media (min-width: 1440px) {
+  .wm-home {
+    max-width: 1400px;
+  }
+
+  .wm-hero h1 {
+    font-size: clamp(2rem, 4vw, 4rem);
+  }
+
+  .wm-hero__copy {
+    max-width: 600px;
+  }
+
+  .wm-hero__text {
+    max-width: 540px;
   }
 }
 
@@ -2308,7 +2483,7 @@ textarea.form-control,
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 768px) {
   .wm-page,
   .admin-dashboard,
   .customer-dashboard,
@@ -2318,19 +2493,19 @@ textarea.form-control,
   }
 
   .wm-nav {
-    gap: 14px;
-    min-height: 78px;
-    padding: 12px 16px;
+    gap: 12px;
+    min-height: 64px;
+    padding: 8px 16px;
   }
 
   .wm-nav__logo {
-    height: 48px;
-    width: 72px;
+    height: 38px;
+    width: 58px;
   }
 
   .wm-nav__brand-copy strong {
-    font-size: 0.88rem;
-    letter-spacing: 0.14em;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
   }
 
   .wm-nav__brand-copy small {
@@ -2352,6 +2527,13 @@ textarea.form-control,
   .wm-hero {
     min-height: 0;
     padding: 32px 20px;
+  }
+
+  .wm-hero__orb {
+    width: 110px;
+    height: 110px;
+    right: 6%;
+    top: 18%;
   }
 
   .wm-hero__showcase {
@@ -2421,5 +2603,78 @@ textarea.form-control,
 
   .wm-footer__bottom {
     flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .wm-product-grid,
+  .wm-category-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .wm-hero h1 {
+    font-size: clamp(1.8rem, 10vw, 2.5rem);
+  }
+
+  .wm-hero__showcase {
+    min-height: 260px;
+  }
+
+  .wm-hero__abstract {
+    height: 240px;
+    width: 240px;
+  }
+
+  .wm-hero__abstract-ring--1 {
+    height: 160px;
+    width: 160px;
+  }
+
+  .wm-hero__abstract-ring--2 {
+    height: 120px;
+    width: 120px;
+  }
+
+  .wm-hero__abstract-ring--3 {
+    height: 80px;
+    width: 80px;
+  }
+
+  .wm-hero__abstract-core {
+    height: 40px;
+    width: 40px;
+  }
+
+  .wm-hero__orbit {
+    height: 160px;
+    width: 160px;
+  }
+
+  .wm-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .wm-button--lg {
+    min-height: 40px;
+    padding: 0.55rem 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wm-parallax {
+    transform: none !important;
+  }
+
+  .wm-hero__abstract-ring,
+  .wm-hero__abstract-core,
+  .wm-hero__orb,
+  .wm-hero__scroll i {
+    animation: none !important;
+  }
+
+  .wm-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }

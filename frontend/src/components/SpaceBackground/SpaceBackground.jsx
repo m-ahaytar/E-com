@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
+import useScrollProgress from '../../hooks/useScrollProgress';
 import './SpaceBackground.css';
 
 const IMMERSIVE_PATHS = ['/'];
@@ -11,14 +12,18 @@ const resolveGroup = (pathname) => {
   return 'utility';
 };
 
+const MAX_VIDEO_RETRIES = 2;
+
 const SpaceBackground = () => {
   const { pathname } = useLocation();
-  const [videoFailed, setVideoFailed] = useState(false);
+  const [videoRetries, setVideoRetries] = useState(0);
   const group = resolveGroup(pathname);
 
-  useEffect(() => {
-    setVideoFailed(false);
-  }, [group]);
+  const handleVideoError = useCallback(() => {
+    setVideoRetries((prev) => Math.min(prev + 1, MAX_VIDEO_RETRIES));
+  }, []);
+
+  const { scrollY } = useScrollProgress();
 
   const videoSrc = useMemo(() => (
     group === 'immersive'
@@ -28,15 +33,20 @@ const SpaceBackground = () => {
 
   const fallbackSrc = 'https://videos.pexels.com/video-files/856309/856309-hd_1920_1080_25fps.mp4';
 
+  const starStyleSm = { transform: `translateY(${scrollY * 0.02}px)` };
+  const starStyleMd = { transform: `translateY(${scrollY * 0.05}px)` };
+  const starStyleLg = { transform: `translateY(${scrollY * 0.08}px)` };
+
   return (
     <div className={`space-background space-background--${group}`} aria-hidden="true">
-      {group === 'immersive' && !videoFailed && (
+      {group === 'immersive' && videoRetries < MAX_VIDEO_RETRIES && (
         <video
           autoPlay
           className="space-background__video"
+          key={`${group}-${videoRetries}`}
           loop
           muted
-          onError={() => setVideoFailed(true)}
+          onError={handleVideoError}
           playsInline
           preload="auto"
         >
@@ -45,10 +55,11 @@ const SpaceBackground = () => {
         </video>
       )}
       <div className="space-background__gradient"></div>
+      <div className="space-background__evolution" style={{ opacity: Math.min(scrollY / 1200, 0.6) }}></div>
       <div className="space-background__stars">
-        <div className="stars-sm"></div>
-        <div className="stars-md"></div>
-        <div className="stars-lg"></div>
+        <div className="stars-sm" style={starStyleSm}></div>
+        <div className="stars-md" style={starStyleMd}></div>
+        <div className="stars-lg" style={starStyleLg}></div>
       </div>
     </div>
   );

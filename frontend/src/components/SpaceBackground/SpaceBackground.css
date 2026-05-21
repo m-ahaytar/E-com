@@ -38,6 +38,17 @@
   background: var(--space-deep);
 }
 
+.space-background__evolution {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 60% 80%, rgba(0, 212, 255, 0.25) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(157, 124, 255, 0.15) 0%, transparent 40%);
+  transition: opacity 0.15s ease;
+}
+
 .space-background__stars {
   position: fixed;
   inset: 0;
