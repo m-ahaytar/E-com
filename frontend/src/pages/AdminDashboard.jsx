@@ -121,7 +121,7 @@ const AdminDashboard = () => {
         <div className="col-md-6 col-lg-3">
           <Link to="/admin/products" className="card border-0 shadow-sm text-decoration-none text-dark h-100" style={{ transition: 'transform 0.3s' }}>
             <div className="card-body text-center py-4">
-              <div className="mb-3" style={{ fontSize: '2.5rem', color: 'var(--wm-neon)' }}>
+              <div className="mb-3" style={{ fontSize: '2.5rem', color: 'var(--space-cyan)' }}>
                 <i className="bi bi-box-seam"></i>
               </div>
               <h5 className="card-title fw-bold">Products</h5>
@@ -135,7 +135,7 @@ const AdminDashboard = () => {
         <div className="col-md-6 col-lg-3">
           <Link to="/admin/categories" className="card border-0 shadow-sm text-decoration-none text-dark h-100" style={{ transition: 'transform 0.3s' }}>
             <div className="card-body text-center py-4">
-              <div className="mb-3" style={{ fontSize: '2.5rem', color: 'var(--wm-neon)' }}>
+              <div className="mb-3" style={{ fontSize: '2.5rem', color: 'var(--space-cyan)' }}>
                 <i className="bi bi-tags"></i>
               </div>
               <h5 className="card-title fw-bold">Categories</h5>
@@ -149,7 +149,7 @@ const AdminDashboard = () => {
         <div className="col-md-6 col-lg-3">
           <Link to="/admin/orders" className="card border-0 shadow-sm text-decoration-none text-dark h-100" style={{ transition: 'transform 0.3s' }}>
             <div className="card-body text-center py-4">
-              <div className="mb-3" style={{ fontSize: '2.5rem', color: 'var(--wm-violet)' }}>
+              <div className="mb-3" style={{ fontSize: '2.5rem', color: 'var(--space-purple)' }}>
                 <i className="bi bi-receipt"></i>
               </div>
               <h5 className="card-title fw-bold">Orders</h5>
@@ -163,7 +163,7 @@ const AdminDashboard = () => {
         <div className="col-md-6 col-lg-3">
           <Link to="/admin/users" className="card border-0 shadow-sm text-decoration-none text-dark h-100" style={{ transition: 'transform 0.3s' }}>
             <div className="card-body text-center py-4">
-              <div className="mb-3" style={{ fontSize: '2.5rem', color: 'var(--wm-danger)' }}>
+              <div className="mb-3" style={{ fontSize: '2.5rem', color: 'var(--space-pink)' }}>
                 <i className="bi bi-people"></i>
               </div>
               <h5 className="card-title fw-bold">Users</h5>
@@ -177,7 +177,7 @@ const AdminDashboard = () => {
         <div className="col-md-6 col-lg-3">
           <Link to="/admin/deals" className="card border-0 shadow-sm text-decoration-none text-dark h-100" style={{ transition: 'transform 0.3s' }}>
             <div className="card-body text-center py-4">
-              <div className="mb-3" style={{ fontSize: '2.5rem', color: 'var(--wm-neon-2)' }}>
+              <div className="mb-3" style={{ fontSize: '2.5rem', color: 'var(--space-violet)' }}>
                 <i className="bi bi-tag-fill"></i>
               </div>
               <h5 className="card-title fw-bold">Deals</h5>

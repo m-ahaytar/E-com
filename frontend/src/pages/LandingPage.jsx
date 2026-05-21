@@ -6,6 +6,7 @@ import Badge from '../components/Badge';
 import Button from '../components/Button';
 import ProductCard from '../components/ProductCard';
 import { buildCategoryOptions, getRawCategoryName } from '../utils/productTech';
+import useParallax from '../hooks/useParallax';
 
 const LandingPage = () => {
   const [products, setProducts] = useState([]);
@@ -15,6 +16,7 @@ const LandingPage = () => {
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const { addToCart } = useCart();
+  const scrollY = useParallax();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -58,15 +60,15 @@ const LandingPage = () => {
       <section className="wm-hero" id="platform">
         <div className="wm-hero__copy">
           <Badge icon="bi-stars" variant="info">Next-gen commerce platform</Badge>
-          <h1>
+          <h1 style={{ transform: `translateY(${scrollY * 0.3}px)` }}>
             Tech from the <span>future</span>, delivered today.
           </h1>
-          <p className="wm-hero__tagline">We Move To The Future</p>
-          <p className="wm-hero__text">
+          <p className="wm-hero__tagline" style={{ transform: `translateY(${scrollY * 0.5}px)` }}>We Move To The Future</p>
+          <p className="wm-hero__text" style={{ transform: `translateY(${scrollY * 0.5}px)` }}>
             Phones, laptops, accessories and smart gadgets collected in one cold, fast,
             high-precision storefront.
           </p>
-          <div className="wm-hero__actions">
+          <div className="wm-hero__actions" style={{ transform: `translateY(${scrollY * 0.6}px)` }}>
             <Button icon="bi-bag" to="/catalogue" variant="primary">Shop Now</Button>
             <Button icon="bi-lightning-charge" to="/deals" variant="outline">
               View Deals
@@ -76,6 +78,7 @@ const LandingPage = () => {
 
         <div className="wm-hero__showcase">
           <div className="wm-hero__orbit" aria-hidden="true"></div>
+          <div className="wm-hero__orb" aria-hidden="true"></div>
           <div className="wm-hero__abstract" aria-hidden="true">
             <div className="wm-hero__abstract-ring wm-hero__abstract-ring--1"></div>
             <div className="wm-hero__abstract-ring wm-hero__abstract-ring--2"></div>
@@ -87,6 +90,9 @@ const LandingPage = () => {
             <strong>{spotlightProduct?.name || 'Quantum Tech Drop'}</strong>
             <small>{spotlightProduct ? `$${spotlightProduct.price?.toFixed(2)}` : 'Live inventory sync'}</small>
           </div>
+        </div>
+        <div className="wm-hero__scroll" aria-hidden="true">
+          <i className="bi bi-chevron-down"></i>
         </div>
       </section>
 
