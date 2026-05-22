@@ -22,7 +22,7 @@ INSERT INTO products (id, name, description, price, stock, image_url, category_i
 
 INSERT INTO products (id, name, description, price, stock, image_url, category_id) VALUES (2, 'Samsung Galaxy S25 Ultra', 'Snapdragon 8 Elite processor, 200MP camera with AI enhancements, built-in S Pen, and a stunning Dynamic AMOLED 2X display.', 1199.99, 30, 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=500&h=500&fit=crop', 1);
 
-INSERT INTO products (id, name, description, price, stock, image_url, category_id) VALUES (3, 'Google Pixel 9 Pro', 'Tensor G4 chip, advanced AI photography with Magic Editor, 48MP triple camera, and 7 years of OS updates guaranteed.', 999.99, 20, 'https://images.unsplash.com/photo-1635874697218-2d0d1a5d8a9c?w=500&h=500&fit=crop', 1);
+INSERT INTO products (id, name, description, price, stock, image_url, category_id) VALUES (3, 'Google Pixel 9 Pro', 'Tensor G4 chip, advanced AI photography with Magic Editor, 48MP triple camera, and 7 years of OS updates guaranteed.', 999.99, 20, 'https://images.unsplash.com/photo-1724322637761-1fef6ca8c8b3?w=500&h=500&fit=crop', 1);
 
 INSERT INTO products (id, name, description, price, stock, image_url, category_id) VALUES (4, 'OnePlus 13', 'Snapdragon 8 Elite, 50MP Hasselblad triple camera, 100W SUPERVOOC charging, and a buttery-smooth 120Hz ProXDR display.', 899.99, 35, 'https://images.unsplash.com/photo-1523206489230-c012c64b2b48?w=500&h=500&fit=crop', 1);
 
@@ -36,7 +36,7 @@ INSERT INTO products (id, name, description, price, stock, image_url, category_i
 
 INSERT INTO products (id, name, description, price, stock, image_url, category_id) VALUES (9, 'Lenovo ThinkPad X1 Carbon', 'Intel Core Ultra 7 vPro, 16GB LPDDR5 RAM, 512GB PCIe SSD, 14" 2.8K OLED display, and MIL-STD-810H durability in a 2.2lb chassis.', 1699.99, 12, 'https://images.unsplash.com/photo-1587202372616-b43abea06c2a?w=500&h=500&fit=crop', 2);
 
-INSERT INTO products (id, name, description, price, stock, image_url, category_id) VALUES (10, 'Microsoft Surface Laptop 7', 'Snapdragon X Elite processor, 16GB RAM, 512GB SSD, 13.8" PixelSense touchscreen, and all-day battery with sleek, lightweight design.', 1299.99, 28, 'https://images.unsplash.com/photo-1593642634443-44adae06623a?w=500&h=500&fit=crop', 2);
+INSERT INTO products (id, name, description, price, stock, image_url, category_id) VALUES (10, 'Microsoft Surface Laptop 7', 'Snapdragon X Elite processor, 16GB RAM, 512GB SSD, 13.8" PixelSense touchscreen, and all-day battery with sleek, lightweight design.', 1299.99, 28, 'https://images.unsplash.com/photo-1633114128174-2f8aa49759b0?w=500&h=500&fit=crop', 2);
 
 INSERT INTO products (id, name, description, price, stock, image_url, category_id) VALUES (11, 'AirPods Pro 3', 'Apple H3 chip with adaptive audio, active noise cancellation with Transparency mode, personalized spatial audio, and USB-C MagSafe case.', 249.99, 60, 'https://images.unsplash.com/photo-1603351154351-5e2d0600bb77?w=500&h=500&fit=crop', 3);
 
@@ -44,9 +44,9 @@ INSERT INTO products (id, name, description, price, stock, image_url, category_i
 
 INSERT INTO products (id, name, description, price, stock, image_url, category_id) VALUES (13, 'Logitech MX Master 3S', '8K DPI optical sensor, silent click buttons, MagSpeed electromagnetic scroll wheel, USB-C fast charging, and ergonomic sculpted design.', 99.99, 80, 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=500&h=500&fit=crop', 3);
 
-INSERT INTO products (id, name, description, price, stock, image_url, category_id) VALUES (14, 'Samsung Galaxy Watch 7', '3nm Exynos chipset, BioActive sensor with body composition analysis, sapphire crystal display, and up to 60-hour battery life on a single charge.', 399.99, 35, 'https://images.unsplash.com/photo-1546868871-af0de0ae72d8?w=500&h=500&fit=crop', 3);
+INSERT INTO products (id, name, description, price, stock, image_url, category_id) VALUES (14, 'Samsung Galaxy Watch 7', '3nm Exynos chipset, BioActive sensor with body composition analysis, sapphire crystal display, and up to 60-hour battery life on a single charge.', 399.99, 35, 'https://images.unsplash.com/photo-1553545204-4f7d339aa06a?w=500&h=500&fit=crop', 3);
 
-INSERT INTO products (id, name, description, price, stock, image_url, category_id) VALUES (15, 'Anker PowerCore 20K', '20,000mAh high-capacity power bank with 65W Power Delivery, dual USB-C ports, trickle-charging mode, and smart temperature control.', 49.99, 120, 'https://images.unsplash.com/photo-1609592424813-7d5d2f0f6ab3?w=500&h=500&fit=crop', 3);
+INSERT INTO products (id, name, description, price, stock, image_url, category_id) VALUES (15, 'Anker PowerCore 20K', '20,000mAh high-capacity power bank with 65W Power Delivery, dual USB-C ports, trickle-charging mode, and smart temperature control.', 49.99, 120, 'https://images.unsplash.com/photo-1585995603413-eb35b5f4a50b?w=500&h=500&fit=crop', 3);
 
 INSERT INTO products (id, name, description, price, stock, image_url, category_id) VALUES (16, 'Apple AirTag 4-Pack', 'Precision Finding with Ultra Wideband, built-in speaker, replaceable battery lasts over a year, and seamless integration with Find My network.', 29.99, 90, 'https://images.unsplash.com/photo-1586943101559-4cdcf86a6f87?w=500&h=500&fit=crop', 3);
 
