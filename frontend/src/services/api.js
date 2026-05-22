@@ -36,11 +36,22 @@ const handleUnauthorized = (status) => {
   }
 };
 
+const FETCH_TIMEOUT = 1500;
+
 export const request = async (endpoint, options = {}) => {
-  const response = await fetch(`${API_BASE_URL}${resolveEndpoint(endpoint)}`, {
-    ...options,
-    headers: buildHeaders(options.headers),
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
+
+  let response;
+  try {
+    response = await fetch(`${API_BASE_URL}${resolveEndpoint(endpoint)}`, {
+      ...options,
+      signal: controller.signal,
+      headers: buildHeaders(options.headers),
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
 
   handleUnauthorized(response.status);
 

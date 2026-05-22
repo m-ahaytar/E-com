@@ -6,6 +6,11 @@ import Badge from '../components/Badge';
 import Button from '../components/Button';
 import ProductCard from '../components/ProductCard';
 import { buildCategoryOptions, getRawCategoryName } from '../utils/productTech';
+import useParallax from '../hooks/useParallax';
+import useScrollProgress from '../hooks/useScrollProgress';
+import useInView from '../hooks/useInView';
+import useStaggerReveal from '../hooks/useStaggerReveal';
+import useCountUp from '../hooks/useCountUp';
 
 const LandingPage = () => {
   const [products, setProducts] = useState([]);
@@ -15,6 +20,14 @@ const LandingPage = () => {
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const { addToCart } = useCart();
+  const scrollY = useParallax();
+  const { scrollY: scrollProgressY } = useScrollProgress();
+  const [metricsRef, metricsVisible] = useInView();
+  const [ctaRef, ctaVisible] = useInView();
+
+  const deliveryCount = useCountUp({ end: 48, startOn: metricsVisible });
+  const productCount = useCountUp({ end: products.length || 50000, duration: 1800, startOn: metricsVisible });
+  const categoryCount = useCountUp({ end: categories.length || 4, duration: 1200, startOn: metricsVisible });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -53,20 +66,35 @@ const LandingPage = () => {
     return source.slice(0, 6);
   }, [products, selectedCategory]);
 
+  const [dealsContainerRef, , dealsVisibility] = useStaggerReveal({
+    itemCount: featuredDeals.length,
+    baseDelay: 80,
+  });
+
+  const [catContainerRef, , catVisibility] = useStaggerReveal({
+    itemCount: categoryCards.length,
+    baseDelay: 80,
+  });
+
+  const [prodContainerRef, , prodVisibility] = useStaggerReveal({
+    itemCount: filteredProducts.length,
+    baseDelay: 80,
+  });
+
   return (
     <div className="wm-page wm-home">
       <section className="wm-hero" id="platform">
         <div className="wm-hero__copy">
           <Badge icon="bi-stars" variant="info">Next-gen commerce platform</Badge>
-          <h1>
+          <h1 className="wm-parallax" style={{ transform: `translateY(${Math.min(scrollY * 0.3, 120)}px)` }}>
             Tech from the <span>future</span>, delivered today.
           </h1>
-          <p className="wm-hero__tagline">We Move To The Future</p>
-          <p className="wm-hero__text">
+          <p className="wm-hero__tagline wm-parallax" style={{ transform: `translateY(${Math.min(scrollY * 0.5, 200)}px)` }}>We Move To The Future</p>
+          <p className="wm-hero__text wm-parallax" style={{ transform: `translateY(${Math.min(scrollY * 0.5, 200)}px)` }}>
             Phones, laptops, accessories and smart gadgets collected in one cold, fast,
             high-precision storefront.
           </p>
-          <div className="wm-hero__actions">
+          <div className="wm-hero__actions wm-parallax" style={{ transform: `translateY(${Math.min(scrollY * 0.6, 240)}px)` }}>
             <Button icon="bi-bag" to="/catalogue" variant="primary">Shop Now</Button>
             <Button icon="bi-lightning-charge" to="/deals" variant="outline">
               View Deals
@@ -76,6 +104,7 @@ const LandingPage = () => {
 
         <div className="wm-hero__showcase">
           <div className="wm-hero__orbit" aria-hidden="true"></div>
+          <div className="wm-hero__orb" aria-hidden="true"></div>
           <div className="wm-hero__abstract" aria-hidden="true">
             <div className="wm-hero__abstract-ring wm-hero__abstract-ring--1"></div>
             <div className="wm-hero__abstract-ring wm-hero__abstract-ring--2"></div>
@@ -88,6 +117,9 @@ const LandingPage = () => {
             <small>{spotlightProduct ? `$${spotlightProduct.price?.toFixed(2)}` : 'Live inventory sync'}</small>
           </div>
         </div>
+        <div className={`wm-hero__scroll${scrollProgressY > 200 ? ' wm-hero__scroll--hidden' : ''}`} aria-hidden="true">
+          <i className="bi bi-chevron-down"></i>
+        </div>
       </section>
 
       {featuredDeals.length > 0 && (
@@ -99,12 +131,16 @@ const LandingPage = () => {
             </div>
             <Link className="wm-text-link" to="/deals">View all deals</Link>
           </div>
-          <div className="wm-product-grid">
-            {featuredDeals.map((deal) => (
-              <article className="wm-deal-card wm-deal-card--compact" key={deal.id}>
+          <div className="wm-product-grid" ref={dealsContainerRef}>
+            {featuredDeals.map((deal, i) => (
+              <article
+                className={`wm-deal-card wm-deal-card--compact wm-reveal${dealsVisibility[i] ? ' wm-reveal-in' : ''}`}
+                key={deal.id}
+                style={{ transitionDelay: `${i * 80}ms` }}
+              >
                 <div className="wm-deal-card__img-wrap">
                   {deal.imageUrl ? (
-                    <img src={deal.imageUrl} alt={deal.productName} className="wm-deal-card__img" />
+                    <img loading="lazy" src={deal.imageUrl} alt={deal.productName} className="wm-deal-card__img" />
                   ) : (
                     <div className="wm-deal-card__img-placeholder">
                       <i className="bi bi-image" aria-hidden="true"></i>
@@ -130,17 +166,17 @@ const LandingPage = () => {
         </section>
       )}
 
-      <section className="wm-metrics" aria-label="Store metrics">
+      <section className={`wm-metrics wm-reveal${metricsVisible ? ' wm-reveal-in' : ''}`} ref={metricsRef} aria-label="Store metrics">
         <div>
-          <strong>48H</strong>
+          <strong>{deliveryCount}H</strong>
           <span>Rapid delivery</span>
         </div>
         <div>
-          <strong>{products.length || '50K+'}</strong>
+          <strong>{products.length ? productCount.toLocaleString() : '50K+'}</strong>
           <span>Synced products</span>
         </div>
         <div>
-          <strong>{categories.length || 4}</strong>
+          <strong>{categories.length ? categoryCount : 4}</strong>
           <span>Backend categories</span>
         </div>
       </section>
@@ -154,11 +190,12 @@ const LandingPage = () => {
           <Link className="wm-text-link" to="/catalogue">Open full grid</Link>
         </div>
 
-        <div className="wm-category-grid">
-          {categoryCards.map((category) => (
+        <div className="wm-category-grid" ref={catContainerRef}>
+          {categoryCards.map((category, i) => (
             <button
-              className={`wm-category-tile${selectedCategory === category.name ? ' active' : ''}`}
+              className={`wm-category-tile wm-reveal${catVisibility[i] ? ' wm-reveal-in' : ''}${selectedCategory === category.name ? ' active' : ''}`}
               key={category.name}
+              style={{ transitionDelay: `${i * 80}ms` }}
               onClick={() => setSelectedCategory(category.name)}
               type="button"
             >
@@ -198,9 +235,18 @@ const LandingPage = () => {
         </div>
 
         {loading && (
-          <div className="wm-loading">
-            <span className="spinner-border text-info" role="status" aria-hidden="true"></span>
-            <span>Loading product matrix...</span>
+          <div className="wm-loading wm-loading--skeleton">
+            {[1, 2, 3].map((n) => (
+              <div className="wm-skeleton" key={n}>
+                <div className="wm-skeleton__img"></div>
+                <div className="wm-skeleton__body">
+                  <div className="wm-skeleton__line wm-skeleton__line--short"></div>
+                  <div className="wm-skeleton__line wm-skeleton__line--long"></div>
+                  <div className="wm-skeleton__line wm-skeleton__line--long" style={{ width: '70%' }}></div>
+                  <div className="wm-skeleton__action"></div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
@@ -212,15 +258,21 @@ const LandingPage = () => {
         )}
 
         {!loading && !error && (
-          <div className="wm-product-grid">
-            {filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} onAddToCart={addToCart} />
+          <div className="wm-product-grid" ref={prodContainerRef}>
+            {filteredProducts.map((product, i) => (
+              <div
+                key={product.id}
+                className={`wm-reveal${prodVisibility[i] ? ' wm-reveal-in' : ''}`}
+                style={{ transitionDelay: `${i * 80}ms` }}
+              >
+                <ProductCard product={product} onAddToCart={addToCart} />
+              </div>
             ))}
           </div>
         )}
       </section>
 
-      <section className="wm-cta-band">
+      <section className={`wm-cta-band wm-reveal${ctaVisible ? ' wm-reveal-in' : ''}`} ref={ctaRef}>
         <div>
           <Badge variant="limited">WM Signal</Badge>
           <h2>Build your future setup.</h2>

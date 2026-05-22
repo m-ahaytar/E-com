@@ -1,0 +1,28 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;500;600&family=Rajdhani:wght@400;500;600&display=swap');
+
+:root {
+  /* ── Space Palette ── */
+  --space-void:       #050510;
+  --space-deep:       #0a0a1f;
+  --space-nebula:     #0d0d2b;
+  --space-purple:     #6c27c0;
+  --space-violet:     #9b59b6;
+  --space-cyan:       #00d4ff;
+  --space-pink:       #e040fb;
+  --space-star:       #ffffff;
+  --space-muted:      #a0a0c0;
+  --space-border:     rgba(108, 39, 192, 0.3);
+  --space-glass:      rgba(13, 13, 43, 0.7);
+  --space-glow-cyan:  0 0 20px rgba(0, 212, 255, 0.4);
+  --space-glow-purple:0 0 20px rgba(108, 39, 192, 0.5);
+
+  /* ── Typography ── */
+  --font-display: 'Orbitron', 'Exo 2', sans-serif;
+  --font-body:    'Inter', 'Rajdhani', sans-serif;
+
+  /* ── Bootstrap overrides ── */
+  --bs-body-bg:    var(--space-deep);
+  --bs-body-color: var(--space-star);
+  --bs-primary:    var(--space-purple);
+  --bs-secondary:  var(--space-violet);
+}

@@ -5,6 +5,7 @@ import { CartProvider } from './context/CartContext';
 import PrivateRoute from './components/PrivateRoute';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import SpaceBackground from './components/SpaceBackground/SpaceBackground';
 import './App.css';
 
 const LandingPage = lazy(() => import('./pages/LandingPage'));
@@ -32,8 +33,9 @@ function App() {
         <BrowserRouter>
           <div className="app">
             <Navbar />
+            <SpaceBackground />
             <main className="main-content">
-              <Suspense fallback={<div className="loading-spinner">Loading...</div>}>
+              <Suspense fallback={<div className="wm-loading"><span className="spinner-border" role="status" aria-hidden="true"></span><span>Loading...</span></div>}>
                 <Routes>
                   <Route path="/" element={<LandingPage />} />
                   <Route path="/catalogue" element={<CataloguePage />} />

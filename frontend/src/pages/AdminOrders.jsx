@@ -24,17 +24,17 @@ const AdminOrders = () => {
 
   const getStatusColor = (status) => {
     const colors = {
-      pending: 'var(--wm-violet)',
-      processing: 'var(--wm-neon)',
-      shipped: 'var(--wm-violet)',
-      delivered: 'var(--wm-neon-2)',
-      cancelled: 'var(--wm-danger)',
+      pending: 'var(--space-purple)',
+      processing: 'var(--space-cyan)',
+      shipped: 'var(--space-purple)',
+      delivered: 'var(--space-violet)',
+      cancelled: 'var(--space-pink)',
     };
-    return colors[status?.toLowerCase()] || 'var(--wm-muted)';
+    return colors[status?.toLowerCase()] || 'var(--space-muted)';
   };
 
   if (loading) {
-    return <div className="admin-page">Loading...</div>;
+    return <div className="admin-page wm-loading"><span className="spinner-border" role="status" aria-hidden="true"></span><span>Loading orders...</span></div>;
   }
 
   return (

@@ -23,7 +23,7 @@ const AdminUsers = () => {
   };
 
   if (loading) {
-    return <div className="admin-page">Loading...</div>;
+    return <div className="admin-page wm-loading"><span className="spinner-border" role="status" aria-hidden="true"></span><span>Loading users...</span></div>;
   }
 
   return (

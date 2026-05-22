@@ -39,10 +39,9 @@ const CustomerDashboard = () => {
 
   if (loading) {
     return (
-      <div className="text-center py-5">
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </div>
+      <div className="wm-loading">
+        <span className="spinner-border" role="status" aria-hidden="true"></span>
+        <span>Loading your dashboard...</span>
       </div>
     );
   }

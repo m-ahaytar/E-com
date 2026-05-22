@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import Button from './Button';
 import SearchBar from './SearchBar';
+import useScrollProgress from '../hooks/useScrollProgress';
 import wmLogo from '../assets/wm-logo.png';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
@@ -11,6 +12,7 @@ const Navbar = () => {
   const { user, logout, role } = useAuth();
   const { items } = useCart();
   const navigate = useNavigate();
+  const { scrollY } = useScrollProgress();
   const [menuOpen, setMenuOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
 
@@ -29,7 +31,7 @@ const Navbar = () => {
   };
 
   return (
-    <header className="wm-nav">
+    <header className={`wm-nav${scrollY > 80 ? ' wm-nav--condensed' : ''}`}>
       <Link className="wm-nav__brand" to="/" onClick={() => setMenuOpen(false)}>
         <img alt="WM logo" className="wm-nav__logo" src={wmLogo} />
         <span className="wm-nav__brand-copy">

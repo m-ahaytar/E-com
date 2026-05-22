@@ -120,7 +120,7 @@ const AdminDeals = () => {
   };
 
   if (loading) {
-    return <div className="admin-page wm-loading">Loading deals...</div>;
+    return <div className="admin-page wm-loading"><span className="spinner-border" role="status" aria-hidden="true"></span><span>Loading deals...</span></div>;
   }
 
   return (
@@ -216,7 +216,7 @@ const AdminDeals = () => {
                 <td>{deal.productName}</td>
                 <td>-{deal.discountPercentage}%</td>
                 <td>${deal.originalPrice?.toFixed(2)}</td>
-                <td style={{ color: 'var(--wm-neon)', fontWeight: 700 }}>
+                <td style={{ color: 'var(--space-cyan)', fontWeight: 700 }}>
                   ${deal.discountedPrice?.toFixed(2)}
                 </td>
                 <td>{new Date(deal.startDate).toLocaleDateString()}</td>

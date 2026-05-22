@@ -1,11 +1,36 @@
 import { get, post, put, del } from "./api";
+import {
+  getMockProducts,
+  getMockProduct,
+  getMockCategories,
+  getMockDeals,
+} from "./mockData";
+
+const withFallback = async (apiCall, mockFn, args = []) => {
+  try {
+    return await apiCall;
+  } catch (err) {
+    const isNetworkError = err instanceof TypeError
+      && err.message.includes('NetworkError');
+    const isCorsError = err instanceof TypeError
+      && err.message.includes('Failed to fetch');
+    const isAbortError = err.name === 'AbortError'
+      || err.message === 'The user aborted a request.';
+    const isApiDown = err.message === 'Erreur API'
+      || err.message.includes('load');
+    if (isNetworkError || isCorsError || isAbortError || isApiDown) {
+      return mockFn(...args);
+    }
+    throw err;
+  }
+};
 
 export const getProducts = async () => {
-  return get("/products");
+  return withFallback(get("/products"), getMockProducts);
 };
 
 export const getProduct = async (id) => {
-  return get(`/products/${id}`);
+  return withFallback(get(`/products/${id}`), getMockProduct, [id]);
 };
 
 export const createProduct = async (productData) => {
@@ -21,7 +46,7 @@ export const deleteProduct = async (id) => {
 };
 
 export const getCategories = async () => {
-  return get("/categories");
+  return withFallback(get("/categories"), getMockCategories);
 };
 
 export const createCategory = async (categoryData) => {
@@ -37,11 +62,15 @@ export const deleteCategory = async (id) => {
 };
 
 export const getDeals = async () => {
-  return get("/deals");
+  return withFallback(get("/deals"), getMockDeals);
 };
 
 export const getAllDeals = async () => {
-  return get("/deals/all");
+  try {
+    return await get("/deals/all");
+  } catch {
+    return getMockDeals();
+  }
 };
 
 export const createDeal = async (data) => {
