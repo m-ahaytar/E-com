@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,6 +25,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +40,7 @@ public class SecurityConfig {
         if (jwtSecret == null || jwtSecret.isBlank()) {
             throw new IllegalStateException("jwt.secret must be configured");
         }
-        this.jwtSecret = jwtSecret;
+        this.jwtSecret = jwtSecret.trim();
     }
 
     @Bean
@@ -48,10 +50,9 @@ public class SecurityConfig {
                 .cors(cors -> cors.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/products").permitAll()
-                        .requestMatchers("/categories").permitAll()
-                        .requestMatchers("/deals").permitAll()
-                        .requestMatchers("/deals/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/products/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/categories/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/deals/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtFilter(jwtSecret), UsernamePasswordAuthenticationFilter.class);
@@ -62,7 +63,7 @@ public class SecurityConfig {
         private final SecretKey key;
 
         public JwtFilter(String secret) {
-            this.key = Keys.hmacShaKeyFor(secret.getBytes());
+            this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         }
 
         @Override
@@ -88,6 +89,7 @@ public class SecurityConfig {
                     Authentication auth = new UsernamePasswordAuthenticationToken(username, null, authorities);
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 } catch (Exception e) {
+                    System.err.println("JWT Validation Error: " + e.getMessage());
                     SecurityContextHolder.clearContext();
                 }
             }

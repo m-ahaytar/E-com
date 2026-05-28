@@ -19,6 +19,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 
     import java.time.Duration;
     import java.time.LocalDateTime;
@@ -28,7 +30,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
     import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,7 +44,9 @@ class OrderServiceTest {
     @Mock
     private OrderRepository orderRepository;
 
-    @InjectMocks
+    @Mock
+    private org.springframework.web.client.RestTemplate restTemplate;
+
     private OrderService orderService;
 
     private Order order;
@@ -58,6 +64,10 @@ class OrderServiceTest {
 
        @BeforeEach
        void setUp() {
+        orderService = new OrderService(orderRepository, restTemplate);
+        org.springframework.test.util.ReflectionTestUtils.setField(orderService, "productServiceUrl", "http://product-service:8082");
+        org.springframework.test.util.ReflectionTestUtils.setField(orderService, "jwtSecret", "test-secret-key-that-is-long-enough-for-hmac-sha256");
+
         order = new Order();
         order.setId(1L);
         order.setUserId(100L);
@@ -104,7 +114,8 @@ class OrderServiceTest {
                 () -> assertEquals(100L, result.getUserId(), "User ID should match"),
                 () -> assertEquals("PENDING", result.getStatus(), "Order status should be PENDING"),
                 () -> assertEquals(1, result.getItems().size(), "Order should have 1 item"),
-                () -> verify(orderRepository).save(any(Order.class))
+                () -> verify(orderRepository).save(any(Order.class)),
+                () -> verifyNoInteractions(restTemplate)
             );
         }
 
@@ -336,6 +347,49 @@ class OrderServiceTest {
                 () -> assertNotNull(result, "Updated order should not be null"),
                 () -> verify(orderRepository).findById(1L),
                 () -> verify(orderRepository).save(any(Order.class))
+            );
+        }
+
+        @Test
+        @DisplayName("update status to PAID decrements stock once")
+        void updateStatus_paid_decrementsStock() {
+            // Arrange
+            when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+            when(orderRepository.save(any(Order.class))).thenReturn(order);
+
+            // Act
+            OrderDTO result = orderService.updateStatus(1L, "PAID");
+
+            // Assert
+            assertAll(
+                () -> assertEquals("PAID", result.getStatus(), "Order status should be PAID"),
+                () -> verify(restTemplate).exchange(
+                    eq("http://product-service:8082/products/1/decrease-stock?quantity=1"),
+                    eq(HttpMethod.PATCH),
+                    argThat((HttpEntity<?> entity) -> entity.getHeaders().getFirst("Authorization") != null
+                            && entity.getHeaders().getFirst("Authorization").startsWith("Bearer ")),
+                    eq(Object.class)
+                ),
+                () -> verify(orderRepository).save(order)
+            );
+        }
+
+        @Test
+        @DisplayName("update status from PAID to CONFIRMED does not decrement stock again")
+        void updateStatus_confirmedAfterPaid_doesNotDecrementStockAgain() {
+            // Arrange
+            order.setStatus("PAID");
+            when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+            when(orderRepository.save(any(Order.class))).thenReturn(order);
+
+            // Act
+            OrderDTO result = orderService.updateStatus(1L, "CONFIRMED");
+
+            // Assert
+            assertAll(
+                () -> assertEquals("CONFIRMED", result.getStatus(), "Order status should be CONFIRMED"),
+                () -> verifyNoInteractions(restTemplate),
+                () -> verify(orderRepository).save(order)
             );
         }
     }

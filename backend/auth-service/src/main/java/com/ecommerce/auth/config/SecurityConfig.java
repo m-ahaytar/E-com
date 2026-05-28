@@ -26,6 +26,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +41,7 @@ public class SecurityConfig {
         if (jwtSecret == null || jwtSecret.isBlank()) {
             throw new IllegalStateException("jwt.secret must be configured");
         }
-        this.jwtSecret = jwtSecret;
+        this.jwtSecret = jwtSecret.trim();
     }
 
     @Bean
@@ -66,7 +67,7 @@ public class SecurityConfig {
         private final SecretKey key;
 
         public JwtFilter(String secret) {
-            this.key = Keys.hmacShaKeyFor(secret.getBytes());
+            this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         }
 
         @Override
@@ -92,6 +93,7 @@ public class SecurityConfig {
                     Authentication auth = new UsernamePasswordAuthenticationToken(username, null, authorities);
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 } catch (Exception e) {
+                    System.err.println("JWT Validation Error: " + e.getMessage());
                     SecurityContextHolder.clearContext();
                 }
             }

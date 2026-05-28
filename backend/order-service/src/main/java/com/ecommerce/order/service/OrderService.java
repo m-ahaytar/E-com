@@ -1,10 +1,15 @@
 package com.ecommerce.order.service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,13 +23,24 @@ import com.ecommerce.order.pattern.factory.OrderStatusFactory;
 import com.ecommerce.order.pattern.singleton.OrderClockSingleton;
 import com.ecommerce.order.repository.OrderRepository;
 
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+
 @Service
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final org.springframework.web.client.RestTemplate restTemplate;
+    
+    @Value("${services.product-service.url}")
+    private String productServiceUrl;
 
-    public OrderService(OrderRepository orderRepository) {
+    @Value("${jwt.secret}")
+    private String jwtSecret;
+
+    public OrderService(OrderRepository orderRepository, org.springframework.web.client.RestTemplate restTemplate) {
         this.orderRepository = orderRepository;
+        this.restTemplate = restTemplate;
     }
 
     @Transactional
@@ -41,21 +57,25 @@ public class OrderService {
         order.setOrderNumber(generateOrderNumber());
 
         Order savedOrder = orderRepository.save(order);
+
         return convertToDTO(savedOrder);
     }
 
+    @Transactional(readOnly = true)
     public List<OrderDTO> getAllOrders() {
         return orderRepository.findAll().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<OrderDTO> getOrdersByUserId(Long userId) {
         return orderRepository.findByUserId(userId).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public OrderDTO getOrderById(Long id) {
         return orderRepository.findById(id)
                 .map(this::convertToDTO)
@@ -95,6 +115,19 @@ public class OrderService {
     }
 
     @Transactional
+    public OrderDTO updateStatus(Long id, String status) {
+        Order existing = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found with id: " + id));
+        String previousStatus = existing.getStatus();
+        existing.setStatus(status);
+        if ("PAID".equalsIgnoreCase(status) && !isStockAlreadyCommitted(previousStatus)) {
+            decrementStock(existing);
+        }
+        Order updated = orderRepository.save(existing);
+        return convertToDTO(updated);
+    }
+
+    @Transactional
     public boolean deleteOrder(Long id) {
         if (!orderRepository.existsById(id)) {
             return false;
@@ -107,6 +140,46 @@ public class OrderService {
         long timestamp = System.currentTimeMillis() / 1000;
         String random = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         return "ORD-" + timestamp + "-" + random;
+    }
+
+    private boolean isStockAlreadyCommitted(String status) {
+        return "PAID".equalsIgnoreCase(status)
+                || "CONFIRMED".equalsIgnoreCase(status)
+                || "SHIPPED".equalsIgnoreCase(status)
+                || "DELIVERED".equalsIgnoreCase(status);
+    }
+
+    private void decrementStock(Order order) {
+        if (order.getItems() == null) {
+            return;
+        }
+
+        for (OrderItem item : order.getItems()) {
+            try {
+                HttpHeaders headers = new HttpHeaders();
+                headers.setBearerAuth(createServiceToken());
+                restTemplate.exchange(
+                        productServiceUrl + "/products/" + item.getProductId() + "/decrease-stock?quantity=" + item.getQuantity(),
+                        HttpMethod.PATCH,
+                        new HttpEntity<>(headers),
+                        Object.class
+                );
+            } catch (Exception e) {
+                throw new IllegalStateException("Failed to decrement stock for product " + item.getProductId(), e);
+            }
+        }
+    }
+
+    private String createServiceToken() {
+        Date now = new Date();
+        Date expiresAt = new Date(now.getTime() + 300_000);
+        return Jwts.builder()
+                .subject("order-service")
+                .claim("role", "SERVICE")
+                .issuedAt(now)
+                .expiration(expiresAt)
+                .signWith(Keys.hmacShaKeyFor(jwtSecret.trim().getBytes(java.nio.charset.StandardCharsets.UTF_8)))
+                .compact();
     }
 
     private OrderDTO convertToDTO(Order order) {

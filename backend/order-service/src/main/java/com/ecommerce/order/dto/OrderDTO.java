@@ -17,8 +17,8 @@ public class OrderDTO {
     
     private String orderNumber;
     
-    @Pattern(regexp = "PENDING|CONFIRMED|SHIPPED|DELIVERED|CANCELLED", 
-             message = "Status must be one of: PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED")
+    @Pattern(regexp = "PENDING|PAID|CONFIRMED|SHIPPED|DELIVERED|CANCELLED",
+             message = "Status must be one of: PENDING, PAID, CONFIRMED, SHIPPED, DELIVERED, CANCELLED")
     private String status;
     
     private LocalDateTime orderDate;

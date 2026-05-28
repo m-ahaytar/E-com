@@ -69,4 +69,14 @@ public class OrderController {
         }
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('SERVICE', 'ADMIN')")
+    public ResponseEntity<OrderDTO> updateStatus(@PathVariable Long id, @RequestParam String status) {
+        OrderDTO updated = orderFacade.updateStatus(id, status);
+        if (updated == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(updated);
+    }
 }

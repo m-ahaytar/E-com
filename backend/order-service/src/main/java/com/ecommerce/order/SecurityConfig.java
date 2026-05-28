@@ -38,7 +38,7 @@ public class SecurityConfig {
         if (jwtSecret == null || jwtSecret.isBlank()) {
             throw new IllegalStateException("jwt.secret must be configured");
         }
-        this.jwtSecret = jwtSecret;
+        this.jwtSecret = jwtSecret.trim();
     }
 
     @Bean
@@ -53,10 +53,10 @@ public class SecurityConfig {
     }
 
     public static class JwtFilter extends OncePerRequestFilter {
-        private final SecretKey key;
+        private final javax.crypto.SecretKey key;
 
         public JwtFilter(String secret) {
-            this.key = Keys.hmacShaKeyFor(secret.getBytes());
+            this.key = io.jsonwebtoken.security.Keys.hmacShaKeyFor(secret.getBytes(java.nio.charset.StandardCharsets.UTF_8));
         }
 
         @Override
@@ -82,6 +82,7 @@ public class SecurityConfig {
                     Authentication auth = new UsernamePasswordAuthenticationToken(username, null, authorities);
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 } catch (Exception e) {
+                    System.err.println("JWT Validation Error: " + e.getMessage());
                     SecurityContextHolder.clearContext();
                 }
             }

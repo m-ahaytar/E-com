@@ -2,59 +2,87 @@ package com.ecommerce.order.service;
 
 import com.ecommerce.order.dto.CartDTO;
 import com.ecommerce.order.dto.CartItemDTO;
+import com.ecommerce.order.entity.CartItem;
+import com.ecommerce.order.repository.CartItemRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.List;
 
 @Service
 public class CartService {
-    private final Map<String, Map<Long, CartItemDTO>> carts = new ConcurrentHashMap<>();
+    private final CartItemRepository cartItemRepository;
+
+    public CartService(CartItemRepository cartItemRepository) {
+        this.cartItemRepository = cartItemRepository;
+    }
 
     public CartDTO getCart(String owner) {
-        return toCartDTO(carts.getOrDefault(owner, new ConcurrentHashMap<>()));
+        return toCartDTO(cartItemRepository.findByOwner(owner));
     }
 
+    @Transactional
     public CartDTO addItem(String owner, CartItemDTO incomingItem) {
-        Map<Long, CartItemDTO> cart = carts.computeIfAbsent(owner, key -> new ConcurrentHashMap<>());
         Long productId = incomingItem.getProductId();
-        CartItemDTO existing = cart.get(productId);
+        CartItem item = cartItemRepository.findByOwnerAndProductId(owner, productId)
+                .orElseGet(() -> {
+                    CartItem newItem = new CartItem();
+                    newItem.setOwner(owner);
+                    newItem.setProductId(productId);
+                    newItem.setProductName(incomingItem.getProductName());
+                    newItem.setDescription(incomingItem.getDescription());
+                    newItem.setPrice(incomingItem.getPrice());
+                    newItem.setStock(incomingItem.getStock());
+                    newItem.setImageUrl(incomingItem.getImageUrl());
+                    newItem.setCategoryId(incomingItem.getCategoryId());
+                    newItem.setCategoryName(incomingItem.getCategoryName());
+                    newItem.setQuantity(0);
+                    return newItem;
+                });
 
-        if (existing == null) {
-            incomingItem.setQuantity(safeQuantity(incomingItem.getQuantity()));
-            cart.put(productId, incomingItem);
-        } else {
-            existing.setQuantity(existing.getQuantity() + safeQuantity(incomingItem.getQuantity()));
-        }
+        item.setQuantity(item.getQuantity() + safeQuantity(incomingItem.getQuantity()));
+        cartItemRepository.save(item);
 
-        return toCartDTO(cart);
+        return getCart(owner);
     }
 
+    @Transactional
     public CartDTO updateQuantity(String owner, Long productId, Integer quantity) {
-        Map<Long, CartItemDTO> cart = carts.computeIfAbsent(owner, key -> new ConcurrentHashMap<>());
-        CartItemDTO existing = cart.get(productId);
-
-        if (existing != null) {
-            existing.setQuantity(safeQuantity(quantity));
-        }
-
-        return toCartDTO(cart);
+        cartItemRepository.findByOwnerAndProductId(owner, productId).ifPresent(item -> {
+            item.setQuantity(safeQuantity(quantity));
+            cartItemRepository.save(item);
+        });
+        return getCart(owner);
     }
 
+    @Transactional
     public CartDTO removeItem(String owner, Long productId) {
-        Map<Long, CartItemDTO> cart = carts.computeIfAbsent(owner, key -> new ConcurrentHashMap<>());
-        cart.remove(productId);
-        return toCartDTO(cart);
+        cartItemRepository.findByOwnerAndProductId(owner, productId).ifPresent(cartItemRepository::delete);
+        return getCart(owner);
     }
 
+    @Transactional
     public CartDTO clear(String owner) {
-        carts.remove(owner);
+        cartItemRepository.deleteByOwner(owner);
         return new CartDTO();
     }
 
-    private CartDTO toCartDTO(Map<Long, CartItemDTO> cart) {
-        return new CartDTO(new ArrayList<>(cart.values()));
+    private CartDTO toCartDTO(List<CartItem> items) {
+        return new CartDTO(items.stream().map(this::toItemDTO).collect(java.util.stream.Collectors.toList()));
+    }
+
+    private CartItemDTO toItemDTO(CartItem item) {
+        CartItemDTO dto = new CartItemDTO();
+        dto.setProductId(item.getProductId());
+        dto.setProductName(item.getProductName());
+        dto.setDescription(item.getDescription());
+        dto.setPrice(item.getPrice());
+        dto.setQuantity(item.getQuantity());
+        dto.setStock(item.getStock());
+        dto.setImageUrl(item.getImageUrl());
+        dto.setCategoryId(item.getCategoryId());
+        dto.setCategoryName(item.getCategoryName());
+        return dto;
     }
 
     private int safeQuantity(Integer quantity) {

@@ -14,3 +14,7 @@ spring:
       hibernate:
         dialect: org.hibernate.community.dialect.SQLiteDialect
     show-sql: false
+
+services:
+  order-service:
+    url: ${ORDER_SERVICE_URL:http://order-service:8083}
