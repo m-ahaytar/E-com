@@ -98,6 +98,7 @@ class AuthServiceTest {
             // Assert
             assertAll(
                 () -> assertNotNull(response, "Response should not be null"),
+                () -> assertEquals(1L, response.getId(), "User ID should be returned"),
                 () -> assertEquals("test@example.com", response.getEmail(), "Email should match"),
                 () -> assertEquals("CUSTOMER", response.getRole(), "Default role should be CUSTOMER"),
                 () -> assertNotNull(response.getToken(), "Token should be generated"),
@@ -127,24 +128,40 @@ class AuthServiceTest {
         @DisplayName("register with custom role sets provided role")
         void register_withCustomRole_setsProvidedRole() {
             // Arrange
-            registerRequest.setRole("ADMIN");
+            registerRequest.setRole("SELLER");
             when(userRepository.existsByEmail("test@example.com")).thenReturn(false);
             when(passwordEncoder.encode("password123")).thenReturn("encoded-password");
 
-            User adminUser = new User("test@example.com", "encoded-password", "ADMIN");
-            adminUser.setId(1L);
-            when(userRepository.save(any(User.class))).thenReturn(adminUser);
+            User sellerUser = new User("test@example.com", "encoded-password", "SELLER");
+            sellerUser.setId(1L);
+            when(userRepository.save(any(User.class))).thenReturn(sellerUser);
 
             // Act
             AuthResponse response = authService.register(registerRequest);
 
             // Assert
-            assertEquals("ADMIN", response.getRole(), "Custom role should be set");
+            assertEquals("SELLER", response.getRole(), "Custom role should be set");
+        }
+
+        @Test
+        @DisplayName("register as ADMIN is forbidden")
+        void register_asAdmin_throwsForbidden() {
+            // Arrange
+            registerRequest.setRole("ADMIN");
+            when(userRepository.existsByEmail("test@example.com")).thenReturn(false);
+
+            // Act & Assert
+            ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> authService.register(registerRequest)
+            );
+            assertEquals(org.springframework.http.HttpStatus.FORBIDDEN, exception.getStatusCode());
+            assertTrue(exception.getReason().contains("Self-registration as ADMIN is not allowed"));
         }
 
         @ParameterizedTest
-        @ValueSource(strings = { "CUSTOMER", "ADMIN", "MODERATOR" })
-        @DisplayName("register with various user roles")
+        @ValueSource(strings = { "CUSTOMER", "SELLER" })
+        @DisplayName("register with allowed user roles")
         void register_multipleRoles(String role) {
             // Arrange
             registerRequest.setRole(role);
@@ -180,6 +197,7 @@ class AuthServiceTest {
             // Assert
             assertAll(
                 () -> assertNotNull(response, "Response should not be null"),
+                () -> assertEquals(1L, response.getId(), "User ID should be returned"),
                 () -> assertEquals("test@example.com", response.getEmail(), "Email should match"),
                 () -> assertEquals("CUSTOMER", response.getRole(), "Role should match"),
                 () -> assertEquals("John", response.getFirstName(), "First name should match"),

@@ -5,6 +5,7 @@ export const login = async (email, password) => {
   const data = await post("/auth/login", { email, password });
   if (data.token) {
     const user = {
+      id: data.id,
       email: data.email,
       role: data.role,
       firstName: data.firstName,
@@ -16,6 +17,7 @@ export const login = async (email, password) => {
   return {
     ...data,
     user: {
+      id: data.id,
       email: data.email,
       role: data.role,
       firstName: data.firstName,
@@ -28,6 +30,7 @@ export const register = async (userData) => {
   const data = await post("/auth/register", userData);
   if (data.token) {
     const user = {
+      id: data.id,
       email: data.email,
       role: data.role,
       firstName: data.firstName,
@@ -39,6 +42,7 @@ export const register = async (userData) => {
   return {
     ...data,
     user: {
+      id: data.id,
       email: data.email,
       role: data.role,
       firstName: data.firstName,

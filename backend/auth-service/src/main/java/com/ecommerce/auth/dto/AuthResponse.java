@@ -1,6 +1,7 @@
 package com.ecommerce.auth.dto;
 
 public class AuthResponse {
+    private Long id;
     private String token;
     private String email;
     private String role;
@@ -13,6 +14,14 @@ public class AuthResponse {
         this.token = token;
         this.email = email;
         this.role = role;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getToken() {

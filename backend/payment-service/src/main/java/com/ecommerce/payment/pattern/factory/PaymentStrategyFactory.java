@@ -11,7 +11,9 @@ public final class PaymentStrategyFactory {
     }
 
     public static PaymentStatusStrategy createStrategy(String method) {
-        if ("CARD".equalsIgnoreCase(method)) {
+        if ("CARD".equalsIgnoreCase(method)
+                || "CREDIT_CARD".equalsIgnoreCase(method)
+                || "DEBIT_CARD".equalsIgnoreCase(method)) {
             return new CardPaymentStatusStrategy();
         }
         return new CashPaymentStatusStrategy();

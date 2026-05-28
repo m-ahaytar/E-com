@@ -22,18 +22,18 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final SecretKey jwtKey;
     private final long jwtExpirationMs;
-
-    public AuthService(UserRepository userRepository,
-                       PasswordEncoder passwordEncoder,
-                       @Value("${jwt.secret:}") String jwtSecret,
-                       @Value("${jwt.expiration:86400000}") long jwtExpirationMs) {
+    public AuthService(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            @Value("${jwt.secret:}") String jwtSecret,
+            @Value("${jwt.expiration:86400000}") Long expiration) {
         if (jwtSecret == null || jwtSecret.isBlank()) {
             throw new IllegalStateException("jwt.secret must be configured");
         }
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.jwtKey = Keys.hmacShaKeyFor(jwtSecret.getBytes());
-        this.jwtExpirationMs = jwtExpirationMs;
+        this.jwtKey = io.jsonwebtoken.security.Keys.hmacShaKeyFor(jwtSecret.trim().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        this.jwtExpirationMs = expiration;
     }
 
     public AuthResponse register(RegisterRequest request) {
@@ -41,16 +41,21 @@ public class AuthService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
         }
 
-        String role = request.getRole() != null ? request.getRole() : "CUSTOMER";
+        String role = request.getRole() != null ? request.getRole().toUpperCase() : "CUSTOMER";
+        if ("ADMIN".equals(role)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Self-registration as ADMIN is not allowed");
+        }
+        
         User user = new User(request.getEmail(), passwordEncoder.encode(request.getPassword()), role);
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
-        String token = generateToken(user);
-        AuthResponse response = new AuthResponse(token, user.getEmail(), user.getRole());
-        response.setFirstName(user.getFirstName());
-        response.setLastName(user.getLastName());
+        String token = generateToken(savedUser);
+        AuthResponse response = new AuthResponse(token, savedUser.getEmail(), savedUser.getRole());
+        response.setId(savedUser.getId());
+        response.setFirstName(savedUser.getFirstName());
+        response.setLastName(savedUser.getLastName());
         return response;
     }
 
@@ -64,6 +69,7 @@ public class AuthService {
 
         String token = generateToken(user);
         AuthResponse response = new AuthResponse(token, user.getEmail(), user.getRole());
+        response.setId(user.getId());
         response.setFirstName(user.getFirstName());
         response.setLastName(user.getLastName());
         return response;

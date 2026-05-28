@@ -55,6 +55,7 @@ const LoginPage = () => {
       const data = await authService.login(formData.email, formData.password);
       login(
         {
+          id: data.id,
           email: data.email,
           role: data.role,
           firstName: data.firstName,

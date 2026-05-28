@@ -131,7 +131,7 @@ const PaymentPage = () => {
 
           <div className="wm-filter-block">
             <span className="wm-filter-block__label">Payment Method</span>
-            <label className={`wm-payment-option${paymentMethod === 'CARD' ? ' active' : ''}`}>
+            <label className={`wm-payment-option${paymentMethod === 'CREDIT_CARD' ? ' active' : ''}`}>
               <input
                 checked={paymentMethod === 'CARD'}
                 name="paymentMethod"

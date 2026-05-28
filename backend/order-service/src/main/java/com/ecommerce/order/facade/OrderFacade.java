@@ -50,6 +50,14 @@ public class OrderFacade {
         return updated;
     }
 
+    public OrderDTO updateStatus(Long id, String status) {
+        OrderDTO updated = orderService.updateStatus(id, status);
+        if (updated != null) {
+            notifyObservers("UPDATE_STATUS", updated.getId());
+        }
+        return updated;
+    }
+
     public boolean deleteOrder(Long id) {
         boolean deleted = orderService.deleteOrder(id);
         if (deleted) {

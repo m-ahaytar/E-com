@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import * as authService from '../services/authService';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -74,6 +76,7 @@ const RegisterPage = () => {
       const { confirmPassword: _confirmPassword, ...registerData } = formData;
       const data = await authService.register(registerData);
       if (data?.token) {
+        login(data.user, data.token);
         navigate('/');
         return;
       }

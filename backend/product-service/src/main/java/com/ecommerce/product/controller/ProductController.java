@@ -48,4 +48,10 @@ public class ProductController {
         productService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping("/{id}/decrease-stock")
+    @PreAuthorize("hasAnyRole('SERVICE', 'ADMIN')")
+    public ResponseEntity<ProductDTO> decreaseStock(@PathVariable Long id, @RequestParam Integer quantity) {
+        return ResponseEntity.ok(productService.decreaseStock(id, quantity));
+    }
 }

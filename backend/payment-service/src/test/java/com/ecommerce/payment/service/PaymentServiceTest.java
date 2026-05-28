@@ -24,6 +24,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -31,8 +33,10 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,7 +48,9 @@ class PaymentServiceTest {
     @Mock
     private PaymentRepository paymentRepository;
 
-    @InjectMocks
+    @Mock
+    private org.springframework.web.client.RestTemplate restTemplate;
+
     private PaymentService paymentService;
      
     private Payment payment;
@@ -62,6 +68,10 @@ class PaymentServiceTest {
 
     @BeforeEach
     void setUp() {
+        paymentService = new PaymentService(paymentRepository, restTemplate);
+        org.springframework.test.util.ReflectionTestUtils.setField(paymentService, "orderServiceUrl", "http://order-service:8083");
+        org.springframework.test.util.ReflectionTestUtils.setField(paymentService, "jwtSecret", "test-secret-key-that-is-long-enough-for-hmac-sha256");
+
         payment = new Payment();
         payment.setId(1L);
         payment.setOrderId(100L);
@@ -80,14 +90,14 @@ class PaymentServiceTest {
     @DisplayName("Process Payment Tests")
     class ProcessPaymentTests {
         @Test
-        @DisplayName("process card payment sets status to COMPLETED")
+        @DisplayName("process credit card payment sets status to COMPLETED and notifies order service")
         void processPayment_card_setsCompleted() {
             // Arrange
-            paymentRequest.setMethod("CARD");
+            paymentRequest.setMethod("CREDIT_CARD");
             Payment savedPayment = new Payment();
             savedPayment.setId(1L);
             savedPayment.setOrderId(100L);
-            savedPayment.setMethod("CARD");
+            savedPayment.setMethod("CREDIT_CARD");
             savedPayment.setStatus("COMPLETED");
             savedPayment.setAmount(100.0);
             savedPayment.setTimestamp(LocalDateTime.now());
@@ -101,10 +111,17 @@ class PaymentServiceTest {
             assertAll(
                 () -> assertNotNull(result, "Payment should not be null"),
                 () -> assertEquals(100L, result.getOrderId(), "Order ID should match"),
-                () -> assertEquals("CARD", result.getMethod(), "Payment method should be CARD"),
+                () -> assertEquals("CREDIT_CARD", result.getMethod(), "Payment method should be CREDIT_CARD"),
                 () -> assertEquals("COMPLETED", result.getStatus(), "Status should be COMPLETED"),
                 () -> assertEquals(100.0, result.getAmount(), "Amount should match"),
-                () -> verify(paymentRepository).save(any(Payment.class))
+                () -> verify(paymentRepository).save(any(Payment.class)),
+                () -> verify(restTemplate).exchange(
+                    eq("http://order-service:8083/orders/100/status?status=PAID"),
+                    eq(HttpMethod.PATCH),
+                    argThat((HttpEntity<?> entity) -> entity.getHeaders().getFirst("Authorization") != null
+                            && entity.getHeaders().getFirst("Authorization").startsWith("Bearer ")),
+                    eq(Object.class)
+                )
             );
         }
 
