@@ -3,6 +3,7 @@ package com.ecommerce.auth.service;
 import com.ecommerce.auth.dto.AuthResponse;
 import com.ecommerce.auth.dto.LoginRequest;
 import com.ecommerce.auth.dto.RegisterRequest;
+import com.ecommerce.auth.dto.UpdateUserRequest;
 import com.ecommerce.auth.entity.User;
 import com.ecommerce.auth.repository.UserRepository;
 import org.junit.jupiter.api.BeforeAll;
@@ -257,6 +258,47 @@ class AuthServiceTest {
             // Assert
             assertEquals(email, response.getEmail(), "Should login with email " + email);
             assertNotNull(response.getToken(), "Token should be generated");
+        }
+    }
+
+    @Nested
+    @DisplayName("User Management Tests")
+    class UserManagementTests {
+        @Test
+        @DisplayName("updateUser with valid data updates fields")
+        void updateUser_existingUser_updatesFields() {
+            User existing = new User("test@demo.com", "encoded", "CUSTOMER");
+            existing.setFirstName("Old");
+            when(userRepository.findById(1L)).thenReturn(Optional.of(existing));
+            when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+
+            UpdateUserRequest req = new UpdateUserRequest();
+            req.setRole("SELLER");
+            req.setFirstName("New");
+
+            User result = authService.updateUser(1L, req);
+
+            assertEquals("SELLER", result.getRole());
+            assertEquals("New", result.getFirstName());
+        }
+
+        @Test
+        @DisplayName("deleteUser with existing user deletes successfully")
+        void deleteUser_existingUser_deletesSuccessfully() {
+            when(userRepository.existsById(1L)).thenReturn(true);
+            doNothing().when(userRepository).deleteById(1L);
+
+            assertDoesNotThrow(() -> authService.deleteUser(1L));
+            verify(userRepository).deleteById(1L);
+        }
+
+        @Test
+        @DisplayName("deleteUser with non-existent user throws not found")
+        void deleteUser_notFound_throwsNotFound() {
+            when(userRepository.existsById(99L)).thenReturn(false);
+
+            assertThrows(ResponseStatusException.class,
+                () -> authService.deleteUser(99L));
         }
     }
 }

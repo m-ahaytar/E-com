@@ -33,6 +33,13 @@ public class OrderController {
         return ResponseEntity.ok(orderFacade.getAllOrders());
     }
 
+    @GetMapping("/by-products")
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
+    public ResponseEntity<List<OrderDTO>> getOrdersByProducts(
+            @RequestParam List<Long> productIds) {
+        return ResponseEntity.ok(orderFacade.getOrdersByProducts(productIds));
+    }
+
     @GetMapping("/user/{userId}")
     @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
     public ResponseEntity<List<OrderDTO>> getOrdersByUserId(@PathVariable Long userId) {

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import * as productService from '../services/productService';
+import * as orderService from '../services/orderService';
 
 const SellerDashboard = () => {
   const { user, logout } = useAuth();
@@ -12,6 +13,8 @@ const SellerDashboard = () => {
   const [deals, setDeals] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [loadingDeals, setLoadingDeals] = useState(true);
+  const [orders, setOrders] = useState([]);
+  const [loadingOrders, setLoadingOrders] = useState(true);
   const [error, setError] = useState('');
 
   const [showProductForm, setShowProductForm] = useState(false);
@@ -32,6 +35,14 @@ const SellerDashboard = () => {
     fetchProducts();
     fetchDeals();
   }, [sellerEmail]);
+
+  useEffect(() => {
+    if (products.length > 0) {
+      fetchOrders();
+    } else {
+      setLoadingOrders(false);
+    }
+  }, [products]);
 
   const fetchProducts = async () => {
     setLoadingProducts(true);
@@ -59,6 +70,24 @@ const SellerDashboard = () => {
       // Non-critical, deals section will show empty
     } finally {
       setLoadingDeals(false);
+    }
+  };
+
+  const fetchOrders = async () => {
+    setLoadingOrders(true);
+    try {
+      const productIds = products.map((p) => p.id);
+      if (productIds.length === 0) {
+        setOrders([]);
+        return;
+      }
+      const data = await orderService.getOrdersByProducts(productIds);
+      setOrders(data);
+    } catch {
+      // Non-critical, orders section will show empty
+      setOrders([]);
+    } finally {
+      setLoadingOrders(false);
     }
   };
 
@@ -523,6 +552,57 @@ const SellerDashboard = () => {
                           <i className="bi bi-trash"></i>
                         </button>
                       </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ORDERS SECTION */}
+      <div className="card mb-4">
+        <div className="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center">
+          <span><i className="bi bi-receipt me-2"></i>Orders from Your Products</span>
+        </div>
+        <div className="card-body">
+          {loadingOrders ? (
+            <div className="text-center py-4">
+              <div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div>
+            </div>
+          ) : orders.length === 0 ? (
+            <p className="text-muted">No orders yet for your products.</p>
+          ) : (
+            <div className="table-responsive">
+              <table className="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Order #</th>
+                    <th>Items</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orders.map((order) => (
+                    <tr key={order.id}>
+                      <td>{order.orderNumber || `#${order.id}`}</td>
+                      <td>
+                        {order.items?.map((item, idx) => (
+                          <div key={idx}>
+                            {item.productName} x{item.quantity}
+                          </div>
+                        ))}
+                      </td>
+                      <td>${order.total?.toFixed(2)}</td>
+                      <td>
+                        <span className={`badge ${order.status === 'PENDING' ? 'bg-warning' : order.status === 'DELIVERED' ? 'bg-success' : order.status === 'CANCELLED' ? 'bg-danger' : 'bg-info'}`}>
+                          {order.status}
+                        </span>
+                      </td>
+                      <td>{new Date(order.orderDate || order.createdAt).toLocaleDateString()}</td>
                     </tr>
                   ))}
                 </tbody>

@@ -76,6 +76,14 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
+    public List<OrderDTO> getOrdersByProducts(List<Long> productIds) {
+        return orderRepository.findDistinctByItemsProductIdIn(productIds)
+            .stream()
+            .map(this::convertToDTO)
+            .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public OrderDTO getOrderById(Long id) {
         return orderRepository.findById(id)
                 .map(this::convertToDTO)
