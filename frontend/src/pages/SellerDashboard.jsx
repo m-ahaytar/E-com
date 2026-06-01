@@ -34,6 +34,7 @@ const SellerDashboard = () => {
   useEffect(() => {
     fetchProducts();
     fetchDeals();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sellerEmail]);
 
   useEffect(() => {
@@ -42,6 +43,7 @@ const SellerDashboard = () => {
     } else {
       setLoadingOrders(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [products]);
 
   const fetchProducts = async () => {
@@ -54,7 +56,7 @@ const SellerDashboard = () => {
       ]);
       setProducts(productsData);
       setCategories(categoriesData);
-    } catch (err) {
+    } catch {
       setError('Failed to load products');
     } finally {
       setLoadingProducts(false);
@@ -194,12 +196,6 @@ const SellerDashboard = () => {
     setValidationErrors({});
   };
 
-  const formatDateForInput = (dateStr) => {
-    if (!dateStr) return '';
-    const d = new Date(dateStr);
-    const pad = (n) => String(n).padStart(2, '0');
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  };
 
   const handleDealChange = (e) => {
     const { name, value } = e.target;
