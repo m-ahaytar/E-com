@@ -20,8 +20,10 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ProductDTO>> findAll(@RequestParam(required = false) Long categoryId) {
-        return ResponseEntity.ok(productService.findAll(categoryId));
+    public ResponseEntity<List<ProductDTO>> findAll(
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) String sellerEmail) {
+        return ResponseEntity.ok(productService.findAll(categoryId, sellerEmail));
     }
 
     @GetMapping("/{id}")

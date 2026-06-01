@@ -7,6 +7,8 @@ import com.ecommerce.product.entity.Product;
 import com.ecommerce.product.repository.DealRepository;
 import com.ecommerce.product.repository.ProductRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -78,6 +80,8 @@ public class DealService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "endDate must be after startDate");
         }
 
+        checkSellerOwnership(product);
+
         Deal deal = new Deal();
         deal.setProduct(product);
         deal.setDiscountPercentage(dto.getDiscountPercentage());
@@ -100,6 +104,8 @@ public class DealService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "endDate must be after startDate");
         }
 
+        checkSellerOwnership(product);
+
         deal.setProduct(product);
         deal.setDiscountPercentage(dto.getDiscountPercentage());
         deal.setStartDate(dto.getStartDate());
@@ -113,7 +119,21 @@ public class DealService {
     public void deleteDeal(Long id) {
         Deal deal = dealRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Deal not found with id: " + id));
+
+        checkSellerOwnership(deal.getProduct());
+
         dealRepository.delete(deal);
+    }
+
+    private void checkSellerOwnership(Product product) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_SELLER"))) {
+            String authenticatedEmail = auth.getName();
+            if (!product.getSellerEmail().equals(authenticatedEmail)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only manage deals for your own products");
+            }
+        }
     }
 
     private DealDTO toDTO(Deal deal) {

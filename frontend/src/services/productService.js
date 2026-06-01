@@ -25,8 +25,13 @@ const withFallback = async (apiCall, mockFn, args = []) => {
   }
 };
 
-export const getProducts = async () => {
-  return withFallback(get("/products"), getMockProducts);
+export const getProducts = async ({ categoryId, sellerEmail } = {}) => {
+  const params = new URLSearchParams();
+  if (categoryId) params.append('categoryId', categoryId);
+  if (sellerEmail) params.append('sellerEmail', sellerEmail);
+  const queryString = params.toString();
+  const endpoint = queryString ? `/products?${queryString}` : '/products';
+  return withFallback(get(endpoint), getMockProducts);
 };
 
 export const getProduct = async (id) => {

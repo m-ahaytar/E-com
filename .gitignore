@@ -91,3 +91,5 @@ lerna-debug.log*
 docker-compose.override.yml
 .docker/
 
+.idea/
+*.zip

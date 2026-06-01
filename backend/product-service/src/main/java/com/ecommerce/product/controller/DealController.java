@@ -37,19 +37,19 @@ public class DealController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
     public ResponseEntity<DealDTO> createDeal(@Valid @RequestBody DealCreateDTO dto) {
         return ResponseEntity.status(org.springframework.http.HttpStatus.CREATED).body(dealService.createDeal(dto));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
     public ResponseEntity<DealDTO> updateDeal(@PathVariable Long id, @Valid @RequestBody DealCreateDTO dto) {
         return ResponseEntity.ok(dealService.updateDeal(id, dto));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
     public ResponseEntity<Void> deleteDeal(@PathVariable Long id) {
         dealService.deleteDeal(id);
         return ResponseEntity.noContent().build();
