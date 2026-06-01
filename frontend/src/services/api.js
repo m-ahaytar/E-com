@@ -36,7 +36,7 @@ const handleUnauthorized = (status) => {
   }
 };
 
-const FETCH_TIMEOUT = 1500;
+const FETCH_TIMEOUT = 10000;
 
 export const request = async (endpoint, options = {}) => {
   const controller = new AbortController();
