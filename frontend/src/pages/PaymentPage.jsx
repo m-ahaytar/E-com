@@ -17,6 +17,8 @@ const PaymentPage = () => {
   const [formData, setFormData] = useState({
     fullName: `${user?.firstName || ''} ${user?.lastName || ''}`.trim(),
     address: '',
+    cardNumber: '',
+    paypalEmail: '',
   });
 
   const handleInputChange = (event) => {
@@ -25,6 +27,10 @@ const PaymentPage = () => {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handlePaymentMethodChange = (event) => {
+    setPaymentMethod(event.target.value);
   };
 
   const cartSubtotal = getTotal();
@@ -133,9 +139,9 @@ const PaymentPage = () => {
             <span className="wm-filter-block__label">Payment Method</span>
             <label className={`wm-payment-option${paymentMethod === 'CREDIT_CARD' ? ' active' : ''}`}>
               <input
-                checked={paymentMethod === 'CARD'}
+                checked={paymentMethod === 'CREDIT_CARD'}
                 name="paymentMethod"
-                onChange={(event) => setPaymentMethod(event.target.value)}
+                onChange={handlePaymentMethodChange}
                 type="radio"
                 value="CREDIT_CARD"
               />
@@ -146,14 +152,55 @@ const PaymentPage = () => {
               <input
                 checked={paymentMethod === 'CASH'}
                 name="paymentMethod"
-                onChange={(event) => setPaymentMethod(event.target.value)}
+                onChange={handlePaymentMethodChange}
                 type="radio"
                 value="CASH"
               />
               <i className="bi bi-cash-coin" aria-hidden="true"></i>
               Cash on Delivery
             </label>
+            <label className={`wm-payment-option${paymentMethod === 'PAYPAL' ? ' active' : ''}`}>
+              <input
+                checked={paymentMethod === 'PAYPAL'}
+                name="paymentMethod"
+                onChange={handlePaymentMethodChange}
+                type="radio"
+                value="PAYPAL"
+              />
+              <i className="bi bi-paypal" aria-hidden="true"></i>
+              PayPal
+            </label>
           </div>
+
+          {paymentMethod === 'CREDIT_CARD' && (
+            <label className="wm-field">
+              <span>Card Number</span>
+              <input
+                className="form-control"
+                name="cardNumber"
+                onChange={handleInputChange}
+                placeholder="0000 0000 0000 0000"
+                required
+                type="text"
+                value={formData.cardNumber}
+              />
+            </label>
+          )}
+
+          {paymentMethod === 'PAYPAL' && (
+            <label className="wm-field">
+              <span>PayPal Email</span>
+              <input
+                className="form-control"
+                name="paypalEmail"
+                onChange={handleInputChange}
+                placeholder="your@email.com"
+                required
+                type="email"
+                value={formData.paypalEmail}
+              />
+            </label>
+          )}
 
           {error && (
             <div className="wm-alert wm-alert--danger" role="alert">

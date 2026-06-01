@@ -10,8 +10,8 @@ import jakarta.validation.constraints.NotNull;
  */
 public class PaymentUpdateRequest {
     @NotBlank(message = "Payment method is required")
-    @Pattern(regexp = "CREDIT_CARD|DEBIT_CARD|UPI|WALLET", 
-             message = "Payment method must be one of: CREDIT_CARD, DEBIT_CARD, UPI, WALLET")
+    @Pattern(regexp = "CREDIT_CARD|DEBIT_CARD|UPI|WALLET|PAYPAL", 
+             message = "Payment method must be one of: CREDIT_CARD, DEBIT_CARD, UPI, WALLET, PAYPAL")
     private String method;
     
     @NotBlank(message = "Status is required")
