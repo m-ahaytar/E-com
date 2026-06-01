@@ -77,7 +77,8 @@ const RegisterPage = () => {
       const data = await authService.register(registerData);
       if (data?.token) {
         login(data.user, data.token);
-        navigate('/');
+        const destination = data.role === 'ADMIN' ? '/admin' : data.role === 'SELLER' ? '/seller' : '/dashboard';
+        navigate(destination);
         return;
       }
       navigate('/login');

@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
     java.util.List<Product> findByCategory_Id(Long categoryId);
+    java.util.List<Product> findBySellerEmail(String sellerEmail);
 }

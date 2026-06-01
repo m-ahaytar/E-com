@@ -1,4 +1,4 @@
-import { get, post } from "./api";
+import { del, get, post, put } from "./api";
 
 export const login = async (email, password) => {
   // Appel simple de l'API d'authentification via fetch.
@@ -53,4 +53,12 @@ export const register = async (userData) => {
 
 export const getUsers = async () => {
   return get("/users");
+};
+
+export const updateUser = async (id, userData) => {
+  return put(`/users/${id}`, userData);
+};
+
+export const deleteUser = async (id) => {
+  return del(`/users/${id}`);
 };

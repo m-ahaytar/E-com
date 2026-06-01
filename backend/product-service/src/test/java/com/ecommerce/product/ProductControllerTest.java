@@ -40,11 +40,11 @@ class ProductControllerTest {
 
     @Test
     void findAll_Success() throws Exception {
-        ProductDTO product1 = new ProductDTO(1L, "Product 1", "Description 1", 10.99, 100, null, 1L, "Category 1");
-        ProductDTO product2 = new ProductDTO(2L, "Product 2", "Description 2", 20.99, 50, null, 1L, "Category 1");
+        ProductDTO product1 = new ProductDTO(1L, "Product 1", "Description 1", 10.99, 100, null, 1L, "Category 1", null);
+        ProductDTO product2 = new ProductDTO(2L, "Product 2", "Description 2", 20.99, 50, null, 1L, "Category 1", null);
         List<ProductDTO> products = List.of(product1, product2);
 
-        when(productService.findAll(null)).thenReturn(products);
+        when(productService.findAll(null, null)).thenReturn(products);
 
         mockMvc.perform(get("/products"))
                 .andExpect(status().isOk())
@@ -56,8 +56,8 @@ class ProductControllerTest {
 
     @Test
     void findAll_WithCategoryId_Success() throws Exception {
-        ProductDTO product = new ProductDTO(1L, "Product 1", "Description 1", 10.99, 100, null, 2L, "Category 2");
-        when(productService.findAll(2L)).thenReturn(List.of(product));
+        ProductDTO product = new ProductDTO(1L, "Product 1", "Description 1", 10.99, 100, null, 2L, "Category 2", null);
+        when(productService.findAll(2L, null)).thenReturn(List.of(product));
 
         mockMvc.perform(get("/products").param("categoryId", "2"))
                 .andExpect(status().isOk())
@@ -67,7 +67,7 @@ class ProductControllerTest {
 
     @Test
     void findById_Success() throws Exception {
-        ProductDTO product = new ProductDTO(1L, "Product 1", "Description 1", 10.99, 100, null, 1L, "Category 1");
+        ProductDTO product = new ProductDTO(1L, "Product 1", "Description 1", 10.99, 100, null, 1L, "Category 1", null);
 
         when(productService.findById(1L)).thenReturn(product);
 
@@ -80,7 +80,7 @@ class ProductControllerTest {
 
     @Test
     void save_Success() throws Exception {
-        ProductDTO savedProduct = new ProductDTO(1L, "New Product", "Description", 15.99, 50, null, 1L, "Category 1");
+        ProductDTO savedProduct = new ProductDTO(1L, "New Product", "Description", 15.99, 50, null, 1L, "Category 1", null);
 
         when(productService.save(any(ProductCreateDTO.class))).thenReturn(savedProduct);
 
@@ -94,7 +94,7 @@ class ProductControllerTest {
 
     @Test
     void update_Success() throws Exception {
-        ProductDTO updatedProduct = new ProductDTO(1L, "Updated Product", "Updated Description", 25.99, 75, null, 1L, "Category 1");
+        ProductDTO updatedProduct = new ProductDTO(1L, "Updated Product", "Updated Description", 25.99, 75, null, 1L, "Category 1", null);
 
         when(productService.update(eq(1L), any(ProductCreateDTO.class))).thenReturn(updatedProduct);
 

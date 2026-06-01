@@ -6,8 +6,11 @@ import com.ecommerce.product.entity.Category;
 import com.ecommerce.product.entity.Product;
 import com.ecommerce.product.repository.CategoryRepository;
 import com.ecommerce.product.repository.ProductRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,6 +43,16 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
+    public List<ProductDTO> findAll(Long categoryId, String sellerEmail) {
+        if (StringUtils.hasText(sellerEmail)) {
+            return productRepository.findBySellerEmail(sellerEmail).stream()
+                    .map(this::toDTO)
+                    .collect(Collectors.toList());
+        }
+        return findAll(categoryId);
+    }
+
+    @Transactional(readOnly = true)
     public ProductDTO findById(Long id) {
         return productRepository.findById(id)
                 .map(this::toDTO)
@@ -54,6 +67,11 @@ public class ProductService {
         product.setPrice(createDTO.getPrice());
         product.setStock(createDTO.getStock());
         product.setImageUrl(createDTO.getImageUrl());
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
+            product.setSellerEmail(auth.getName());
+        }
 
         Category category = categoryRepository.findById(createDTO.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Category not found with id: " + createDTO.getCategoryId()));
@@ -116,6 +134,7 @@ public class ProductService {
         dto.setPrice(product.getPrice());
         dto.setStock(product.getStock());
         dto.setImageUrl(product.getImageUrl());
+        dto.setSellerEmail(product.getSellerEmail());
         if (product.getCategory() != null) {
             dto.setCategoryId(product.getCategory().getId());
             dto.setCategoryName(product.getCategory().getName());

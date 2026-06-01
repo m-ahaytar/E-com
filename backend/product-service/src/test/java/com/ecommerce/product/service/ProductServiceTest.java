@@ -31,6 +31,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ProductService Tests")
 @Tag("unit")
@@ -57,6 +62,7 @@ class ProductServiceTest {
 
     @AfterAll
     static void afterAll() {
+        SecurityContextHolder.clearContext();
         System.out.println("Finished tests for ProductService");
     }
 
@@ -74,6 +80,7 @@ class ProductServiceTest {
         product.setStock(10);
         product.setImageUrl("http://example.com/laptop.jpg");
         product.setCategory(category);
+        product.setSellerEmail("seller@demo.com");
 
         createDTO = new ProductCreateDTO();
         createDTO.setName("Laptop");
@@ -181,6 +188,12 @@ class ProductServiceTest {
         @DisplayName("save with valid DTO creates product successfully")
         void save_validDTO_createsProduct() {
             // Arrange
+            Authentication auth = new UsernamePasswordAuthenticationToken(
+                "seller@demo.com", null,
+                List.of(new SimpleGrantedAuthority("ROLE_SELLER"))
+            );
+            SecurityContextHolder.getContext().setAuthentication(auth);
+
             when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
             when(productRepository.save(any(Product.class))).thenReturn(product);
 
@@ -191,9 +204,12 @@ class ProductServiceTest {
             assertAll(
                 () -> assertNotNull(result, "Saved product should not be null"),
                 () -> assertEquals("Laptop", result.getName(), "Product name should match"),
+                () -> assertEquals("seller@demo.com", result.getSellerEmail(), "Seller email should be set from auth"),
                 () -> verify(categoryRepository).findById(1L),
                 () -> verify(productRepository).save(any(Product.class))
             );
+
+            SecurityContextHolder.clearContext();
         }
 
         @Test
@@ -218,6 +234,12 @@ class ProductServiceTest {
         @DisplayName("save product with different category IDs")
         void save_withVariousCategoryIds(Long categoryId) {
             // Arrange
+            Authentication auth = new UsernamePasswordAuthenticationToken(
+                "seller@demo.com", null,
+                List.of(new SimpleGrantedAuthority("ROLE_SELLER"))
+            );
+            SecurityContextHolder.getContext().setAuthentication(auth);
+
             Category testCategory = new Category();
             testCategory.setId(categoryId);
             testCategory.setName("Category " + categoryId);
@@ -226,6 +248,7 @@ class ProductServiceTest {
             testProduct.setId(1L);
             testProduct.setName("Test Product");
             testProduct.setCategory(testCategory);
+            testProduct.setSellerEmail("seller@demo.com");
             when(productRepository.save(any(Product.class))).thenReturn(testProduct);
             createDTO.setCategoryId(categoryId);
 
@@ -234,7 +257,10 @@ class ProductServiceTest {
 
             // Assert
             assertNotNull(result, "Product should be created for category " + categoryId);
+            assertEquals("seller@demo.com", result.getSellerEmail(), "Seller email should be set from auth");
             verify(categoryRepository).findById(categoryId);
+
+            SecurityContextHolder.clearContext();
         }
     }
 

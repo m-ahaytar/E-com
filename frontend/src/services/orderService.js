@@ -16,6 +16,11 @@ export const getOrder = async (id) => {
   return get(`/orders/${id}`);
 };
 
+export const getOrdersByProducts = async (productIds) => {
+  const ids = productIds.join(',');
+  return get(`/orders/by-products?productIds=${ids}`);
+};
+
 export const getCart = async () => {
   return get('/cart');
 };

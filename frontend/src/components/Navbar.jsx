@@ -109,7 +109,7 @@ const Navbar = () => {
                 <Link
                   className="wm-account__item"
                   onClick={() => setAccountOpen(false)}
-                  to={userRole === 'ADMIN' ? '/admin' : '/dashboard'}
+                  to={userRole === 'ADMIN' ? '/admin' : userRole === 'SELLER' ? '/seller' : '/dashboard'}
                 >
                   <i className="bi bi-speedometer2" aria-hidden="true"></i>
                   Dashboard

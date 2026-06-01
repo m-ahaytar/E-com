@@ -3,6 +3,7 @@ package com.ecommerce.auth.service;
 import com.ecommerce.auth.dto.AuthResponse;
 import com.ecommerce.auth.dto.LoginRequest;
 import com.ecommerce.auth.dto.RegisterRequest;
+import com.ecommerce.auth.dto.UpdateUserRequest;
 import com.ecommerce.auth.entity.User;
 import com.ecommerce.auth.repository.UserRepository;
 import io.jsonwebtoken.Jwts;
@@ -15,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class AuthService {
@@ -73,6 +75,26 @@ public class AuthService {
         response.setFirstName(user.getFirstName());
         response.setLastName(user.getLastName());
         return response;
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    public User updateUser(Long id, UpdateUserRequest request) {
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        if (request.getRole() != null) user.setRole(request.getRole().toUpperCase());
+        if (request.getFirstName() != null) user.setFirstName(request.getFirstName());
+        if (request.getLastName() != null) user.setLastName(request.getLastName());
+        return userRepository.save(user);
+    }
+
+    public void deleteUser(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+        userRepository.deleteById(id);
     }
 
     private String generateToken(User user) {

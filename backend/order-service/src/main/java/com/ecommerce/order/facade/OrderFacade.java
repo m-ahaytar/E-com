@@ -34,6 +34,10 @@ public class OrderFacade {
         return orderService.getAllOrders();
     }
 
+    public List<OrderDTO> getOrdersByProducts(List<Long> productIds) {
+        return orderService.getOrdersByProducts(productIds);
+    }
+
     public List<OrderDTO> getOrdersByUserId(Long userId) {
         return orderService.getOrdersByUserId(userId);
     }

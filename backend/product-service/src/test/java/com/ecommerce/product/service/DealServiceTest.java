@@ -28,6 +28,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 @ExtendWith(MockitoExtension.class)
 @DisplayName("DealService Tests")
 @Tag("unit")
@@ -55,6 +60,7 @@ class DealServiceTest {
         product.setName("Laptop");
         product.setPrice(999.99);
         product.setImageUrl("http://example.com/laptop.jpg");
+        product.setSellerEmail("seller@demo.com");
 
         LocalDateTime now = LocalDateTime.now();
 
@@ -199,6 +205,12 @@ class DealServiceTest {
         @DisplayName("create deal with valid DTO creates deal successfully")
         void createDeal_validDTO_createsDeal() {
             // Arrange
+            Authentication auth = new UsernamePasswordAuthenticationToken(
+                "seller@demo.com", null,
+                List.of(new SimpleGrantedAuthority("ROLE_SELLER"))
+            );
+            SecurityContextHolder.getContext().setAuthentication(auth);
+
             when(productRepository.findById(1L)).thenReturn(Optional.of(product));
             when(dealRepository.save(any(Deal.class))).thenReturn(deal1);
 
@@ -212,6 +224,7 @@ class DealServiceTest {
                 () -> verify(productRepository).findById(1L),
                 () -> verify(dealRepository).save(any(Deal.class))
             );
+            SecurityContextHolder.clearContext();
         }
 
         @Test
@@ -277,6 +290,12 @@ class DealServiceTest {
         @DisplayName("create deal with various discount percentages")
         void createDeal_multipleDiscountPercentages(double discountPercentage) {
             // Arrange
+            Authentication auth = new UsernamePasswordAuthenticationToken(
+                "seller@demo.com", null,
+                List.of(new SimpleGrantedAuthority("ROLE_SELLER"))
+            );
+            SecurityContextHolder.getContext().setAuthentication(auth);
+
             LocalDateTime now = LocalDateTime.now();
             createDTO.setDiscountPercentage(discountPercentage);
             Deal testDeal = new Deal();
@@ -294,6 +313,32 @@ class DealServiceTest {
             // Assert
             assertNotNull(result, "Should create deal with " + discountPercentage + "% discount");
             assertEquals(discountPercentage, result.getDiscountPercentage());
+            SecurityContextHolder.clearContext();
+        }
+
+        @Test
+        @DisplayName("create deal when seller does not own product throws forbidden")
+        void createDeal_sellerDoesNotOwnProduct_throwsForbidden() {
+            // Arrange
+            Authentication auth = new UsernamePasswordAuthenticationToken(
+                "other@demo.com", null,
+                List.of(new SimpleGrantedAuthority("ROLE_SELLER"))
+            );
+            SecurityContextHolder.getContext().setAuthentication(auth);
+
+            when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+
+            // Act & Assert
+            ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> dealService.createDeal(createDTO),
+                "Should throw ResponseStatusException when seller does not own product"
+            );
+            assertEquals(org.springframework.http.HttpStatus.FORBIDDEN, exception.getStatusCode());
+            assertTrue(exception.getReason().contains("You can only manage deals for your own products"),
+                "Exception reason should mention product ownership");
+            verify(dealRepository, never()).save(any(Deal.class));
+            SecurityContextHolder.clearContext();
         }
     }
 
@@ -304,6 +349,12 @@ class DealServiceTest {
         @DisplayName("update deal with valid DTO updates deal successfully")
         void updateDeal_validDTO_updatesDeal() {
             // Arrange
+            Authentication auth = new UsernamePasswordAuthenticationToken(
+                "seller@demo.com", null,
+                List.of(new SimpleGrantedAuthority("ROLE_SELLER"))
+            );
+            SecurityContextHolder.getContext().setAuthentication(auth);
+
             when(dealRepository.findById(1L)).thenReturn(Optional.of(deal1));
             when(productRepository.findById(1L)).thenReturn(Optional.of(product));
             when(dealRepository.save(any(Deal.class))).thenReturn(deal1);
@@ -319,6 +370,7 @@ class DealServiceTest {
                 () -> verify(dealRepository).findById(1L),
                 () -> verify(dealRepository).save(any(Deal.class))
             );
+            SecurityContextHolder.clearContext();
         }
     }
 
@@ -329,6 +381,12 @@ class DealServiceTest {
         @DisplayName("delete deal by valid ID deletes deal successfully")
         void deleteDeal_validId_deletesDeal() {
             // Arrange
+            Authentication auth = new UsernamePasswordAuthenticationToken(
+                "seller@demo.com", null,
+                List.of(new SimpleGrantedAuthority("ROLE_SELLER"))
+            );
+            SecurityContextHolder.getContext().setAuthentication(auth);
+
             when(dealRepository.findById(1L)).thenReturn(Optional.of(deal1));
 
             // Act
@@ -336,6 +394,7 @@ class DealServiceTest {
 
             // Assert
             verify(dealRepository).delete(deal1);
+            SecurityContextHolder.clearContext();
         }
 
         @Test
