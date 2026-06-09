@@ -46,6 +46,29 @@ const PaymentPage = () => {
       return;
     }
 
+    if (paymentMethod === 'CREDIT_CARD') {
+      const digitsOnly = formData.cardNumber.replace(/\D/g, '');
+      if (!digitsOnly) {
+        setError('Please enter your card number.');
+        return;
+      }
+      if (digitsOnly.length < 13 || digitsOnly.length > 19) {
+        setError('Card number must be between 13 and 19 digits.');
+        return;
+      }
+    }
+
+    if (paymentMethod === 'PAYPAL') {
+      if (!formData.paypalEmail) {
+        setError('Please enter your PayPal email.');
+        return;
+      }
+      if (!/\S+@\S+\.\S+/.test(formData.paypalEmail)) {
+        setError('Please enter a valid email address for PayPal.');
+        return;
+      }
+    }
+
     try {
       setLoading(true);
       setError(null);

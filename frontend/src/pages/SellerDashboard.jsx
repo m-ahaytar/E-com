@@ -161,7 +161,7 @@ const SellerDashboard = () => {
       resetProductForm();
       fetchProducts();
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to save product');
+      setError(err.message || 'Failed to save product');
     }
   };
 

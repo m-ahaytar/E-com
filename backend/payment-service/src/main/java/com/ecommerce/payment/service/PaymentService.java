@@ -35,7 +35,7 @@ public class PaymentService {
     @Value("${services.order-service.url}")
     private String orderServiceUrl;
 
-    @Value("${jwt.secret}")
+    @Value("${jwt.secret:}")
     private String jwtSecret;
 
     public PaymentService(PaymentRepository paymentRepository, org.springframework.web.client.RestTemplate restTemplate) {

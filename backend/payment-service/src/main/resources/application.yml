@@ -15,6 +15,9 @@ spring:
         dialect: org.hibernate.community.dialect.SQLiteDialect
     show-sql: false
 
+jwt:
+  secret: ${JWT_SECRET}
+
 services:
   order-service:
     url: ${ORDER_SERVICE_URL:http://order-service:8083}

@@ -6,6 +6,7 @@ import com.ecommerce.payment.dto.PaymentUpdateRequest;
 import com.ecommerce.payment.service.PaymentService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,17 +22,20 @@ public class PaymentController {
     }
 
     @PostMapping("/process")
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<PaymentDTO> processPayment(@Valid @RequestBody PaymentRequest request) {
         PaymentDTO result = paymentService.processPayment(request);
         return ResponseEntity.ok(result);
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<PaymentDTO>> getAllPayments() {
         return ResponseEntity.ok(paymentService.getAllPayments());
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
     public ResponseEntity<PaymentDTO> getPaymentById(@PathVariable Long id) {
         return paymentService.getPaymentById(id)
                 .map(ResponseEntity::ok)
@@ -39,6 +43,7 @@ public class PaymentController {
     }
 
     @GetMapping("/order/{orderId}")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
     public ResponseEntity<PaymentDTO> getPaymentByOrderId(@PathVariable Long orderId) {
         return paymentService.getPaymentByOrderId(orderId)
                 .map(ResponseEntity::ok)
@@ -46,6 +51,7 @@ public class PaymentController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PaymentDTO> updatePayment(@PathVariable Long id, @RequestBody PaymentUpdateRequest request) {
         return paymentService.updatePayment(id, request)
                 .map(ResponseEntity::ok)
@@ -53,6 +59,7 @@ public class PaymentController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deletePayment(@PathVariable Long id) {
         boolean deleted = paymentService.deletePayment(id);
         if (!deleted) {
