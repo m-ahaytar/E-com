@@ -86,6 +86,14 @@ public class ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
 
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = auth != null && auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        if (!isAdmin && auth != null && product.getSellerEmail() != null
+                && !product.getSellerEmail().equals(auth.getName())) {
+            throw new RuntimeException("You can only update your own products");
+        }
+
         product.setName(createDTO.getName());
         product.setDescription(createDTO.getDescription());
         product.setPrice(createDTO.getPrice());

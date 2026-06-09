@@ -27,9 +27,8 @@ const parseJsonSafely = async (response) => {
   }
 };
 
-const handleUnauthorized = (status) => {
-  // Meme comportement que l'ancienne gestion centralisee des erreurs 401.
-  if (status === 401) {
+const handleUnauthorized = (status, endpoint) => {
+  if (status === 401 && !endpoint.startsWith('/auth/')) {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     window.location.href = "/login";
@@ -53,7 +52,7 @@ export const request = async (endpoint, options = {}) => {
     clearTimeout(timeoutId);
   }
 
-  handleUnauthorized(response.status);
+  handleUnauthorized(response.status, endpoint);
 
   const contentType = response.headers.get("content-type") || "";
   const isJson = contentType.includes("application/json");

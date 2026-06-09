@@ -13,7 +13,7 @@ services:
       redis:
         condition: service_healthy
       auth-service:
-        condition: service_started
+        condition: service_healthy
       product-service:
         condition: service_started
       order-service:
@@ -36,6 +36,12 @@ services:
       - auth-data:/data
     networks:
       - ecom-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/auth/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   product-service:
     build: ./backend/product-service
