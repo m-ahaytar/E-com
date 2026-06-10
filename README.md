@@ -4,7 +4,7 @@ A full-stack e-commerce platform with role-based access, a microservices backend
 
 **Built by** Amjahdi Walid & Ahaytar Mohamed  
 **Faculté des Sciences Semlalia, Marrakech** — Semestre 6 (2025–2026)  
-**Course:** JEE & Advanced Software Engineering (design patterns module)
+**Course:** GL Avancé
 
 [![GitHub](https://img.shields.io/badge/GitHub-E--com-181717?logo=github)](https://github.com/m-ahaytar/E-com)
 [![Live](https://img.shields.io/badge/Live-withmeshop.tech-6c27c0)](https://withmeshop.tech/)
